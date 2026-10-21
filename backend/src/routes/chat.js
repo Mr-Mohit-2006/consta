@@ -6,6 +6,7 @@ const { db } = require('../db/database');
 const { authenticateToken } = require('../middleware/auth');
 const XPService = require('../services/xp_service');
 const NotificationService = require('../services/notification_service');
+const { broadcastToChatRoom } = require('../websocket/chat_server');
 
 const uploadDir = path.join(__dirname, '../../uploads');
 const storage = multer.diskStorage({
@@ -179,6 +180,17 @@ router.post('/room/:chatRoomId/messages', authenticateToken, upload.array('attac
   savedMessage.mentions = parsedMentions;
   savedMessage.attachments = savedAttachments;
 
+  // Real-time broadcast to all connected WebSocket clients in this chat room
+  try {
+    broadcastToChatRoom(chatRoomId, {
+      type: 'NEW_CHAT_MESSAGE',
+      chatRoomId: Number(chatRoomId),
+      message: savedMessage
+    });
+  } catch (e) {
+    // ignore
+  }
+
   res.status(201).json(savedMessage);
 });
 
@@ -216,6 +228,15 @@ router.post('/messages/:messageId/solution', authenticateToken, (req, res) => {
       `/chat/${msg.chat_room_id}`
     );
   }
+
+  try {
+    broadcastToChatRoom(msg.chat_room_id, {
+      type: 'SOLUTION_TOGGLED',
+      chatRoomId: Number(msg.chat_room_id),
+      messageId: Number(messageId),
+      is_solution: newSolutionState
+    });
+  } catch (e) {}
 
   res.json({ success: true, is_solution: newSolutionState });
 });

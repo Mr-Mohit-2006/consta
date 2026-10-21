@@ -4,11 +4,23 @@ const { JWT_SECRET } = require('../middleware/auth');
 const { db } = require('../db/database');
 const NotificationService = require('../services/notification_service');
 
+// Map of chatRoomId -> Set of ws clients
+const roomSubscriptions = new Map();
+
+function broadcastToChatRoom(chatRoomId, data) {
+  const rId = Number(chatRoomId);
+  if (roomSubscriptions.has(rId)) {
+    const outMsg = typeof data === 'string' ? data : JSON.stringify(data);
+    for (const client of roomSubscriptions.get(rId)) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(outMsg);
+      }
+    }
+  }
+}
+
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server, path: '/ws' });
-
-  // Map of chatRoomId -> Set of ws clients
-  const roomSubscriptions = new Map();
 
   wss.on('connection', (ws, req) => {
     let authenticatedUser = null;
@@ -171,4 +183,4 @@ function setupWebSocket(server) {
   return wss;
 }
 
-module.exports = { setupWebSocket };
+module.exports = { setupWebSocket, broadcastToChatRoom };
