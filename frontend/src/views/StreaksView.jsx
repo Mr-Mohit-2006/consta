@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
-  Flame, Calendar, CheckCircle2, Shield, Sparkles, Plus, Clock, Award
+  Flame, Calendar, CheckCircle2, Shield, Sparkles, Plus, Clock, Award, ArrowLeft
 } from 'lucide-react';
 
-export default function StreaksView() {
+export default function StreaksView({ onNavigate, onBack }) {
   const { user, streaks, refreshUserData } = useAuth();
   const [weekly, setWeekly] = useState([]);
   const [heatmap, setHeatmap] = useState({});
@@ -63,14 +63,27 @@ export default function StreaksView() {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-          <Flame className="w-5 h-5 text-amber-400" />
-          <span>Daily Streaks & Learning Consistency</span>
-        </h2>
-        <p className="text-xs text-slate-400 mt-1">
-          Streaks reflect disciplined study habits. Calculated on the backend using persistent completion records.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer flex items-center space-x-1.5 shrink-0 shadow-sm"
+            title="Go back"
+          >
+            <ArrowLeft className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold">Back</span>
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+              <Flame className="w-5 h-5 text-amber-400" />
+              <span>Daily Streaks & Learning Consistency</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Streaks reflect disciplined study habits. Calculated on the backend using persistent completion records.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Streak Category Cards */}

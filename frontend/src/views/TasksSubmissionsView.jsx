@@ -5,10 +5,10 @@ import {
   CheckSquare, Plus, Clock, FileText, Image as ImageIcon, Link as LinkIcon,
   CheckCircle2, AlertCircle, RefreshCw, ChevronRight, Eye, Send, UploadCloud,
   FileCheck, Shield, ExternalLink, Trophy, Play, Flame, Zap, ChevronLeft,
-  Trash2, Check, Square, Users, User, Calendar
+  Trash2, Check, Square, Users, User, Calendar, ArrowLeft
 } from 'lucide-react';
 
-export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge }) {
+export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, onNavigate, onBack }) {
   const { user, refreshUserData } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -322,14 +322,25 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge })
     <div className="space-y-6">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-            <CheckSquare className="w-5 h-5 text-indigo-400" />
-            <span>Study Tasks & Submissions</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Quickly add tasks for yourself or study groups with interactive checklist completion.
-          </p>
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer flex items-center space-x-1.5 shrink-0 shadow-sm"
+            title="Go back"
+          >
+            <ArrowLeft className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold">Back</span>
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+              <CheckSquare className="w-5 h-5 text-indigo-400" />
+              <span>Study Tasks & Submissions</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Quickly add tasks for yourself or study groups with interactive checklist completion.
+            </p>
+          </div>
         </div>
 
         <button
@@ -596,12 +607,16 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge })
                     <div className="flex items-center space-x-2">
                       <button
                         type="button"
-                        onClick={() => setMobileView('list')}
-                        className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-bold flex items-center space-x-1 border border-slate-700"
+                        onClick={() => {
+                          setSelectedTask(null);
+                          setTaskDetails(null);
+                          setMobileView('list');
+                        }}
+                        className="p-1.5 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 hover:text-white text-xs font-bold flex items-center space-x-1 border border-slate-700 cursor-pointer transition shadow-xs"
                         title="Back to Task List"
                       >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span>Tasks</span>
+                        <ChevronLeft className="w-4 h-4 text-indigo-400" />
+                        <span>Back to Tasks</span>
                       </button>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                         {selectedTask.subject} &bull; {selectedTask.topic || 'General'}

@@ -4,10 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import {
   Play, Pause, Square, RotateCcw, Plus, Check, Clock, AlertTriangle,
   Sparkles, BookOpen, Layers, CheckCircle2, History, ChevronRight,
-  Bell, Flame, Award
+  Bell, Flame, Award, ArrowLeft
 } from 'lucide-react';
 
-export default function SoloStudyView() {
+export default function SoloStudyView({ onNavigate, onBack }) {
   const { user, refreshUserData } = useAuth();
 
   // Create session modal or active session state
@@ -217,14 +217,25 @@ export default function SoloStudyView() {
     <div className="space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-            <BookOpen className="w-5 h-5 text-indigo-400" />
-            <span>Solo Study Studio</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Focus deeply on learning objectives with built-in timer, concept breakdown, and problem logging.
-          </p>
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer flex items-center space-x-1.5 shrink-0 shadow-sm"
+            title="Go back"
+          >
+            <ArrowLeft className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold">Back</span>
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+              <BookOpen className="w-5 h-5 text-indigo-400" />
+              <span>Solo Study Studio</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Focus deeply on learning objectives with built-in timer, concept breakdown, and problem logging.
+            </p>
+          </div>
         </div>
 
         {!activeSession && (

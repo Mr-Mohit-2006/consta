@@ -3,10 +3,10 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   BarChart3, Clock, CheckCircle2, Award, Flame, RefreshCw,
-  Users, Layers, ArrowUpRight, ArrowDownRight, BookOpen
+  Users, Layers, ArrowUpRight, ArrowDownRight, BookOpen, ArrowLeft
 } from 'lucide-react';
 
-export default function AnalyticsView() {
+export default function AnalyticsView({ onNavigate, onBack }) {
   const { user } = useAuth();
   const [personalAnalytics, setPersonalAnalytics] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -58,14 +58,25 @@ export default function AnalyticsView() {
     <div className="space-y-6">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-            <BarChart3 className="w-5 h-5 text-indigo-400" />
-            <span>Learning Analytics & Empirical Metrics</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Separates time-on-task from verified learning outcomes. All metrics computed from authentic database entries.
-          </p>
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer flex items-center space-x-1.5 shrink-0 shadow-sm"
+            title="Go back"
+          >
+            <ArrowLeft className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold">Back</span>
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+              <BarChart3 className="w-5 h-5 text-indigo-400" />
+              <span>Learning Analytics & Empirical Metrics</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Separates time-on-task from verified learning outcomes. All metrics computed from authentic database entries.
+            </p>
+          </div>
         </div>
 
         {/* Tab Toggle */}

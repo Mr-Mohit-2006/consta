@@ -18,6 +18,7 @@ import AnalyticsView from './views/AnalyticsView';
 function AppContent() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [history, setHistory] = useState(['dashboard']);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [friendsOpen, setFriendsOpen] = useState(false);
   const [deepTaskId, setDeepTaskId] = useState(null);
@@ -41,22 +42,35 @@ function AppContent() {
   }
 
   function handleNavigate(tabId) {
-    setActiveTab(tabId);
+    if (tabId !== activeTab) {
+      setHistory(prev => [...prev, activeTab]);
+      setActiveTab(tabId);
+    }
+  }
+
+  function handleBack() {
+    if (history.length > 0) {
+      const prev = history[history.length - 1];
+      setHistory(h => h.slice(0, -1));
+      setActiveTab(prev || 'dashboard');
+    } else {
+      setActiveTab('dashboard');
+    }
   }
 
   function handleOpenTask(taskId) {
     setDeepTaskId(taskId);
-    setActiveTab('tasks');
+    handleNavigate('tasks');
   }
 
   function handleOpenChatRoom(chatRoomId) {
     setDeepChatRoomId(chatRoomId);
-    setActiveTab('chat');
+    handleNavigate('chat');
   }
 
   function handleOpenChallenge(challengeId) {
     setDeepChallengeId(challengeId);
-    setActiveTab('challenges');
+    handleNavigate('challenges');
   }
 
   function handleNotificationClick(link) {
@@ -75,7 +89,7 @@ function AppContent() {
       {/* Platform Header */}
       <Header
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleNavigate}
         onOpenNotifications={() => setNotificationsOpen(true)}
         onOpenFriends={() => setFriendsOpen(true)}
       />
@@ -83,10 +97,13 @@ function AppContent() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === 'dashboard' && <DashboardView onNavigate={handleNavigate} />}
-        {activeTab === 'solo' && <SoloStudyView />}
+        {activeTab === 'solo' && (
+          <SoloStudyView onNavigate={handleNavigate} onBack={handleBack} />
+        )}
         {activeTab === 'group' && (
           <GroupStudyView
             onNavigate={handleNavigate}
+            onBack={handleBack}
             onOpenTask={handleOpenTask}
             onOpenChatRoom={handleOpenChatRoom}
             onOpenChallenge={handleOpenChallenge}
@@ -96,21 +113,41 @@ function AppContent() {
           <TasksSubmissionsView
             initialTaskId={deepTaskId}
             onOpenChallenge={handleOpenChallenge}
+            onNavigate={handleNavigate}
+            onBack={handleBack}
           />
         )}
         {activeTab === 'challenges' && (
           <ChallengesView
             initialChallengeId={deepChallengeId}
             onOpenTask={handleOpenTask}
+            onNavigate={handleNavigate}
+            onBack={handleBack}
           />
         )}
         {activeTab === 'chat' && (
-          <ChatDiscussionView initialChatRoomId={deepChatRoomId} />
+          <ChatDiscussionView
+            initialChatRoomId={deepChatRoomId}
+            onNavigate={handleNavigate}
+            onBack={handleBack}
+          />
         )}
-        {activeTab === 'gamification' && <GamificationView />}
-        {activeTab === 'streaks' && <StreaksView />}
-        {activeTab === 'profile' && <ProfileView onOpenFriends={() => setFriendsOpen(true)} />}
-        {activeTab === 'analytics' && <AnalyticsView />}
+        {activeTab === 'gamification' && (
+          <GamificationView onNavigate={handleNavigate} onBack={handleBack} />
+        )}
+        {activeTab === 'streaks' && (
+          <StreaksView onNavigate={handleNavigate} onBack={handleBack} />
+        )}
+        {activeTab === 'profile' && (
+          <ProfileView
+            onOpenFriends={() => setFriendsOpen(true)}
+            onNavigate={handleNavigate}
+            onBack={handleBack}
+          />
+        )}
+        {activeTab === 'analytics' && (
+          <AnalyticsView onNavigate={handleNavigate} onBack={handleBack} />
+        )}
       </main>
 
       {/* Notification Center Modal */}

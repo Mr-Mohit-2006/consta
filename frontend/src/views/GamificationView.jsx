@@ -3,10 +3,10 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   Award, ShieldAlert, History, Trophy, Plus, Check, ArrowUpRight,
-  ArrowDownRight, HelpCircle, FileText
+  ArrowDownRight, HelpCircle, FileText, ArrowLeft
 } from 'lucide-react';
 
-export default function GamificationView() {
+export default function GamificationView({ onNavigate, onBack }) {
   const { user, progression, refreshUserData } = useAuth();
   const [history, setHistory] = useState([]);
   const [levels, setLevels] = useState([]);
@@ -70,14 +70,27 @@ export default function GamificationView() {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-          <Award className="w-5 h-5 text-indigo-400" />
-          <span>Performance-Based XP & Level Progression</span>
-        </h2>
-        <p className="text-xs text-slate-400 mt-1">
-          Transparent, auditable gamification system reflecting sustained learning consistency and verified peer feedback.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer flex items-center space-x-1.5 shrink-0 shadow-sm"
+            title="Go back"
+          >
+            <ArrowLeft className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold">Back</span>
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+              <Award className="w-5 h-5 text-indigo-400" />
+              <span>Performance-Based XP & Level Progression</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Transparent, auditable gamification system reflecting sustained learning consistency and verified peer feedback.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Main Progression Card */}

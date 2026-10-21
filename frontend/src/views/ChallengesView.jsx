@@ -4,10 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import {
   Trophy, Flame, Clock, Play, CheckCircle2, Plus, Users, User,
   Sparkles, Award, ArrowRight, ShieldCheck, Square, Check, ChevronLeft,
-  Calendar, Zap, CalendarDays, Pause, RotateCcw, Timer, Eye, EyeOff, Hourglass, Trash2
+  Calendar, Zap, CalendarDays, Pause, RotateCcw, Timer, Eye, EyeOff, Hourglass, Trash2, ArrowLeft
 } from 'lucide-react';
 
-export default function ChallengesView({ initialChallengeId, onOpenTask }) {
+export default function ChallengesView({ initialChallengeId, onOpenTask, onNavigate, onBack }) {
   const { user, refreshUserData } = useAuth();
   const [challenges, setChallenges] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -289,16 +289,27 @@ export default function ChallengesView({ initialChallengeId, onOpenTask }) {
     <div className="space-y-6">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
-              <Trophy className="w-5 h-5" />
-            </div>
-            <span>Study Challenges & Quests</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Tackle Daily Sprints, Weekly Milestones (7 Days), or Monthly Quests (30 Days). Earn massive XP bonuses!
-          </p>
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer flex items-center space-x-1.5 shrink-0 shadow-sm"
+            title="Go back"
+          >
+            <ArrowLeft className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold">Back</span>
+          </button>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white flex items-center space-x-2.5">
+              <div className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <span>Study Challenges & Quests</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Tackle Daily Sprints, Weekly Milestones (7 Days), or Monthly Quests (30 Days). Earn massive XP bonuses!
+            </p>
+          </div>
         </div>
 
         <button
@@ -482,12 +493,16 @@ export default function ChallengesView({ initialChallengeId, onOpenTask }) {
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setMobileView('list')}
-                        className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-amber-400 text-xs font-bold flex items-center space-x-1 border border-slate-700 cursor-pointer"
-                        title="Back to Challenges List"
+                        onClick={() => {
+                          setSelectedChallenge(null);
+                          setChallengeDetails(null);
+                          setMobileView('list');
+                        }}
+                        className="p-1.5 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-white text-xs font-bold flex items-center space-x-1 border border-slate-700 cursor-pointer transition shadow-xs"
+                        title="Back to All Challenges"
                       >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span>All Challenges</span>
+                        <ChevronLeft className="w-4 h-4 text-amber-400" />
+                        <span>Back to Challenges</span>
                       </button>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         {selectedChallenge.challenge_scope} sprint

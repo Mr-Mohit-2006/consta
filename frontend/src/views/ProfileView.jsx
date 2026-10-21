@@ -4,10 +4,10 @@ import { apiRequest } from '../api';
 import {
   User, Lock, Shield, Eye, Flame, Award, Users, UserPlus,
   CheckCircle2, Globe, Settings, Key, AlertCircle, RefreshCw,
-  Calendar, Edit3, ShieldAlert, Check, Sparkles, Trash2, Plus, UserX
+  Calendar, Edit3, ShieldAlert, Check, Sparkles, Trash2, Plus, UserX, ArrowLeft
 } from 'lucide-react';
 
-export default function ProfileView({ onOpenFriends }) {
+export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
   const { user, streaks: contextStreaks, progression: contextProgression, refreshUserData } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -181,6 +181,19 @@ export default function ProfileView({ onOpenFriends }) {
 
   return (
     <div className="space-y-6">
+      {/* Top Navigation Bar: Back Arrow */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
+          className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer flex items-center space-x-1.5 shrink-0 shadow-sm"
+          title="Go back"
+        >
+          <ArrowLeft className="w-4 h-4 text-indigo-400" />
+          <span className="text-xs font-bold">Back</span>
+        </button>
+      </div>
+
       {/* Top Profile Header Card */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />

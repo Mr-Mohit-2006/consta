@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { apiRequest, ChatSocket, getAssetUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
-  Users, Plus, Lock, Globe, Key, ShieldCheck, CheckCircle, ArrowRight,
+  Users, Plus, Lock, Globe, Key, ShieldCheck, CheckCircle, ArrowRight, ArrowLeft,
   MessageSquare, CheckSquare, Award, Clock, BarChart3, UserCheck,
   Crown, Trash2, UserPlus, AlertCircle, ChevronLeft, LogOut, LogIn,
   Search, Calendar, Square, Check, UserX, ShieldAlert, Trophy, Zap, Flame, Timer, Hourglass, Send, RefreshCw, ExternalLink,
   Hash, Image, Paperclip, X, CheckSquare2, Sparkles
 } from 'lucide-react';
 
-export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom, onOpenChallenge }) {
+export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenChatRoom, onOpenChallenge }) {
   const { user } = useAuth();
   const [rooms, setRooms] = useState([]);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -406,7 +406,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom,
     const targetRoom = rooms.find(r => r.id === roomId) || roomDetails?.room;
     const roomName = targetRoom?.name || 'this group';
 
-    if (!window.confirm(`Are you sure you want to leave "${roomName}"?`)) {
+    if (!window.confirm(`Are you sure you want to exit and leave "${roomName}"?`)) {
       return;
     }
 
@@ -414,10 +414,12 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom,
       await apiRequest(`/study-rooms/${roomId}/leave`, {
         method: 'POST'
       });
-      await loadRooms();
       if (selectedRoomId === roomId) {
-        await loadRoomDetails(roomId);
+        setSelectedRoomId(null);
+        setRoomDetails(null);
+        setMobileView('list');
       }
+      await loadRooms();
     } catch (err) {
       alert(err.message || 'Failed to leave group.');
     }
@@ -680,16 +682,27 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom,
     <div className="space-y-6">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
-              <Users className="w-5 h-5" />
-            </div>
-            <span>Study Groups</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Choose Public or Private groups (Private requires Admin approval). Schedule tasks and collaborate seamlessly.
-          </p>
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer flex items-center space-x-1.5 shrink-0 shadow-sm"
+            title="Go back"
+          >
+            <ArrowLeft className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold">Back</span>
+          </button>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white flex items-center space-x-2.5">
+              <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
+                <Users className="w-5 h-5" />
+              </div>
+              <span>Study Groups</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Choose Public or Private groups (Private requires Admin approval). Schedule tasks and collaborate seamlessly.
+            </p>
+          </div>
         </div>
 
         <button
@@ -929,12 +942,16 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom,
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <button
                         type="button"
-                        onClick={() => setMobileView('list')}
-                        className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-bold flex items-center space-x-1 border border-slate-700 cursor-pointer"
-                        title="Back to Groups List"
+                        onClick={() => {
+                          setSelectedRoomId(null);
+                          setRoomDetails(null);
+                          setMobileView('list');
+                        }}
+                        className="p-1.5 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 hover:text-white text-xs font-bold flex items-center space-x-1.5 border border-slate-700 cursor-pointer transition shadow-xs"
+                        title="Back to All Groups"
                       >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span>All Groups</span>
+                        <ChevronLeft className="w-4 h-4 text-indigo-400" />
+                        <span>Back to Groups</span>
                       </button>
 
                       <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
@@ -1000,24 +1017,52 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom,
                         </span>
                         <button
                           type="button"
+                          onClick={() => {
+                            setSelectedRoomId(null);
+                            setRoomDetails(null);
+                            setMobileView('list');
+                          }}
+                          className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center space-x-1 cursor-pointer"
+                          title="Exit group view"
+                        >
+                          <LogOut className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>Exit Group</span>
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleDeleteGroup(roomDetails?.room?.id || selectedRoomId)}
                           className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center space-x-1 cursor-pointer"
                           title="Permanently delete this group"
                         >
                           <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-                          <span className="hidden sm:inline">Delete Group</span>
+                          <span className="hidden sm:inline">Delete</span>
                         </button>
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleLeaveRoom(roomDetails.room.id)}
-                        className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center space-x-1.5 transition cursor-pointer"
-                        title="Leave this group"
-                      >
-                        <LogOut className="w-3.5 h-3.5 text-rose-400" />
-                        <span>Leave Group</span>
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedRoomId(null);
+                            setRoomDetails(null);
+                            setMobileView('list');
+                          }}
+                          className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center space-x-1 cursor-pointer"
+                          title="Exit to groups list"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>Exit View</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleLeaveRoom(roomDetails.room.id)}
+                          className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center space-x-1.5 transition cursor-pointer"
+                          title="Exit and leave this group"
+                        >
+                          <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                          <span>Exit Group</span>
+                        </button>
+                      </div>
                     )}
 
                     <div className="flex items-center gap-2">
@@ -1356,6 +1401,21 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom,
                     </div>
 
                     <div className="flex items-center space-x-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedRoomId(null);
+                          setRoomDetails(null);
+                          setMobileView('list');
+                        }}
+                        className="px-2.5 py-1.5 rounded-lg bg-[#383a40] hover:bg-[#404249] text-slate-200 text-xs font-bold flex items-center space-x-1.5 border border-[#4e5058]/50 transition cursor-pointer"
+                        title="Exit group view"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5 text-indigo-400" />
+                        <span className="hidden sm:inline">Exit Group</span>
+                        <span className="sm:hidden">Exit</span>
+                      </button>
+
                       <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         <span>{chatPresenceCount || roomDetails.members?.length || 1} online</span>
