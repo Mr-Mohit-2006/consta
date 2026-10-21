@@ -3,6 +3,8 @@ const router = express.Router();
 const { db } = require('../db/database');
 const { authenticateToken } = require('../middleware/auth');
 const NotificationService = require('../services/notification_service');
+const FriendService = require('../services/friend_service');
+const StreakService = require('../services/streak_service');
 
 // Create study task
 router.post('/', authenticateToken, (req, res) => {
@@ -231,6 +233,42 @@ router.get('/:id', authenticateToken, (req, res) => {
   });
 });
 
+// Start task -> Triggers push notifications to friends!
+router.post('/:id/start', authenticateToken, (req, res) => {
+  const taskId = req.params.id;
+  const userId = req.user.id;
+
+  const task = db.prepare('SELECT * FROM study_tasks WHERE id = ?').get(taskId);
+  if (!task) return res.status(404).json({ error: 'Task not found.' });
+
+  db.prepare("UPDATE study_tasks SET status = 'in_progress', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(taskId);
+
+  db.prepare(`
+    INSERT INTO study_task_assignments (task_id, user_id, status)
+    VALUES (?, ?, 'in_progress')
+    ON CONFLICT(task_id, user_id)
+    DO UPDATE SET status = 'in_progress'
+  `).run(taskId, userId);
+
+  // Record activity in streak service
+  StreakService.recordActivity(userId, 'study', 'task_started', taskId, req.user.timezone);
+
+  // Push notifications to all friends!
+  const notified = FriendService.notifyFriends(
+    userId,
+    'task',
+    `🚀 Friend Started: "${task.title.slice(0, 35)}"`,
+    `${req.user.full_name} started working on "${task.title}". Check out their progress or study together!`,
+    `/tasks/${taskId}`
+  );
+
+  res.json({
+    success: true,
+    status: 'in_progress',
+    notifiedFriendsCount: notified.length
+  });
+});
+
 // Update task status
 router.put('/:id/status', authenticateToken, (req, res) => {
   const taskId = req.params.id;
@@ -253,6 +291,17 @@ router.put('/:id/status', authenticateToken, (req, res) => {
     SET status = ?, completed_at = CASE WHEN ? = 'completed' THEN CURRENT_TIMESTAMP ELSE completed_at END
     WHERE task_id = ? AND user_id = ?
   `).run(status === 'completed' ? 'completed' : 'in_progress', status, taskId, userId);
+
+  // If status is transitioning to in_progress, notify friends!
+  if (status === 'in_progress') {
+    FriendService.notifyFriends(
+      userId,
+      'task',
+      `🚀 Friend Started: "${task.title.slice(0, 35)}"`,
+      `${req.user.full_name} started working on "${task.title}". Join them or cheer them on!`,
+      `/tasks/${taskId}`
+    );
+  }
 
   res.json({ success: true, status });
 });

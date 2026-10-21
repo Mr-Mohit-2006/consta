@@ -317,14 +317,22 @@ function initDatabase() {
     CREATE TABLE IF NOT EXISTS study_challenges (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       room_id INTEGER,
+      task_id INTEGER,
+      creator_id INTEGER,
       title TEXT NOT NULL,
       description TEXT NOT NULL,
+      challenge_scope TEXT CHECK(challenge_scope IN ('self', 'group', 'friends')) DEFAULT 'group',
+      time_limit_minutes INTEGER DEFAULT 30,
+      min_score REAL DEFAULT 4.0,
       target_criteria TEXT DEFAULT '',
       xp_reward INTEGER DEFAULT 100,
+      status TEXT CHECK(status IN ('active', 'completed', 'expired')) DEFAULT 'active',
       start_date DATETIME,
       end_date DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (room_id) REFERENCES study_rooms(id) ON DELETE CASCADE
+      FOREIGN KEY (room_id) REFERENCES study_rooms(id) ON DELETE CASCADE,
+      FOREIGN KEY (task_id) REFERENCES study_tasks(id) ON DELETE CASCADE,
+      FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
     -- Study Challenge Participants
@@ -332,12 +340,28 @@ function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       challenge_id INTEGER NOT NULL,
       user_id INTEGER NOT NULL,
+      status TEXT CHECK(status IN ('joined', 'in_progress', 'completed', 'failed')) DEFAULT 'joined',
+      started_at DATETIME,
+      time_taken_seconds INTEGER DEFAULT 0,
+      score_achieved REAL DEFAULT 0,
       progress REAL DEFAULT 0.0,
       is_completed INTEGER DEFAULT 0,
       completed_at DATETIME,
       UNIQUE(challenge_id, user_id),
       FOREIGN KEY (challenge_id) REFERENCES study_challenges(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    -- Friendships & Study Buddies
+    CREATE TABLE IF NOT EXISTS friendships (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      friend_id INTEGER NOT NULL,
+      status TEXT CHECK(status IN ('pending', 'accepted', 'blocked')) DEFAULT 'accepted',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user_id, friend_id),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
     -- Gamification: XP Transactions Ledger (Immutable Audit Log)
@@ -465,6 +489,8 @@ function initDatabase() {
       review_alerts INTEGER DEFAULT 1,
       chat_mentions INTEGER DEFAULT 1,
       streak_alerts INTEGER DEFAULT 1,
+      friend_activity_alerts INTEGER DEFAULT 1,
+      challenge_alerts INTEGER DEFAULT 1,
       quiet_hours_enabled INTEGER DEFAULT 0,
       quiet_hours_start TEXT DEFAULT '22:00',
       quiet_hours_end TEXT DEFAULT '07:00',
@@ -480,9 +506,65 @@ function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_activity_logs_date ON daily_activity_logs(user_id, activity_date);
     CREATE INDEX IF NOT EXISTS idx_chat_room_time ON chat_messages(chat_room_id, created_at);
     CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read);
+    CREATE INDEX IF NOT EXISTS idx_friendships_user ON friendships(user_id, friend_id);
   `);
 
+  runMigrations();
   seedData();
+}
+
+function runMigrations() {
+  try {
+    const challengeCols = db.prepare('PRAGMA table_info(study_challenges)').all().map(c => c.name);
+    if (!challengeCols.includes('task_id')) {
+      db.exec('ALTER TABLE study_challenges ADD COLUMN task_id INTEGER;');
+    }
+    db.exec('CREATE INDEX IF NOT EXISTS idx_challenges_task ON study_challenges(task_id);');
+    if (!challengeCols.includes('creator_id')) {
+      db.exec('ALTER TABLE study_challenges ADD COLUMN creator_id INTEGER;');
+    }
+    if (!challengeCols.includes('challenge_scope')) {
+      db.exec("ALTER TABLE study_challenges ADD COLUMN challenge_scope TEXT DEFAULT 'group';");
+    }
+    if (!challengeCols.includes('time_limit_minutes')) {
+      db.exec('ALTER TABLE study_challenges ADD COLUMN time_limit_minutes INTEGER DEFAULT 30;');
+    }
+    if (!challengeCols.includes('min_score')) {
+      db.exec('ALTER TABLE study_challenges ADD COLUMN min_score REAL DEFAULT 4.0;');
+    }
+    if (!challengeCols.includes('status')) {
+      db.exec("ALTER TABLE study_challenges ADD COLUMN status TEXT DEFAULT 'active';");
+    }
+
+    const partCols = db.prepare('PRAGMA table_info(study_challenge_participants)').all().map(c => c.name);
+    if (!partCols.includes('status')) {
+      db.exec("ALTER TABLE study_challenge_participants ADD COLUMN status TEXT DEFAULT 'joined';");
+    }
+    if (!partCols.includes('started_at')) {
+      db.exec('ALTER TABLE study_challenge_participants ADD COLUMN started_at DATETIME;');
+    }
+    if (!partCols.includes('time_taken_seconds')) {
+      db.exec('ALTER TABLE study_challenge_participants ADD COLUMN time_taken_seconds INTEGER DEFAULT 0;');
+    }
+    if (!partCols.includes('score_achieved')) {
+      db.exec('ALTER TABLE study_challenge_participants ADD COLUMN score_achieved REAL DEFAULT 0;');
+    }
+
+    const notifPrefCols = db.prepare('PRAGMA table_info(notification_preferences)').all().map(c => c.name);
+    if (!notifPrefCols.includes('friend_activity_alerts')) {
+      db.exec('ALTER TABLE notification_preferences ADD COLUMN friend_activity_alerts INTEGER DEFAULT 1;');
+    }
+    if (!notifPrefCols.includes('challenge_alerts')) {
+      db.exec('ALTER TABLE notification_preferences ADD COLUMN challenge_alerts INTEGER DEFAULT 1;');
+    }
+
+    // Update names to Indian personas: Mohit Kumar, Abhijit Sharma, Prof. Abhishek Verma
+    db.prepare("UPDATE users SET full_name = 'Mohit Kumar' WHERE id = 1").run();
+    db.prepare("UPDATE users SET full_name = 'Abhijit Sharma' WHERE id = 2").run();
+    db.prepare("UPDATE users SET full_name = 'Prof. Abhishek Verma' WHERE id = 3").run();
+  } catch (e) {
+    console.error('Migration notice:', e.message);
+  }
 }
 
 function seedData() {
@@ -692,6 +774,22 @@ function seedData() {
       INSERT INTO xp_transactions (user_id, amount, reason, category, ref_type, ref_id)
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(2, 85, 'Initial platform welcome', 'study_session', 'system', 0);
+  }
+
+  // Seed default friendships if empty
+  try {
+    const friendCount = db.prepare('SELECT COUNT(*) as count FROM friendships').get();
+    if (friendCount.count === 0) {
+      const insertFriend = db.prepare("INSERT OR IGNORE INTO friendships (user_id, friend_id, status) VALUES (?, ?, 'accepted')");
+      insertFriend.run(1, 2);
+      insertFriend.run(2, 1);
+      insertFriend.run(1, 3);
+      insertFriend.run(3, 1);
+      insertFriend.run(2, 3);
+      insertFriend.run(3, 2);
+    }
+  } catch (e) {
+    // ignore
   }
 }
 

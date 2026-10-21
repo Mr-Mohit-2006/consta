@@ -36,6 +36,8 @@ app.use('/api/streaks', require('./routes/streaks'));
 app.use('/api/profile', require('./routes/profile'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/friends', require('./routes/friends'));
+app.use('/api/challenges', require('./routes/challenges'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

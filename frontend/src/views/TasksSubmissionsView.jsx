@@ -4,16 +4,24 @@ import { useAuth } from '../context/AuthContext';
 import {
   CheckSquare, Plus, Clock, FileText, Image as ImageIcon, Link as LinkIcon,
   CheckCircle2, AlertCircle, RefreshCw, ChevronRight, Eye, Send, UploadCloud,
-  FileCheck, Shield, ExternalLink
+  FileCheck, Shield, ExternalLink, Trophy, Play, Flame, Zap
 } from 'lucide-react';
 
-export default function TasksSubmissionsView({ initialTaskId, onOpenReview }) {
+export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOpenChallenge }) {
   const { user, refreshUserData } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [taskDetails, setTaskDetails] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+
+  // Challenge modal for this task
+  const [showTaskChallengeModal, setShowTaskChallengeModal] = useState(false);
+  const [taskChalTitle, setTaskChalTitle] = useState('');
+  const [taskChalScope, setTaskChalScope] = useState('self'); // 'self' | 'group' | 'friends'
+  const [taskChalTime, setTaskChalTime] = useState(25);
+  const [taskChalScore, setTaskChalScore] = useState(4.5);
+  const [taskChalXp, setTaskChalXp] = useState(80);
 
   // New task modal
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -148,6 +156,50 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview }) {
     }
   }
 
+  async function handleStartTask(taskId) {
+    try {
+      const res = await apiRequest(`/study-tasks/${taskId}/start`, { method: 'POST' });
+      await refreshUserData();
+      await loadTasks();
+      if (selectedTask?.id === taskId) {
+        await loadTaskDetails(taskId);
+      }
+      alert(`🚀 Task started! Push notifications sent to your study buddies so they know you are studying.`);
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  async function handleCreateTaskChallenge(e) {
+    e.preventDefault();
+    if (!selectedTask || !taskChalTitle.trim()) return;
+
+    try {
+      const res = await apiRequest('/challenges', {
+        method: 'POST',
+        body: {
+          task_id: selectedTask.id,
+          room_id: selectedTask.room_id || null,
+          title: taskChalTitle.trim(),
+          challenge_scope: taskChalScope,
+          time_limit_minutes: Number(taskChalTime),
+          min_score: Number(taskChalScore),
+          xp_reward: Number(taskChalXp)
+        }
+      });
+
+      setShowTaskChallengeModal(false);
+      setTaskChalTitle('');
+      alert(`⚡ Challenge "${res.title}" created successfully! Notifications sent to your ${taskChalScope === 'group' ? 'cohort members' : 'study buddies'}.`);
+
+      if (onOpenChallenge) {
+        onOpenChallenge(res.id);
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
   const filteredTasks = tasks.filter(t => {
     if (statusFilter === 'all') return true;
     return t.status === statusFilter;
@@ -269,7 +321,30 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview }) {
                     <h3 className="text-xl font-bold text-white mt-2.5">{selectedTask.title}</h3>
                   </div>
 
-                  <div className="flex space-x-2 shrink-0">
+                  <div className="flex flex-wrap gap-2 shrink-0">
+                    {selectedTask.status === 'not_started' && (
+                      <button
+                        onClick={() => handleStartTask(selectedTask.id)}
+                        className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center space-x-1.5 shadow-lg shadow-emerald-600/20 transition"
+                        title="Start task and push notification to study buddies"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-white" />
+                        <span>Start Task (Notify Buddies)</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setTaskChalTitle(`${selectedTask.title} Sprint`);
+                        setShowTaskChallengeModal(true);
+                      }}
+                      className="px-3.5 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-semibold text-xs flex items-center space-x-1.5 transition"
+                      title="Turn this task into a self or group sprint challenge"
+                    >
+                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                      <span>⚡ Turn into Challenge</span>
+                    </button>
+
                     <button
                       onClick={() => setShowSubmitModal(true)}
                       className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition"
@@ -638,6 +713,119 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview }) {
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{submitting ? 'Submitting...' : 'Confirm Submission'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Modal: Turn Task into Challenge */}
+      {showTaskChallengeModal && selectedTask && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-white mb-1 flex items-center space-x-2">
+              <Trophy className="w-5 h-5 text-amber-400" />
+              <span>Launch Challenge on "{selectedTask.title}"</span>
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Set speedrun and score goals for yourself, your cohort, or your study buddies.
+            </p>
+
+            <form onSubmit={handleCreateTaskChallenge} className="space-y-3.5">
+              <div>
+                <label className="text-xs text-slate-400 block mb-1">Challenge Scope</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'self', label: 'Self Sprint', desc: 'Focus timer' },
+                    { id: 'group', label: 'Cohort Group', desc: 'Shared room' },
+                    { id: 'friends', label: 'Study Buddies', desc: 'Notify friends' }
+                  ].map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setTaskChalScope(item.id)}
+                      className={`p-2.5 rounded-xl border text-center transition ${
+                        taskChalScope === item.id
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <div className="text-xs font-semibold">{item.label}</div>
+                      <div className="text-[10px] text-slate-500">{item.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-400 block mb-1">Challenge Title</label>
+                <input
+                  type="text"
+                  required
+                  value={taskChalTitle}
+                  onChange={e => setTaskChalTitle(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">Time Limit (mins)</label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="180"
+                    value={taskChalTime}
+                    onChange={e => setTaskChalTime(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">Min Score</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="5"
+                    value={taskChalScore}
+                    onChange={e => setTaskChalScore(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">Bonus XP</label>
+                  <input
+                    type="number"
+                    min="10"
+                    max="500"
+                    value={taskChalXp}
+                    onChange={e => setTaskChalXp(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-relaxed">
+                📢 {taskChalScope === 'group'
+                  ? 'All members of the study room will receive an alert.'
+                  : taskChalScope === 'friends'
+                  ? 'All your connected study buddies will receive an instant invite.'
+                  : 'Starting this self challenge will notify your study buddies to cheer you on!'}
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowTaskChallengeModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs"
+                >
+                  Create & Launch
                 </button>
               </div>
             </form>

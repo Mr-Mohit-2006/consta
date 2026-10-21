@@ -61,9 +61,14 @@ router.post('/login', (req, res) => {
     return res.status(400).json({ error: 'Identifier and password are required.' });
   }
 
+  let mappedUsername = identifier;
+  if (['mohit', 'mohit_learner'].includes(identifier.toLowerCase())) mappedUsername = 'alex_learner';
+  if (['abhijit', 'abhijit_study'].includes(identifier.toLowerCase())) mappedUsername = 'sam_study';
+  if (['abhishek', 'abhishek_mentor'].includes(identifier.toLowerCase())) mappedUsername = 'dr_stone';
+
   const user = db.prepare(`
-    SELECT * FROM users WHERE username = ? OR email = ?
-  `).get(identifier, identifier);
+    SELECT * FROM users WHERE username = ? OR email = ? OR username = ?
+  `).get(identifier, identifier, mappedUsername);
 
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return res.status(401).json({ error: 'Invalid credentials.' });

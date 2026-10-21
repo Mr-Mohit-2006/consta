@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   BookOpen, Users, CheckSquare, MessageSquare, Flame, Award, BarChart3,
-  User, Bell, ChevronDown, Sparkles, GraduationCap, ShieldCheck
+  User, Bell, ChevronDown, Sparkles, GraduationCap, ShieldCheck, Trophy, UserCheck
 } from 'lucide-react';
 
-export default function Header({ activeTab, setActiveTab, onOpenNotifications }) {
+export default function Header({ activeTab, setActiveTab, onOpenNotifications, onOpenFriends }) {
   const { user, streaks, progression, unreadNotifications, switchUser, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -14,6 +14,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications })
     { id: 'solo', label: 'Solo Study', icon: BookOpen },
     { id: 'group', label: 'Group Study', icon: Users },
     { id: 'tasks', label: 'Study Tasks', icon: CheckSquare },
+    { id: 'challenges', label: 'Challenges', icon: Trophy },
     { id: 'reviews', label: 'Review Center', icon: ShieldCheck },
     { id: 'chat', label: 'Doubt Chat', icon: MessageSquare },
     { id: 'gamification', label: 'XP & Levels', icon: Award },
@@ -83,6 +84,15 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications })
             <span className="font-bold text-xs">{studyStreak}d Streak</span>
           </div>
 
+          {/* Study Buddies / Friends Button */}
+          <button
+            onClick={onOpenFriends}
+            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition flex items-center space-x-1"
+            title="Study Buddies & Friend Activity"
+          >
+            <Users className="w-5 h-5 text-indigo-400" />
+          </button>
+
           {/* Notifications Bell */}
           <button
             onClick={onOpenNotifications}
@@ -129,9 +139,9 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications })
                 </div>
 
                 {[
-                  { username: 'alex_learner', name: 'Alex Rivera (Student)', role: 'Student' },
-                  { username: 'sam_study', name: 'Sam Chen (Collaborator)', role: 'Peer' },
-                  { username: 'dr_stone', name: 'Dr. Evelyn Stone (Mentor)', role: 'Mentor/Reviewer' }
+                  { username: 'mohit_learner', name: 'Mohit Kumar (Student)', role: 'Student' },
+                  { username: 'abhijit_study', name: 'Abhijit Sharma (Collaborator)', role: 'Peer' },
+                  { username: 'abhishek_mentor', name: 'Prof. Abhishek Verma (Mentor)', role: 'Mentor/Reviewer' }
                 ].map(p => (
                   <button
                     key={p.username}
@@ -140,11 +150,11 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications })
                       setUserMenuOpen(false);
                     }}
                     className={`w-full text-left px-4 py-1.5 hover:bg-slate-800 flex items-center justify-between ${
-                      user?.username === p.username ? 'text-indigo-400 font-semibold' : 'text-slate-300'
+                      (user?.username === p.username || (p.username === 'mohit_learner' && user?.username === 'alex_learner') || (p.username === 'abhijit_study' && user?.username === 'sam_study') || (p.username === 'abhishek_mentor' && user?.username === 'dr_stone')) ? 'text-indigo-400 font-semibold' : 'text-slate-300'
                     }`}
                   >
                     <span>{p.name}</span>
-                    {user?.username === p.username && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
+                    {((user?.username === p.username) || (p.username === 'mohit_learner' && user?.username === 'alex_learner')) && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
                   </button>
                 ))}
 

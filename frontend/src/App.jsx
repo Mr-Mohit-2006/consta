@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import NotificationModal from './components/NotificationModal';
+import FriendsModal from './components/FriendsModal';
 import DashboardView from './views/DashboardView';
 import SoloStudyView from './views/SoloStudyView';
 import GroupStudyView from './views/GroupStudyView';
 import TasksSubmissionsView from './views/TasksSubmissionsView';
+import ChallengesView from './views/ChallengesView';
 import ReviewCenterView from './views/ReviewCenterView';
 import ChatDiscussionView from './views/ChatDiscussionView';
 import GamificationView from './views/GamificationView';
@@ -17,6 +19,7 @@ function AppContent() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [friendsOpen, setFriendsOpen] = useState(false);
   const [deepTaskId, setDeepTaskId] = useState(null);
   const [deepChatRoomId, setDeepChatRoomId] = useState(null);
 
@@ -68,6 +71,7 @@ function AppContent() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenNotifications={() => setNotificationsOpen(true)}
+        onOpenFriends={() => setFriendsOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -85,7 +89,11 @@ function AppContent() {
           <TasksSubmissionsView
             initialTaskId={deepTaskId}
             onOpenReview={handleOpenReview}
+            onOpenChallenge={() => setActiveTab('challenges')}
           />
+        )}
+        {activeTab === 'challenges' && (
+          <ChallengesView onOpenTask={handleOpenTask} />
         )}
         {activeTab === 'reviews' && (
           <ReviewCenterView initialTaskId={deepTaskId} />
@@ -104,6 +112,13 @@ function AppContent() {
         isOpen={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
         onNotificationClick={handleNotificationClick}
+      />
+
+      {/* Friends & Study Buddies Modal */}
+      <FriendsModal
+        isOpen={friendsOpen}
+        onClose={() => setFriendsOpen(false)}
+        onNavigateToTask={handleOpenTask}
       />
     </div>
   );

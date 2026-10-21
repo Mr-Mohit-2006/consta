@@ -424,3 +424,108 @@ test('11. Public Profile & Portfolio with Privacy Controls', async () => {
   assert.ok(pubRes.data.achievements);
   assert.ok(pubRes.data.timeline);
 });
+
+test('12. Push Notification to Friends When Starting Task', async () => {
+  // Alex logs in and starts a task
+  const alexLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'alex_learner', password: 'password123' }
+  });
+  const alexToken = alexLogin.data.token;
+
+  // Alex starts task #1
+  const startRes = await request('/api/study-tasks/1/start', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${alexToken}` }
+  });
+  assert.equal(startRes.status, 200);
+  assert.equal(startRes.data.status, 'in_progress');
+  assert.ok(startRes.data.notifiedFriendsCount > 0);
+
+  // Sam logs in and checks notifications
+  const samLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'sam_study', password: 'password123' }
+  });
+  const notifRes = await request('/api/notifications', {
+    headers: { Authorization: `Bearer ${samLogin.data.token}` }
+  });
+  assert.equal(notifRes.status, 200);
+  const friendAlert = notifRes.data.find(n => n.title.includes('Friend Started'));
+  assert.ok(friendAlert, 'Friend should have received task start push notification');
+  assert.ok(friendAlert.message.includes('Mohit Kumar'));
+});
+
+test('13. Group and Self Challenge on Any Task with Friend Alerts', async () => {
+  // Sam creates a Self Challenge on task #1
+  const samLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'sam_study', password: 'password123' }
+  });
+  const samToken = samLogin.data.token;
+
+  const selfChalRes = await request('/api/challenges', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${samToken}` },
+    body: {
+      task_id: 1,
+      title: 'LIS Binary Search Speedrun',
+      description: 'Implement patience sorting within 25 minutes error-free.',
+      challenge_scope: 'self',
+      time_limit_minutes: 25,
+      xp_reward: 80
+    }
+  });
+  assert.equal(selfChalRes.status, 201);
+  const selfChallengeId = selfChalRes.data.id;
+
+  // Sam starts the challenge -> Friend notifications should fire!
+  const startChalRes = await request(`/api/challenges/${selfChallengeId}/start`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${samToken}` }
+  });
+  assert.equal(startChalRes.status, 200);
+  assert.equal(startChalRes.data.status, 'in_progress');
+
+  // Alex checks notifications for friend challenge alert
+  const alexLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'alex_learner', password: 'password123' }
+  });
+  const alexNotifs = await request('/api/notifications', {
+    headers: { Authorization: `Bearer ${alexLogin.data.token}` }
+  });
+  const chalAlert = alexNotifs.data.find(n => n.title.includes('Friend Started a Challenge'));
+  assert.ok(chalAlert, 'Alex should receive friend challenge start notification');
+
+  // Sam completes the challenge
+  const compChalRes = await request(`/api/challenges/${selfChallengeId}/complete`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${samToken}` },
+    body: { time_taken_seconds: 1200, score_achieved: 5.0 }
+  });
+  assert.equal(compChalRes.status, 200);
+  assert.equal(compChalRes.data.is_completed, 1);
+  assert.equal(compChalRes.data.xpReward, 80);
+
+  // Dr. Stone creates a Group Challenge on task #1 for room #1
+  const mentorLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'dr_stone', password: 'password123' }
+  });
+  const groupChalRes = await request('/api/challenges', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${mentorLogin.data.token}` },
+    body: {
+      task_id: 1,
+      room_id: 1,
+      title: 'Cohort LIS Patience Sort Tournament',
+      description: 'First to submit approved solution earns +100 bonus XP!',
+      challenge_scope: 'group',
+      time_limit_minutes: 60,
+      xp_reward: 100
+    }
+  });
+  assert.equal(groupChalRes.status, 201);
+  assert.equal(groupChalRes.data.challenge_scope, 'group');
+});
