@@ -68,7 +68,23 @@ router.get('/', authenticateToken, (req, res) => {
   query += ' ORDER BY r.created_at DESC';
 
   const rooms = db.prepare(query).all(...params);
-  res.json(rooms);
+
+  const challengesStmt = db.prepare(`
+    SELECT c.id, c.room_id, c.title, c.description, c.duration_type, c.has_timer,
+           c.time_limit_minutes, c.scheduled_date, c.start_date, c.end_date,
+           c.xp_reward, c.status,
+           (SELECT COUNT(*) FROM study_challenge_participants p WHERE p.challenge_id = c.id) as participant_count
+    FROM study_challenges c
+    WHERE c.room_id = ? AND c.status = 'active'
+    ORDER BY COALESCE(c.scheduled_date, c.start_date) ASC, c.created_at DESC
+  `);
+
+  const enrichedRooms = rooms.map(r => ({
+    ...r,
+    challenges: challengesStmt.all(r.id)
+  }));
+
+  res.json(enrichedRooms);
 });
 
 // Get room details

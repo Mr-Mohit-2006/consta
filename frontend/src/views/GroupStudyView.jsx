@@ -257,6 +257,45 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     };
   }
 
+  function formatChallengeTimer(c) {
+    if (!c) return 'Untimed';
+
+    // 1. If end_date is present, compute remaining time
+    if (c.end_date) {
+      const msLeft = new Date(c.end_date) - Date.now();
+      if (msLeft > 0) {
+        const days = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((msLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+        if (days > 0) return `${days}d ${hours}h left`;
+        if (hours > 0) return `${hours}h ${mins}m left`;
+        return `${mins}m left`;
+      }
+      return 'Expired';
+    }
+
+    // 2. If scheduled_date is in the future
+    if (c.scheduled_date) {
+      const msUntil = new Date(c.scheduled_date) - Date.now();
+      if (msUntil > 0) {
+        const days = Math.ceil(msUntil / (1000 * 60 * 60 * 24));
+        return `Starts in ${days}d`;
+      }
+    }
+
+    // 3. If explicit timer minutes configured
+    if (c.has_timer && Number(c.time_limit_minutes) > 0) {
+      return `${c.time_limit_minutes}m timer`;
+    }
+
+    // 4. Fallback based on duration type
+    if (c.duration_type === 'daily') return '24h window';
+    if (c.duration_type === 'weekly') return '7-Day window';
+    if (c.duration_type === 'monthly') return '30-Day window';
+
+    return 'Active';
+  }
+
   async function loadRoomDetails(id) {
     const numId = Number(id);
     if (!numId || isNaN(numId)) return;
@@ -588,6 +627,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
       setGroupChalDate('');
       setGroupChalTaskId('');
       await loadRoomDetails(selectedRoomId);
+      await loadRooms();
       alert(`🏆 Group Challenge "${res.title}" scheduled successfully for ${groupChalDate ? new Date(groupChalDate).toLocaleDateString() : 'today'}! Cohort members have been alerted.`);
     } catch (err) {
       alert(err.message);
@@ -602,6 +642,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     try {
       await apiRequest(`/challenges/${challengeId}`, { method: 'DELETE' });
       await loadRoomDetails(selectedRoomId);
+      await loadRooms();
       alert('Challenge deleted successfully.');
     } catch (err) {
       alert(err.message);
@@ -707,10 +748,13 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition self-start cursor-pointer"
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition self-start cursor-pointer group"
+          title="Create New Study Group"
         >
-          <Plus className="w-4 h-4" />
-          <span>Create New Group</span>
+          <div className="w-5 h-5 rounded-lg bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <UserPlus className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span>Create Group</span>
         </button>
       </div>
 
@@ -748,6 +792,15 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Groups ({filteredRooms.length})
             </span>
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="p-1 px-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+              title="Create New Study Group"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Create Group</span>
+            </button>
           </div>
 
           {/* Segmented Filter Switcher */}
@@ -818,6 +871,76 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
                   <h4 className="font-bold text-sm text-white mt-2 truncate">{r.name}</h4>
                   <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{r.description || 'Collaborative study cohort.'}</p>
+
+                  {/* Active Challenges & Timers Section on Group Card */}
+                  {r.challenges && r.challenges.length > 0 ? (
+                    <div className="mt-2.5 pt-2.5 border-t border-slate-800/80 space-y-1.5">
+                      <div className="flex items-center justify-between text-[10px] font-bold text-amber-400">
+                        <span className="flex items-center space-x-1">
+                          <Trophy className="w-3 h-3 text-amber-400" />
+                          <span>Active Challenge{r.challenges.length > 1 ? `s (${r.challenges.length})` : ''}</span>
+                        </span>
+                        <span className="text-[10px] text-indigo-300 font-mono">
+                          +{r.challenges.reduce((sum, c) => sum + (c.xp_reward || 0), 0)} XP
+                        </span>
+                      </div>
+
+                      {r.challenges.slice(0, 2).map(c => {
+                        const timerText = formatChallengeTimer(c);
+                        const isExpired = timerText === 'Expired';
+                        return (
+                          <div
+                            key={c.id}
+                            className="p-2 rounded-xl bg-slate-900/90 border border-amber-500/20 hover:border-amber-500/40 transition flex items-center justify-between gap-2"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-white truncate flex items-center space-x-1">
+                                <span className="text-amber-400 text-xs">⚡</span>
+                                <span className="truncate">{c.title}</span>
+                              </p>
+                              {c.scheduled_date && (
+                                <p className="text-[10px] text-amber-300/80 flex items-center space-x-1 mt-0.5">
+                                  <Calendar className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                                  <span>{new Date(c.scheduled_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Challenge Timer Pill */}
+                            <div className={`shrink-0 flex items-center space-x-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold border ${
+                              isExpired
+                                ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                                : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                            }`}>
+                              <Timer className={`w-3 h-3 ${isExpired ? 'text-rose-400' : 'text-amber-400 animate-pulse'}`} />
+                              <span>{timerText}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (isMember || isOwner) ? (
+                    <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
+                      <span className="text-slate-400 flex items-center space-x-1">
+                        <Trophy className="w-3 h-3 text-slate-500" />
+                        <span>No active challenge</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRoomId(r.id);
+                          loadRoomDetails(r.id);
+                          setShowCreateChallengeModal(true);
+                        }}
+                        className="text-amber-400 hover:text-amber-300 font-bold hover:underline cursor-pointer flex items-center space-x-0.5"
+                        title="Schedule a challenge with timer for this group"
+                      >
+                        <Plus className="w-2.5 h-2.5" />
+                        <span>Add Challenge</span>
+                      </button>
+                    </div>
+                  ) : null}
 
                   <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
                     <span className="text-slate-400">{r.member_count} member(s)</span>
@@ -1110,6 +1233,42 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                   <div className="mt-4 p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs">
                     <span className="font-bold text-slate-200 block mb-1">Study Objectives:</span>
                     <p className="text-slate-400 leading-relaxed">{roomDetails.room.objectives}</p>
+                  </div>
+                )}
+
+                {/* Active Cohort Challenge & Live Countdown Spotlight */}
+                {roomDetails.challenges && roomDetails.challenges.length > 0 && (
+                  <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-indigo-950/40 to-slate-900 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/30">
+                        <Trophy className="w-5 h-5 text-amber-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Active Group Challenge
+                          </span>
+                          <span className="text-xs text-indigo-300 font-mono">
+                            +{roomDetails.challenges[0].xp_reward} XP
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-bold text-white mt-0.5 truncate">{roomDetails.challenges[0].title}</h4>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold">
+                        <Timer className="w-4 h-4 text-amber-400 animate-pulse" />
+                        <span>{formatChallengeTimer(roomDetails.challenges[0])}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveGroupTab('challenges')}
+                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition cursor-pointer"
+                      >
+                        View Challenge
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
