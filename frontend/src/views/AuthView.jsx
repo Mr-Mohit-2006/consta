@@ -357,7 +357,7 @@ export default function AuthView({ onSuccess }) {
                       required
                       value={loginIdentifier}
                       onChange={e => setLoginIdentifier(e.target.value)}
-                      placeholder="e.g. mohit@example.com or mohit"
+                      placeholder="Enter your email or username"
                       className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                     />
                   </div>
@@ -454,7 +454,7 @@ export default function AuthView({ onSuccess }) {
                           required
                           value={forgotEmail}
                           onChange={e => setForgotEmail(e.target.value)}
-                          placeholder="e.g. mohit@example.com"
+                          placeholder="youremail@example.com"
                           className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                         />
                       </div>
@@ -588,7 +588,7 @@ export default function AuthView({ onSuccess }) {
                       required
                       value={regFullName}
                       onChange={e => setRegFullName(e.target.value)}
-                      placeholder="e.g. Mohit Kumar"
+                      placeholder="Your Full Name"
                       className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                     />
                   </div>
@@ -630,7 +630,7 @@ export default function AuthView({ onSuccess }) {
                     required
                     value={regUsername}
                     onChange={e => setRegUsername(e.target.value)}
-                    placeholder="e.g. mohit_dev"
+                    placeholder="your_unique_username"
                     className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                   />
                 </div>

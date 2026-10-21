@@ -58,20 +58,6 @@ export function AuthProvider({ children }) {
     return res.user;
   }
 
-  async function switchUser(username) {
-    setLoading(true);
-    try {
-      const res = await apiRequest('/auth/login', {
-        method: 'POST',
-        body: { identifier: username, password: 'password123' }
-      });
-      setStoredToken(res.token);
-      await loadMe();
-    } catch (e) {
-      setLoading(false);
-    }
-  }
-
   function logout() {
     setStoredToken(null);
     setUser(null);
@@ -90,7 +76,6 @@ export function AuthProvider({ children }) {
       loading,
       login,
       register,
-      switchUser,
       logout,
       refreshUserData: loadMe
     }}>

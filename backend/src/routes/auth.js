@@ -93,15 +93,11 @@ router.post('/login', (req, res) => {
   }
 
   const cleanId = identifier.trim().toLowerCase();
-  let mappedUsername = cleanId;
-  if (['mohit', 'mohit_learner'].includes(cleanId)) mappedUsername = 'alex_learner';
-  if (['abhijit', 'abhijit_study'].includes(cleanId)) mappedUsername = 'sam_study';
-  if (['abhishek', 'abhishek_mentor'].includes(cleanId)) mappedUsername = 'dr_stone';
 
   const user = db.prepare(`
     SELECT * FROM users 
-    WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(username) = ?
-  `).get(cleanId, cleanId, mappedUsername);
+    WHERE LOWER(username) = ? OR LOWER(email) = ?
+  `).get(cleanId, cleanId);
 
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return res.status(401).json({ error: 'Invalid email/username or password.' });
