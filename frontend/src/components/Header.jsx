@@ -19,7 +19,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
     { id: 'chat', label: 'Doubt Chat', icon: MessageSquare },
     { id: 'gamification', label: 'XP & Levels', icon: Award },
     { id: 'streaks', label: 'Streaks', icon: Flame },
-    { id: 'portfolio', label: 'Portfolio', icon: User },
+    { id: 'profile', label: 'Profile', icon: User },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
@@ -129,53 +129,31 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
                 className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl py-2 z-50 text-xs"
                 onMouseLeave={() => setUserMenuOpen(false)}
               >
-                <div className="px-4 py-2 border-b border-slate-800">
+                <div className="px-4 py-2.5 border-b border-slate-800">
                   <div className="font-semibold text-slate-200">{user?.full_name}</div>
-                  <div className="text-[11px] text-slate-400 font-mono">@{user?.username} ({user?.role})</div>
+                  <div className="text-[11px] text-indigo-400 font-mono">@{user?.username}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5 capitalize">{user?.email}</div>
                 </div>
 
-                <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  Switch Persona (Quick Test)
-                </div>
-
-                {[
-                  { username: 'mohit_learner', name: 'Mohit Kumar (Student)', role: 'Student' },
-                  { username: 'abhijit_study', name: 'Abhijit Sharma (Collaborator)', role: 'Peer' },
-                  { username: 'abhishek_mentor', name: 'Prof. Abhishek Verma (Mentor)', role: 'Mentor/Reviewer' }
-                ].map(p => (
-                  <button
-                    key={p.username}
-                    onClick={() => {
-                      switchUser(p.username);
-                      setUserMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-1.5 hover:bg-slate-800 flex items-center justify-between ${
-                      (user?.username === p.username || (p.username === 'mohit_learner' && user?.username === 'alex_learner') || (p.username === 'abhijit_study' && user?.username === 'sam_study') || (p.username === 'abhishek_mentor' && user?.username === 'dr_stone')) ? 'text-indigo-400 font-semibold' : 'text-slate-300'
-                    }`}
-                  >
-                    <span>{p.name}</span>
-                    {((user?.username === p.username) || (p.username === 'mohit_learner' && user?.username === 'alex_learner')) && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
-                  </button>
-                ))}
-
-                <div className="border-t border-slate-800 mt-2 pt-1">
+                <div className="pt-1">
                   <button
                     onClick={() => {
-                      setActiveTab('portfolio');
+                      setActiveTab('profile');
                       setUserMenuOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-slate-800 text-slate-300"
+                    className="w-full text-left px-4 py-2 hover:bg-slate-800 text-slate-300 flex items-center space-x-2"
                   >
-                    My Learning Portfolio & Settings
+                    <User className="w-4 h-4 text-indigo-400" />
+                    <span>My Profile & Settings</span>
                   </button>
                   <button
                     onClick={() => {
                       logout();
                       setUserMenuOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-slate-800 text-rose-400"
+                    className="w-full text-left px-4 py-2 hover:bg-slate-800 text-rose-400 flex items-center space-x-2"
                   >
-                    Sign Out
+                    <span>Sign Out</span>
                   </button>
                 </div>
               </div>

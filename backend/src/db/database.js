@@ -364,6 +364,17 @@ function initDatabase() {
       FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    -- User Follows (Followers and Following)
+    CREATE TABLE IF NOT EXISTS user_follows (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      follower_id INTEGER NOT NULL,
+      following_id INTEGER NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(follower_id, following_id),
+      FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
     -- Gamification: XP Transactions Ledger (Immutable Audit Log)
     CREATE TABLE IF NOT EXISTS xp_transactions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -557,6 +568,20 @@ function runMigrations() {
     if (!notifPrefCols.includes('challenge_alerts')) {
       db.exec('ALTER TABLE notification_preferences ADD COLUMN challenge_alerts INTEGER DEFAULT 1;');
     }
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS user_follows (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        follower_id INTEGER NOT NULL,
+        following_id INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(follower_id, following_id),
+        FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_follows_following ON user_follows(following_id);
+      CREATE INDEX IF NOT EXISTS idx_follows_follower ON user_follows(follower_id);
+    `);
 
     // Update names to Indian personas: Mohit Kumar, Abhijit Sharma, Prof. Abhishek Verma
     db.prepare("UPDATE users SET full_name = 'Mohit Kumar' WHERE id = 1").run();

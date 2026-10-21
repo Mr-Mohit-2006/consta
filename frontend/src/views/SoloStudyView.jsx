@@ -3,7 +3,8 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   Play, Pause, Square, RotateCcw, Plus, Check, Clock, AlertTriangle,
-  Sparkles, BookOpen, Layers, CheckCircle2, History, ChevronRight
+  Sparkles, BookOpen, Layers, CheckCircle2, History, ChevronRight,
+  Bell, Flame, Award
 } from 'lucide-react';
 
 export default function SoloStudyView() {
@@ -377,52 +378,47 @@ export default function SoloStudyView() {
             </div>
           </div>
 
-          {/* Right Col: AI Explanation Assistant */}
+          {/* Right Col: Study Alerts & Notifications */}
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
               <div className="flex items-center space-x-2 text-indigo-400 mb-2">
-                <Sparkles className="w-4 h-4" />
-                <h4 className="font-bold text-sm text-white">AI Concept Assistant</h4>
+                <Bell className="w-4 h-4" />
+                <h4 className="font-bold text-sm text-white">Study Alerts & Notifications</h4>
               </div>
               <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                Stuck on a theorem or question? Request a structured, pedagogical breakdown.
+                Stay updated with real-time push notifications for your study streaks, break reminders, and buddy milestones.
               </p>
 
-              <form onSubmit={askAiAssistant} className="space-y-3">
-                <textarea
-                  rows={3}
-                  value={aiQuestion}
-                  onChange={e => setAiQuestion(e.target.value)}
-                  placeholder={`Ask a question about ${activeSession.topic}...`}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
-                />
-                <button
-                  type="submit"
-                  disabled={aiLoading || !aiQuestion.trim()}
-                  className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-xs flex items-center justify-center space-x-2 shadow-lg transition"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{aiLoading ? 'Analyzing...' : 'Generate Explanation'}</span>
-                </button>
-              </form>
-
-              {aiAnswer && (
-                <div className="mt-4 p-4 rounded-xl bg-slate-950/60 border border-indigo-900/40 text-xs space-y-2">
-                  <div className="font-semibold text-indigo-300">{aiAnswer.shortAnswer}</div>
-                  <div className="text-slate-300 leading-relaxed">{aiAnswer.detailedWalkthrough}</div>
-                  <div className="pt-2 border-t border-slate-800/80">
-                    <span className="font-semibold text-slate-400 block mb-1">Key Principles:</span>
-                    <ul className="list-disc list-inside space-y-1 text-slate-300">
-                      {aiAnswer.keyConcepts.map((c, i) => (
-                        <li key={i}>{c}</li>
-                      ))}
-                    </ul>
+              <div className="space-y-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-start space-x-3">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                    <Flame className="w-4 h-4 fill-amber-400" />
                   </div>
-                  <div className="text-[10px] text-slate-500 italic pt-2">
-                    {aiAnswer.disclaimer}
+                  <div>
+                    <div className="font-bold text-white">Streak Milestone Alert</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
+                      Completing this session logs persistent progress toward your daily study streak.
+                    </div>
                   </div>
                 </div>
-              )}
+
+                <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-start space-x-3">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
+                    <Award className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-white">Session Points & XP</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
+                      Tracked independently from stopwatch duration to promote genuine learning outcomes.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[11px] flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                  <span>Real-time buddy alerts active: Friends are notified when you start or complete sessions.</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

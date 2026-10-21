@@ -256,14 +256,10 @@ export default function ReviewCenterView({ initialTaskId }) {
                     </span>
                   </div>
 
-                  <button
-                    onClick={runAiEvaluation}
-                    disabled={aiLoading}
-                    className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-xs flex items-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
-                    <span>{aiLoading ? 'AI Evaluating...' : 'Run Assistive AI Evaluation'}</span>
-                  </button>
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+                    <CheckCircle className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Peer & Mentor Evaluation Mode</span>
+                  </div>
                 </div>
 
                 {/* Submitted text */}
@@ -291,37 +287,6 @@ export default function ReviewCenterView({ initialTaskId }) {
                   </div>
                 )}
               </div>
-
-              {/* Assistive AI Evaluation Box if available */}
-              {aiEvaluation && (
-                <div className="bg-slate-900/90 border border-cyan-500/30 rounded-3xl p-6 shadow-xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-cyan-400">
-                      <Sparkles className="w-4 h-4" />
-                      <h4 className="font-bold text-sm text-white">Assistive AI Evaluation Report</h4>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20">
-                      Confidence: {Math.round(aiEvaluation.confidence * 100)}%
-                    </span>
-                  </div>
-
-                  {/* AI Disclaimer */}
-                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-relaxed">
-                    {aiEvaluation.disclaimer}
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
-                    <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800">
-                      <span className="font-semibold text-emerald-400 block mb-1">What Was Done Well:</span>
-                      <p className="text-slate-300 leading-relaxed">{aiEvaluation.whatDoneWell}</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800">
-                      <span className="font-semibold text-amber-400 block mb-1">Recommended Improvements:</span>
-                      <p className="text-slate-300 leading-relaxed">{aiEvaluation.whatNeedsImprovement}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Review Scorecard Form */}
               <form onSubmit={handleSubmitReview} className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">

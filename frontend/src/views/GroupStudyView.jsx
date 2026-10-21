@@ -3,7 +3,8 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   Users, Plus, Lock, Globe, Key, Shield, CheckCircle, ArrowRight,
-  MessageSquare, CheckSquare, Award, Clock, BarChart3, UserCheck
+  MessageSquare, CheckSquare, Award, Clock, BarChart3, UserCheck,
+  Crown, Trash2, UserPlus, AlertCircle
 } from 'lucide-react';
 
 export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom }) {
@@ -29,6 +30,13 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
   // Group analytics tab
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [groupAnalytics, setGroupAnalytics] = useState(null);
+
+  // Member management state
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [memberIdentifier, setMemberIdentifier] = useState('');
+  const [memberRole, setMemberRole] = useState('member');
+  const [memberActionLoading, setMemberActionLoading] = useState(false);
+  const [memberActionError, setMemberActionError] = useState('');
 
   useEffect(() => {
     loadRooms();
@@ -82,6 +90,54 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
       loadRoomDetails(res.room.id);
     } catch (err) {
       alert(err.message);
+    }
+  }
+
+  async function handleAddMember(e) {
+    e.preventDefault();
+    if (!memberIdentifier.trim() || !selectedRoomId) return;
+
+    setMemberActionLoading(true);
+    setMemberActionError('');
+    try {
+      await apiRequest(`/study-rooms/${selectedRoomId}/members`, {
+        method: 'POST',
+        body: { identifier: memberIdentifier.trim(), role: memberRole }
+      });
+      setShowAddMemberModal(false);
+      setMemberIdentifier('');
+      await loadRoomDetails(selectedRoomId);
+      await loadRooms();
+    } catch (err) {
+      setMemberActionError(err.message || 'Failed to add member.');
+    } finally {
+      setMemberActionLoading(false);
+    }
+  }
+
+  async function handleRemoveMember(memberUserId, memberName) {
+    if (!window.confirm(`Are you sure you want to remove ${memberName} from this study group?`)) return;
+
+    try {
+      await apiRequest(`/study-rooms/${selectedRoomId}/members/${memberUserId}`, {
+        method: 'DELETE'
+      });
+      await loadRoomDetails(selectedRoomId);
+      await loadRooms();
+    } catch (err) {
+      alert('Failed to remove member: ' + err.message);
+    }
+  }
+
+  async function handleChangeMemberRole(memberUserId, newRole) {
+    try {
+      await apiRequest(`/study-rooms/${selectedRoomId}/members/${memberUserId}/role`, {
+        method: 'PUT',
+        body: { role: newRole }
+      });
+      await loadRoomDetails(selectedRoomId);
+    } catch (err) {
+      alert('Failed to update role: ' + err.message);
     }
   }
 
@@ -271,30 +327,72 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
                     <Users className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>Active Cohort Members ({roomDetails.members?.length || 0})</span>
+                    <span>Cohort Members ({roomDetails.members?.length || 0})</span>
                   </h4>
-                  <span className="text-[11px] text-slate-500">
-                    Membership alone does not award participation points
-                  </span>
+                  
+                  {/* If current user is the Room Mentor / Creator */}
+                  {roomDetails.room.owner_id === user?.id && (
+                    <button
+                      onClick={() => {
+                        setShowAddMemberModal(true);
+                        setMemberActionError('');
+                      }}
+                      className="flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition cursor-pointer"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>+ Add / Invite Member</span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                   {(roomDetails.members || []).map(m => (
-                    <div key={m.user_id} className="p-2.5 rounded-xl bg-slate-950/40 border border-slate-800/80 flex items-center space-x-2.5">
-                      <img
-                        src={m.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
-                        alt={m.full_name}
-                        className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-700"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-semibold text-slate-200 truncate">{m.full_name}</div>
-                        <div className="flex items-center space-x-2 text-[10px] text-slate-400">
-                          <span className={`capitalize font-medium ${m.role === 'owner' ? 'text-amber-400' : m.role === 'moderator' ? 'text-cyan-400' : 'text-slate-400'}`}>
-                            {m.role}
-                          </span>
-                          <span>&bull; {m.study_streak || 0}d streak</span>
+                    <div key={m.user_id} className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <img
+                          src={m.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}&background=4f46e5&color=fff`}
+                          alt={m.full_name}
+                          className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-700"
+                        />
+                        <div className="min-w-0">
+                          <div className="text-xs font-semibold text-slate-200 truncate">{m.full_name}</div>
+                          <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5">
+                            {m.role === 'owner' ? (
+                              <span className="text-amber-400 font-bold flex items-center space-x-1">
+                                <Crown className="w-3 h-3 text-amber-400" />
+                                <span>Mentor</span>
+                              </span>
+                            ) : (
+                              <span className="capitalize text-slate-400 font-medium">
+                                {m.role}
+                              </span>
+                            )}
+                            <span>&bull; {m.study_streak || 0}d streak</span>
+                          </div>
                         </div>
                       </div>
+
+                      {/* Mentor actions on members */}
+                      {roomDetails.room.owner_id === user?.id && m.role !== 'owner' && (
+                        <div className="flex items-center space-x-1 ml-2">
+                          <select
+                            value={m.role}
+                            onChange={e => handleChangeMemberRole(m.user_id, e.target.value)}
+                            className="bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-1.5 py-0.5 text-[10px] focus:outline-hidden"
+                            title="Edit member role"
+                          >
+                            <option value="member">Member</option>
+                            <option value="moderator">Moderator</option>
+                          </select>
+                          <button
+                            onClick={() => handleRemoveMember(m.user_id, m.full_name)}
+                            className="p-1 hover:bg-rose-500/20 text-rose-400 rounded-lg transition"
+                            title="Remove member"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -540,6 +638,70 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
             <p className="text-[11px] text-slate-400 leading-relaxed italic">
               Note: Analytics are computed strictly from verified database records. Group membership alone does not award participation credit.
             </p>
+          </div>
+        </div>
+      )}
+      {/* Modal: Add / Invite Member (for Mentor / Owner) */}
+      {showAddMemberModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl">
+            <h3 className="text-base font-bold text-white mb-1 flex items-center space-x-2">
+              <UserPlus className="w-4 h-4 text-indigo-400" />
+              <span>Add Member to Study Cohort</span>
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Invite a user by their username or email to collaborate in this room.
+            </p>
+
+            {memberActionError && (
+              <div className="p-3 rounded-xl mb-4 text-xs bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-start space-x-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{memberActionError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAddMember} className="space-y-4">
+              <div>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Username or Email</label>
+                <input
+                  type="text"
+                  required
+                  value={memberIdentifier}
+                  onChange={e => setMemberIdentifier(e.target.value)}
+                  placeholder="e.g. learner_username or learner@example.com"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Assigned Role</label>
+                <select
+                  value={memberRole}
+                  onChange={e => setMemberRole(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-indigo-500"
+                >
+                  <option value="member">Member (Can participate, submit work & chat)</option>
+                  <option value="moderator">Moderator (Can help review & manage tasks)</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddMemberModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={memberActionLoading}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30"
+                >
+                  {memberActionLoading ? 'Adding...' : 'Add to Cohort'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

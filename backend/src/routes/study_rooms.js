@@ -178,6 +178,82 @@ router.post('/:id/leave', authenticateToken, (req, res) => {
   res.json({ success: true, message: 'Successfully left study room.' });
 });
 
+// Add / Invite member to room (owner/moderator only)
+router.post('/:id/members', authenticateToken, (req, res) => {
+  const roomId = req.params.id;
+  const userId = req.user.id;
+  const { identifier, role } = req.body; // username or email
+
+  if (!identifier) {
+    return res.status(400).json({ error: 'Username or email is required to add a member.' });
+  }
+
+  const room = db.prepare('SELECT * FROM study_rooms WHERE id = ?').get(roomId);
+  if (!room) return res.status(404).json({ error: 'Study room not found.' });
+
+  const myMembership = db.prepare('SELECT role FROM study_room_memberships WHERE room_id = ? AND user_id = ?').get(roomId, userId);
+  if (!myMembership || (myMembership.role !== 'owner' && myMembership.role !== 'moderator')) {
+    return res.status(403).json({ error: 'Only group mentors or moderators can add members.' });
+  }
+
+  const cleanId = identifier.trim().toLowerCase();
+  const targetUser = db.prepare('SELECT id, username, full_name FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?').get(cleanId, cleanId);
+
+  if (!targetUser) {
+    return res.status(404).json({ error: 'No user found with that username or email.' });
+  }
+
+  const targetRole = role === 'moderator' ? 'moderator' : 'member';
+
+  db.prepare(`
+    INSERT INTO study_room_memberships (room_id, user_id, role, status)
+    VALUES (?, ?, ?, 'active')
+    ON CONFLICT(room_id, user_id)
+    DO UPDATE SET status = 'active', role = ?
+  `).run(roomId, targetUser.id, targetRole, targetRole);
+
+  // Send in-app notification to the invited user
+  try {
+    const NotificationService = require('../services/notification_service');
+    NotificationService.createNotification(
+      targetUser.id,
+      'group_invite',
+      `Added to Study Group: ${room.name}`,
+      `You were added to "${room.name}" as a ${targetRole}.`,
+      `/group`
+    );
+  } catch (e) {
+    // Ignore notification error
+  }
+
+  res.status(201).json({
+    success: true,
+    message: `${targetUser.full_name} (@${targetUser.username}) added to group.`,
+    user: targetUser
+  });
+});
+
+// Remove / Kick member from room (owner/moderator only)
+router.delete('/:id/members/:memberId', authenticateToken, (req, res) => {
+  const { id: roomId, memberId } = req.params;
+  const userId = req.user.id;
+
+  const room = db.prepare('SELECT owner_id FROM study_rooms WHERE id = ?').get(roomId);
+  if (!room) return res.status(404).json({ error: 'Study room not found.' });
+
+  const myMembership = db.prepare('SELECT role FROM study_room_memberships WHERE room_id = ? AND user_id = ?').get(roomId, userId);
+  if (!myMembership || (myMembership.role !== 'owner' && myMembership.role !== 'moderator')) {
+    return res.status(403).json({ error: 'Only group mentors or moderators can remove members.' });
+  }
+
+  if (Number(memberId) === room.owner_id) {
+    return res.status(400).json({ error: 'Cannot remove the group creator/mentor.' });
+  }
+
+  db.prepare('DELETE FROM study_room_memberships WHERE room_id = ? AND user_id = ?').run(roomId, memberId);
+  res.json({ success: true, message: 'Member removed from study room.' });
+});
+
 // Change member role (owner/moderator only)
 router.put('/:id/members/:memberId/role', authenticateToken, (req, res) => {
   const { id: roomId, memberId } = req.params;

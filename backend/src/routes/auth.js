@@ -37,7 +37,7 @@ router.get('/check-email', (req, res) => {
 
 // Register
 router.post('/register', (req, res) => {
-  const { username, email, password, full_name, bio, role, timezone } = req.body;
+  const { username, email, password, full_name, bio, timezone } = req.body;
 
   if (!username || !email || !password || !full_name) {
     return res.status(400).json({ error: 'Username, email, password, and full name are required.' });
@@ -52,7 +52,7 @@ router.post('/register', (req, res) => {
   }
 
   const pwHash = bcrypt.hashSync(password, 8);
-  const userRole = ['student', 'mentor', 'admin'].includes(role) ? role : 'student';
+  const userRole = 'student'; // Single unified user mode
   const tz = timezone || 'UTC';
 
   const userRes = db.prepare(`

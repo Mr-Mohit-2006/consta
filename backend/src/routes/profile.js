@@ -1,18 +1,169 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 const { db } = require('../db/database');
-const { optionalToken } = require('../middleware/auth');
+const { authenticateToken, optionalToken } = require('../middleware/auth');
 const XPService = require('../services/xp_service');
 const StreakService = require('../services/streak_service');
 
-// Get public profile / learning portfolio
+// Get current logged-in user profile with friends, followers, following, streaks, and settings
+router.get('/me', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+
+  const user = db.prepare(`
+    SELECT id, username, email, full_name, bio, avatar_url, role, timezone, created_at
+    FROM users WHERE id = ?
+  `).get(userId);
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found.' });
+  }
+
+  const profile = db.prepare('SELECT * FROM user_profiles WHERE user_id = ?').get(userId) || {
+    is_public: 1,
+    show_streak: 1,
+    show_xp: 1,
+    show_tasks: 1,
+    show_analytics: 1,
+    skills: '[]',
+    subjects: '[]',
+    portfolio_links: '[]'
+  };
+
+  // Friends count
+  const friendCountRow = db.prepare(`
+    SELECT COUNT(*) as count FROM friendships
+    WHERE (user_id = ? OR friend_id = ?) AND status = 'accepted'
+  `).get(userId, userId);
+  const friendCount = friendCountRow ? friendCountRow.count : 0;
+
+  // Follower count
+  const followerCountRow = db.prepare('SELECT COUNT(*) as count FROM user_follows WHERE following_id = ?').get(userId);
+  const followerCount = followerCountRow ? followerCountRow.count : 0;
+
+  // Following count
+  const followingCountRow = db.prepare('SELECT COUNT(*) as count FROM user_follows WHERE follower_id = ?').get(userId);
+  const followingCount = followingCountRow ? followingCountRow.count : 0;
+
+  // Progression & Level
+  const progression = XPService.getUserProgression(userId);
+
+  // Streaks
+  const streaks = StreakService.getUserStreaks(userId);
+
+  // Friends list
+  const friends = db.prepare(`
+    SELECT u.id, u.username, u.full_name, u.avatar_url, f.created_at as friendship_date,
+           (SELECT current_streak FROM streak_records sr WHERE sr.user_id = u.id AND sr.category = 'study') as study_streak
+    FROM friendships f
+    JOIN users u ON (CASE WHEN f.user_id = ? THEN f.friend_id ELSE f.user_id END) = u.id
+    WHERE (f.user_id = ? OR f.friend_id = ?) AND f.status = 'accepted'
+    ORDER BY u.full_name ASC
+  `).all(userId, userId, userId);
+
+  res.json({
+    user,
+    profile: {
+      is_public: Boolean(profile.is_public),
+      skills: JSON.parse(profile.skills || '[]'),
+      subjects: JSON.parse(profile.subjects || '[]')
+    },
+    counts: {
+      friends: friendCount,
+      followers: followerCount,
+      following: followingCount
+    },
+    progression,
+    streaks,
+    friends
+  });
+});
+
+// Update privacy mode (Public vs Private: Friends Only)
+router.put('/privacy', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { is_public } = req.body;
+  const val = is_public ? 1 : 0;
+
+  db.prepare(`
+    INSERT INTO user_profiles (user_id, is_public) VALUES (?, ?)
+    ON CONFLICT(user_id) DO UPDATE SET is_public = ?
+  `).run(userId, val, val);
+
+  res.json({ success: true, is_public: Boolean(val) });
+});
+
+// Update profile details (Name, Bio, Avatar)
+router.put('/me', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { full_name, bio, avatar_url, timezone } = req.body;
+
+  db.prepare(`
+    UPDATE users 
+    SET full_name = COALESCE(?, full_name),
+        bio = COALESCE(?, bio),
+        avatar_url = COALESCE(?, avatar_url),
+        timezone = COALESCE(?, timezone),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(full_name?.trim() || null, bio !== undefined ? bio.trim() : null, avatar_url?.trim() || null, timezone || null, userId);
+
+  const updatedUser = db.prepare('SELECT id, username, email, full_name, bio, avatar_url, role, timezone, created_at FROM users WHERE id = ?').get(userId);
+  res.json({ success: true, user: updatedUser });
+});
+
+// Reset / Change password
+router.post('/reset-password', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current password and new password are required.' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+  }
+
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  if (!user || !bcrypt.compareSync(currentPassword, user.password_hash)) {
+    return res.status(400).json({ error: 'Current password is incorrect.' });
+  }
+
+  const newHash = bcrypt.hashSync(newPassword, 8);
+  db.prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(newHash, userId);
+
+  res.json({ success: true, message: 'Password updated successfully!' });
+});
+
+// Follow / Unfollow user
+router.post('/:targetUserId/follow', authenticateToken, (req, res) => {
+  const followerId = req.user.id;
+  const targetId = Number(req.params.targetUserId);
+
+  if (followerId === targetId) {
+    return res.status(400).json({ error: 'You cannot follow yourself.' });
+  }
+
+  const existing = db.prepare('SELECT id FROM user_follows WHERE follower_id = ? AND following_id = ?').get(followerId, targetId);
+
+  if (existing) {
+    db.prepare('DELETE FROM user_follows WHERE follower_id = ? AND following_id = ?').run(followerId, targetId);
+    return res.json({ following: false, message: 'Unfollowed user.' });
+  } else {
+    db.prepare('INSERT INTO user_follows (follower_id, following_id) VALUES (?, ?)').run(followerId, targetId);
+    return res.json({ following: true, message: 'Now following user!' });
+  }
+});
+
+// Get user profile by username with privacy check (Private mode = Only Friends Can See)
 router.get('/:username', optionalToken, (req, res) => {
   const username = req.params.username;
   const viewerId = req.user ? req.user.id : null;
 
   const targetUser = db.prepare(`
     SELECT id, username, full_name, bio, avatar_url, role, timezone, created_at
-    FROM users WHERE username = ?
+    FROM users WHERE LOWER(username) = LOWER(?)
   `).get(username);
 
   if (!targetUser) {
@@ -24,32 +175,66 @@ router.get('/:username', optionalToken, (req, res) => {
     show_streak: 1,
     show_xp: 1,
     show_tasks: 1,
-    show_analytics: 1,
-    skills: '[]',
-    subjects: '[]',
-    portfolio_links: '[]'
+    show_analytics: 1
   };
 
   const isOwner = viewerId === targetUser.id;
 
-  // Check privacy
-  if (!profile.is_public && !isOwner) {
-    return res.status(403).json({ error: 'This learning portfolio is private.' });
+  // Check if viewer is an accepted friend
+  let isFriend = false;
+  if (viewerId && !isOwner) {
+    const friendRow = db.prepare(`
+      SELECT id FROM friendships 
+      WHERE ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) 
+        AND status = 'accepted'
+    `).get(viewerId, targetUser.id, targetUser.id, viewerId);
+    if (friendRow) isFriend = true;
   }
+
+  // Follow check
+  let isFollowing = false;
+  if (viewerId && !isOwner) {
+    const followRow = db.prepare('SELECT id FROM user_follows WHERE follower_id = ? AND following_id = ?').get(viewerId, targetUser.id);
+    if (followRow) isFollowing = true;
+  }
+
+  // If private and not owner and not friend, block private details
+  if (!profile.is_public && !isOwner && !isFriend) {
+    return res.status(200).json({
+      isPrivate: true,
+      user: {
+        id: targetUser.id,
+        username: targetUser.username,
+        full_name: targetUser.full_name,
+        avatar_url: targetUser.avatar_url
+      },
+      counts: {
+        friends: null,
+        followers: null,
+        following: null
+      },
+      isFriend,
+      isFollowing,
+      message: 'This profile is Private. Only confirmed friends can see full details, streaks, and progress.'
+    });
+  }
+
+  // Friends, followers, following counts
+  const friendCountRow = db.prepare(`
+    SELECT COUNT(*) as count FROM friendships
+    WHERE (user_id = ? OR friend_id = ?) AND status = 'accepted'
+  `).get(targetUser.id, targetUser.id);
+
+  const followerCountRow = db.prepare('SELECT COUNT(*) as count FROM user_follows WHERE following_id = ?').get(targetUser.id);
+  const followingCountRow = db.prepare('SELECT COUNT(*) as count FROM user_follows WHERE follower_id = ?').get(targetUser.id);
 
   // Progression & Level
-  let progression = null;
-  if (profile.show_xp || isOwner) {
-    progression = XPService.getUserProgression(targetUser.id);
-  }
+  const progression = XPService.getUserProgression(targetUser.id);
 
   // Streaks
-  let streaks = null;
-  if (profile.show_streak || isOwner) {
-    streaks = StreakService.getUserStreaks(targetUser.id);
-  }
+  const streaks = StreakService.getUserStreaks(targetUser.id);
 
-  // Unlocked public achievements
+  // Achievements
   const achievements = db.prepare(`
     SELECT a.code, a.title, a.description, a.category, a.icon, a.xp_reward, ua.unlocked_at
     FROM user_achievements ua
@@ -58,32 +243,19 @@ router.get('/:username', optionalToken, (req, res) => {
     ORDER BY ua.unlocked_at DESC
   `).all(targetUser.id);
 
-  // Selected completed study tasks (only approved ones, protecting private drafts)
-  let showcaseTasks = [];
-  if (profile.show_tasks || isOwner) {
-    showcaseTasks = db.prepare(`
-      SELECT t.id, t.title, t.subject, t.topic, t.expected_outcome,
-             s.updated_at as completed_at,
-             (SELECT overall_score FROM submission_reviews r WHERE r.submission_id = s.id AND r.decision = 'approved' ORDER BY r.created_at DESC LIMIT 1) as verified_score
-      FROM study_submissions s
-      JOIN study_tasks t ON s.task_id = t.id
-      WHERE s.user_id = ? AND s.status = 'approved'
-      ORDER BY s.updated_at DESC
-      LIMIT 10
-    `).all(targetUser.id);
-  }
-
-  // Accepted solutions (helpful answers in doubt solving)
-  const acceptedSolutions = db.prepare(`
-    SELECT cm.id, cm.content, cm.created_at, cr.room_type
-    FROM chat_messages cm
-    JOIN chat_rooms cr ON cm.chat_room_id = cr.id
-    WHERE cm.sender_id = ? AND cm.is_solution = 1
-    ORDER BY cm.created_at DESC
-    LIMIT 5
+  // Showcase tasks
+  const showcaseTasks = db.prepare(`
+    SELECT t.id, t.title, t.subject, t.topic, t.expected_outcome,
+           s.updated_at as completed_at,
+           (SELECT overall_score FROM submission_reviews r WHERE r.submission_id = s.id AND r.decision = 'approved' ORDER BY r.created_at DESC LIMIT 1) as verified_score
+    FROM study_submissions s
+    JOIN study_tasks t ON s.task_id = t.id
+    WHERE s.user_id = ? AND s.status = 'approved'
+    ORDER BY s.updated_at DESC
+    LIMIT 10
   `).all(targetUser.id);
 
-  // Activity timeline (privacy safe)
+  // Timeline
   const timeline = db.prepare(`
     SELECT activity_date, activity_type, COUNT(*) as count
     FROM daily_activity_logs
@@ -94,19 +266,23 @@ router.get('/:username', optionalToken, (req, res) => {
   `).all(targetUser.id);
 
   res.json({
+    isPrivate: false,
     user: targetUser,
     isOwner,
+    isFriend,
+    isFollowing,
     profile: {
-      is_public: Boolean(profile.is_public),
-      skills: JSON.parse(profile.skills || '[]'),
-      subjects: JSON.parse(profile.subjects || '[]'),
-      portfolio_links: JSON.parse(profile.portfolio_links || '[]')
+      is_public: Boolean(profile.is_public)
+    },
+    counts: {
+      friends: friendCountRow ? friendCountRow.count : 0,
+      followers: followerCountRow ? followerCountRow.count : 0,
+      following: followingCountRow ? followingCountRow.count : 0
     },
     progression,
     streaks,
     achievements,
     showcaseTasks,
-    acceptedSolutions,
     timeline
   });
 });

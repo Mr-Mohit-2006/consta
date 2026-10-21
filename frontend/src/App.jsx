@@ -13,7 +13,7 @@ import ReviewCenterView from './views/ReviewCenterView';
 import ChatDiscussionView from './views/ChatDiscussionView';
 import GamificationView from './views/GamificationView';
 import StreaksView from './views/StreaksView';
-import PortfolioView from './views/PortfolioView';
+import ProfileView from './views/ProfileView';
 import AnalyticsView from './views/AnalyticsView';
 
 function AppContent() {
@@ -109,7 +109,7 @@ function AppContent() {
         )}
         {activeTab === 'gamification' && <GamificationView />}
         {activeTab === 'streaks' && <StreaksView />}
-        {activeTab === 'portfolio' && <PortfolioView />}
+        {activeTab === 'profile' && <ProfileView onOpenFriends={() => setFriendsOpen(true)} />}
         {activeTab === 'analytics' && <AnalyticsView />}
       </main>
 

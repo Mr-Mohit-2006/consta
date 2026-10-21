@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../api';
 import {
-  GraduationCap, Mail, Lock, User, Check, X, Eye, EyeOff, Sparkles,
-  ArrowRight, ShieldCheck, Flame, Award, BookOpen
+  GraduationCap, Mail, Lock, User, Eye, EyeOff, Sparkles,
+  ArrowRight, ShieldCheck, Flame, Users
 } from 'lucide-react';
 
 export default function AuthView({ onSuccess }) {
-  const { login, register, switchUser } = useAuth();
+  const { login, register } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'register'
 
   // Login form state
@@ -20,11 +20,10 @@ export default function AuthView({ onSuccess }) {
   const [regEmail, setRegEmail] = useState('');
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
-  const [regRole, setRegRole] = useState('student');
   const [regBio, setRegBio] = useState('');
 
   // Live availability states
-  const [usernameStatus, setUsernameStatus] = useState(null); // { available: bool, message: string }
+  const [usernameStatus, setUsernameStatus] = useState(null);
   const [emailStatus, setEmailStatus] = useState(null);
 
   const [loading, setLoading] = useState(false);
@@ -103,26 +102,12 @@ export default function AuthView({ onSuccess }) {
         email: regEmail.trim().toLowerCase(),
         username: regUsername.trim().toLowerCase(),
         password: regPassword,
-        role: regRole,
         bio: regBio.trim(),
         timezone: detectedTz
       });
       if (onSuccess) onSuccess();
     } catch (err) {
       setErrorMessage(err.message || 'Registration failed.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleQuickPersona(username) {
-    setLoading(true);
-    setErrorMessage('');
-    try {
-      await switchUser(username);
-      if (onSuccess) onSuccess();
-    } catch (err) {
-      setErrorMessage(err.message);
     } finally {
       setLoading(false);
     }
@@ -161,7 +146,7 @@ export default function AuthView({ onSuccess }) {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Sign In by Email
+              User Login
             </button>
             <button
               onClick={() => {
@@ -198,7 +183,7 @@ export default function AuthView({ onSuccess }) {
                     required
                     value={loginIdentifier}
                     onChange={e => setLoginIdentifier(e.target.value)}
-                    placeholder="e.g. mohit@consta.edu or mohit_learner"
+                    placeholder="Enter your email or username"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
                   />
                 </div>
@@ -229,14 +214,28 @@ export default function AuthView({ onSuccess }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition mt-2"
+                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition mt-2 cursor-pointer"
               >
-                <span>{loading ? 'Authenticating...' : 'Sign In to Dashboard'}</span>
-                <ArrowRight className="w-4 h-4" />
+                <User className="w-4 h-4" />
+                <span>{loading ? 'Authenticating...' : 'User Login'}</span>
+                <ArrowRight className="w-4 h-4 ml-1" />
               </button>
+
+              <div className="text-center pt-2">
+                <span className="text-[11px] text-slate-500">
+                  New to CONSTA?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setMode('register')}
+                    className="text-indigo-400 hover:underline font-semibold"
+                  >
+                    Create an account
+                  </button>
+                </span>
+              </div>
             </form>
           ) : (
-            /* Register Form */
+            /* Register Form - Unified User Mode */
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <div>
                 <label className="text-xs text-slate-300 block mb-1 font-medium">Full Name</label>
@@ -247,7 +246,7 @@ export default function AuthView({ onSuccess }) {
                     required
                     value={regFullName}
                     onChange={e => setRegFullName(e.target.value)}
-                    placeholder="e.g. Mohit Kumar"
+                    placeholder="Your Full Name"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
                   />
                 </div>
@@ -269,7 +268,7 @@ export default function AuthView({ onSuccess }) {
                     required
                     value={regEmail}
                     onChange={e => setRegEmail(e.target.value)}
-                    placeholder="e.g. mohit@gmail.com"
+                    placeholder="youremail@example.com"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
                   />
                 </div>
@@ -289,7 +288,7 @@ export default function AuthView({ onSuccess }) {
                   required
                   value={regUsername}
                   onChange={e => setRegUsername(e.target.value)}
-                  placeholder="e.g. mohit_coder"
+                  placeholder="e.g. your_unique_username"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
                 />
               </div>
@@ -318,56 +317,44 @@ export default function AuthView({ onSuccess }) {
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 block mb-1 font-medium">Platform Role</label>
-                <select
-                  value={regRole}
-                  onChange={e => setRegRole(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-indigo-500"
-                >
-                  <option value="student">Student (Focus on Solo & Group Study)</option>
-                  <option value="mentor">Academic Mentor (Review & Moderate)</option>
-                </select>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Short Bio (Optional)</label>
+                <input
+                  type="text"
+                  value={regBio}
+                  onChange={e => setRegBio(e.target.value)}
+                  placeholder="e.g. Enthusiastic learner studying CS & mathematics"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
+                />
               </div>
 
               <div className="p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-900/40 text-[11px] text-indigo-300 flex items-center space-x-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                <span>Creating an account instantly grants +50 welcome XP & your day 1 streak!</span>
+                <span>Signing up awards +50 welcome XP and sets up your daily study streak!</span>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition"
+                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition cursor-pointer"
               >
-                <span>{loading ? 'Creating Account...' : 'Register & Launch Dashboard'}</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>{loading ? 'Creating Account...' : 'Create Account & Start Learning'}</span>
+                <ArrowRight className="w-4 h-4 ml-1" />
               </button>
+
+              <div className="text-center pt-1">
+                <span className="text-[11px] text-slate-500">
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setMode('login')}
+                    className="text-indigo-400 hover:underline font-semibold"
+                  >
+                    User Login
+                  </button>
+                </span>
+              </div>
             </form>
           )}
-
-          {/* Quick Demo Switcher Section */}
-          <div className="mt-6 pt-5 border-t border-slate-800">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block text-center mb-2.5">
-              Or Explore with Pre-Seeded Profiles:
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { username: 'mohit_learner', label: 'Mohit', sub: 'Student' },
-                { username: 'abhijit_study', label: 'Abhijit', sub: 'Peer' },
-                { username: 'abhishek_mentor', label: 'Prof. Abhishek', sub: 'Mentor' }
-              ].map(p => (
-                <button
-                  key={p.username}
-                  type="button"
-                  onClick={() => handleQuickPersona(p.username)}
-                  className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-center transition"
-                >
-                  <div className="text-xs font-bold text-white truncate">{p.label}</div>
-                  <div className="text-[10px] text-indigo-400 font-medium">{p.sub}</div>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
