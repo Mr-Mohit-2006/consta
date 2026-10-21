@@ -166,14 +166,20 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
             )}
           </div>
 
-          {/* Mobile Navigation Menu Toggle Button */}
+          {/* Mobile Navigation Menu Toggle Button (Phone & Tablet) */}
           <button
             type="button"
+            aria-label="Toggle Navigation Menu"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer shrink-0"
+            className={`md:hidden p-2 sm:px-2.5 rounded-xl border transition-all cursor-pointer flex items-center space-x-1 shrink-0 ${
+              mobileMenuOpen
+                ? 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30'
+                : 'bg-slate-900/95 hover:bg-slate-800 text-indigo-300 hover:text-white border-indigo-500/30 hover:border-indigo-500/60'
+            }`}
             title={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
           >
-            {mobileMenuOpen ? <X className="w-5 h-5 text-indigo-400" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-indigo-300" />}
+            <span className="text-[11px] font-bold hidden xs:inline">{mobileMenuOpen ? 'Close' : 'Menu'}</span>
           </button>
         </div>
       </div>

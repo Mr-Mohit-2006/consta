@@ -170,12 +170,13 @@ router.post('/:id/leave', authenticateToken, (req, res) => {
   const userId = req.user.id;
 
   const room = db.prepare('SELECT owner_id FROM study_rooms WHERE id = ?').get(roomId);
-  if (room && room.owner_id === userId) {
-    return res.status(400).json({ error: 'Room owners cannot leave without transferring ownership.' });
+  if (!room) return res.status(404).json({ error: 'Study room not found.' });
+  if (room.owner_id === userId) {
+    return res.status(400).json({ error: 'Group admin cannot leave their own group.' });
   }
 
   db.prepare('DELETE FROM study_room_memberships WHERE room_id = ? AND user_id = ?').run(roomId, userId);
-  res.json({ success: true, message: 'Successfully left study room.' });
+  res.json({ success: true, message: 'Successfully left study group.' });
 });
 
 // Add / Invite member to room (owner/moderator only)
@@ -193,7 +194,7 @@ router.post('/:id/members', authenticateToken, (req, res) => {
 
   const myMembership = db.prepare('SELECT role FROM study_room_memberships WHERE room_id = ? AND user_id = ?').get(roomId, userId);
   if (!myMembership || (myMembership.role !== 'owner' && myMembership.role !== 'moderator')) {
-    return res.status(403).json({ error: 'Only group mentors or moderators can add members.' });
+    return res.status(403).json({ error: 'Only group admin or moderators can add members.' });
   }
 
   const cleanId = identifier.trim().toLowerCase();
@@ -243,11 +244,11 @@ router.delete('/:id/members/:memberId', authenticateToken, (req, res) => {
 
   const myMembership = db.prepare('SELECT role FROM study_room_memberships WHERE room_id = ? AND user_id = ?').get(roomId, userId);
   if (!myMembership || (myMembership.role !== 'owner' && myMembership.role !== 'moderator')) {
-    return res.status(403).json({ error: 'Only group mentors or moderators can remove members.' });
+    return res.status(403).json({ error: 'Only group admin or moderators can remove members.' });
   }
 
   if (Number(memberId) === room.owner_id) {
-    return res.status(400).json({ error: 'Cannot remove the group creator/mentor.' });
+    return res.status(400).json({ error: 'Cannot remove the group admin/creator.' });
   }
 
   db.prepare('DELETE FROM study_room_memberships WHERE room_id = ? AND user_id = ?').run(roomId, memberId);
@@ -286,6 +287,28 @@ router.get('/:id/analytics', authenticateToken, (req, res) => {
   } catch (err) {
     res.status(403).json({ error: err.message });
   }
+});
+
+// Delete group (Group Admin only)
+router.delete('/:id', authenticateToken, (req, res) => {
+  const roomId = req.params.id;
+  const userId = req.user.id;
+
+  const room = db.prepare('SELECT owner_id, name FROM study_rooms WHERE id = ?').get(roomId);
+  if (!room) return res.status(404).json({ error: 'Study group not found.' });
+
+  if (room.owner_id !== userId) {
+    return res.status(403).json({ error: 'Only the Group Admin can delete this study group.' });
+  }
+
+  // Clean up related rows
+  db.prepare('DELETE FROM study_room_memberships WHERE room_id = ?').run(roomId);
+  db.prepare('DELETE FROM study_tasks WHERE room_id = ?').run(roomId);
+  db.prepare('DELETE FROM study_challenges WHERE room_id = ?').run(roomId);
+  db.prepare("DELETE FROM chat_rooms WHERE room_type = 'study_room' AND reference_id = ?").run(roomId);
+  db.prepare('DELETE FROM study_rooms WHERE id = ?').run(roomId);
+
+  res.json({ success: true, message: `Group "${room.name}" deleted successfully.` });
 });
 
 module.exports = router;

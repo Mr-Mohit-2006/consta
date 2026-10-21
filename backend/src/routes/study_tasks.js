@@ -306,4 +306,65 @@ router.put('/:id/status', authenticateToken, (req, res) => {
   res.json({ success: true, status });
 });
 
+// Toggle task completion (Checkbox functionality)
+router.patch('/:id/toggle', authenticateToken, (req, res) => {
+  const taskId = req.params.id;
+  const userId = req.user.id;
+
+  const task = db.prepare('SELECT * FROM study_tasks WHERE id = ?').get(taskId);
+  if (!task) return res.status(404).json({ error: 'Task not found.' });
+
+  const isCurrentlyCompleted = task.status === 'completed' || task.status === 'approved';
+  const newStatus = isCurrentlyCompleted ? 'not_started' : 'completed';
+
+  db.prepare('UPDATE study_tasks SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(newStatus, taskId);
+
+  db.prepare(`
+    INSERT INTO study_task_assignments (task_id, user_id, status, completed_at)
+    VALUES (?, ?, ?, CASE WHEN ? = 'completed' THEN CURRENT_TIMESTAMP ELSE NULL END)
+    ON CONFLICT(task_id, user_id)
+    DO UPDATE SET status = ?, completed_at = CASE WHEN ? = 'completed' THEN CURRENT_TIMESTAMP ELSE NULL END
+  `).run(taskId, userId, newStatus, newStatus, newStatus, newStatus);
+
+  if (newStatus === 'completed') {
+    StreakService.recordActivity(userId, 'study', 'task_completed', taskId, req.user.timezone);
+  }
+
+  res.json({
+    success: true,
+    status: newStatus,
+    is_completed: newStatus === 'completed'
+  });
+});
+
+// Delete task (Creator or Group Admin only)
+router.delete('/:id', authenticateToken, (req, res) => {
+  const taskId = req.params.id;
+  const userId = req.user.id;
+
+  const task = db.prepare(`
+    SELECT t.*, r.owner_id as room_owner_id
+    FROM study_tasks t
+    LEFT JOIN study_rooms r ON t.room_id = r.id
+    WHERE t.id = ?
+  `).get(taskId);
+
+  if (!task) return res.status(404).json({ error: 'Task not found.' });
+
+  const isCreator = task.creator_id === userId;
+  const isRoomAdmin = task.room_owner_id === userId;
+
+  if (!isCreator && !isRoomAdmin) {
+    return res.status(403).json({ error: 'Only the task creator or group admin can delete this task.' });
+  }
+
+  // Clean up related rows
+  db.prepare('DELETE FROM study_task_assignments WHERE task_id = ?').run(taskId);
+  db.prepare('DELETE FROM study_challenges WHERE task_id = ?').run(taskId);
+  db.prepare('DELETE FROM chat_rooms WHERE room_type = \'task_discussion\' AND reference_id = ?').run(taskId);
+  db.prepare('DELETE FROM study_tasks WHERE id = ?').run(taskId);
+
+  res.json({ success: true, message: 'Task deleted successfully.' });
+});
+
 module.exports = router;

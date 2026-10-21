@@ -546,6 +546,9 @@ function runMigrations() {
     if (!challengeCols.includes('status')) {
       db.exec("ALTER TABLE study_challenges ADD COLUMN status TEXT DEFAULT 'active';");
     }
+    if (!challengeCols.includes('duration_type')) {
+      db.exec("ALTER TABLE study_challenges ADD COLUMN duration_type TEXT DEFAULT 'daily';");
+    }
 
     const partCols = db.prepare('PRAGMA table_info(study_challenge_participants)').all().map(c => c.name);
     if (!partCols.includes('status')) {

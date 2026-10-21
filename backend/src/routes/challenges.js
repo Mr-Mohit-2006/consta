@@ -19,16 +19,35 @@ router.post('/', authenticateToken, (req, res) => {
     time_limit_minutes,
     min_score,
     target_criteria,
-    xp_reward
+    xp_reward,
+    duration_type // 'daily' | 'weekly' | 'monthly'
   } = req.body;
 
   if (!title || !title.trim()) {
     return res.status(400).json({ error: 'Challenge title is required.' });
   }
 
+  const validDuration = ['daily', 'weekly', 'monthly'].includes(duration_type) ? duration_type : 'daily';
   const scope = ['self', 'group', 'friends'].includes(challenge_scope) ? challenge_scope : 'group';
-  const timeLimit = Number(time_limit_minutes) || 30;
-  const xpBonus = Number(xp_reward) || 75;
+
+  let timeLimit = Number(time_limit_minutes);
+  let xpBonus = Number(xp_reward);
+  let daysModifier = '+1 day';
+
+  if (validDuration === 'weekly') {
+    if (!timeLimit) timeLimit = 7 * 24 * 60; // 7 days in minutes
+    if (!xpBonus) xpBonus = 250;
+    daysModifier = '+7 days';
+  } else if (validDuration === 'monthly') {
+    if (!timeLimit) timeLimit = 30 * 24 * 60; // 30 days in minutes
+    if (!xpBonus) xpBonus = 600;
+    daysModifier = '+30 days';
+  } else {
+    if (!timeLimit) timeLimit = 60;
+    if (!xpBonus) xpBonus = 100;
+    daysModifier = '+1 day';
+  }
+
   const scoreReq = Number(min_score) || 4.0;
 
   let task = null;
@@ -40,19 +59,21 @@ router.post('/', authenticateToken, (req, res) => {
   const chalRes = db.prepare(`
     INSERT INTO study_challenges (
       room_id, task_id, creator_id, title, description, challenge_scope,
-      time_limit_minutes, min_score, target_criteria, xp_reward, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
+      time_limit_minutes, min_score, target_criteria, xp_reward, status,
+      duration_type, start_date, end_date
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, datetime('now', '${daysModifier}'))
   `).run(
     room_id || null,
     task_id || null,
     userId,
     title.trim(),
-    description || `Sprint challenge: Complete task within ${timeLimit} minutes with score >= ${scoreReq}`,
+    description || `${validDuration.toUpperCase()} Challenge: Complete target task before deadline with score >= ${scoreReq}`,
     scope,
     timeLimit,
     scoreReq,
-    target_criteria || `Speed & quality sprint: ${timeLimit} mins`,
-    xpBonus
+    target_criteria || `${validDuration} goal target`,
+    xpBonus,
+    validDuration
   );
 
   const challengeId = Number(chalRes.lastInsertRowid);

@@ -242,8 +242,8 @@ export default function AuthView({ onSuccess }) {
                 <Users className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Groups & Mentorship</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Group creator leads as mentor; manage tasks & members.</p>
+                <h4 className="text-xs font-bold text-white">Study Groups & Admin</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Group creator is Admin; easily join or leave groups & manage tasks.</p>
               </div>
             </div>
 
