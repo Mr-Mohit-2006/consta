@@ -180,7 +180,12 @@ export default function ProfileView({ onOpenFriends }) {
                 )}
               </div>
 
-              <div className="text-xs text-indigo-400 font-mono mt-0.5">@{currentUser?.username}</div>
+              <div className="flex items-center space-x-2 mt-0.5">
+                <span className="text-xs text-indigo-400 font-mono">@{currentUser?.username}</span>
+                <span className="font-mono px-2 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-300 font-bold border border-slate-700">
+                  User ID: #{currentUser?.id}
+                </span>
+              </div>
               <div className="text-xs text-slate-400 mt-1 max-w-xl leading-relaxed">
                 {currentUser?.bio || 'Learning actively on CONSTA with solo sessions and group study.'}
               </div>

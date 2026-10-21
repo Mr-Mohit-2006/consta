@@ -10,6 +10,38 @@ router.get('/', authenticateToken, (req, res) => {
   res.json(friends);
 });
 
+// Search user by ID (or username/email) to add as friend
+router.get('/search', authenticateToken, (req, res) => {
+  const query = (req.query.id || req.query.query || '').trim();
+  if (!query) {
+    return res.status(400).json({ error: 'Please enter a user ID, username, or email to search.' });
+  }
+
+  const userId = req.user.id;
+  const targetUser = db.prepare(`
+    SELECT id, username, full_name, bio, avatar_url, role, timezone, created_at,
+           (SELECT current_streak FROM streak_records sr WHERE sr.user_id = users.id AND sr.category = 'study') as study_streak
+    FROM users 
+    WHERE id = ? OR LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)
+  `).get(query, query, query);
+
+  if (!targetUser) {
+    return res.status(404).json({ error: `No user found with identifier "${query}".` });
+  }
+
+  const isFriendRow = db.prepare(`
+    SELECT id FROM friendships
+    WHERE ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?))
+      AND status = 'accepted'
+  `).get(userId, targetUser.id, targetUser.id, userId);
+
+  res.json({
+    user: targetUser,
+    is_self: targetUser.id === userId,
+    is_friend: Boolean(isFriendRow)
+  });
+});
+
 // Add friend
 router.post('/', authenticateToken, (req, res) => {
   const { identifier } = req.body;

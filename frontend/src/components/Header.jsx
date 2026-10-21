@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   BookOpen, Users, CheckSquare, MessageSquare, Flame, Award, BarChart3,
-  User, Bell, ChevronDown, Sparkles, GraduationCap, ShieldCheck, Trophy, UserCheck
+  User, Bell, ChevronDown, Sparkles, GraduationCap, ShieldCheck, Trophy, UserCheck,
+  Menu, X
 } from 'lucide-react';
 
 export default function Header({ activeTab, setActiveTab, onOpenNotifications, onOpenFriends }) {
   const { user, streaks, progression, unreadNotifications, switchUser, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Sparkles },
@@ -159,8 +161,84 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
               </div>
             )}
           </div>
+
+          {/* Mobile Navigation Menu Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition cursor-pointer shrink-0"
+            title={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5 text-indigo-400" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Drawer Navigation Menu (Phone & Tablet) */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-slate-800 bg-slate-900/98 backdrop-blur-xl px-4 py-3 shadow-2xl transition-all">
+          <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-2">
+            <span>Navigation Sections</span>
+            <span className="text-indigo-400 font-mono">ID: #{user?.id}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center space-x-2 p-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-md'
+                      : 'bg-slate-950/70 border border-slate-800 text-slate-300 hover:bg-slate-800'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-indigo-400'}`} />
+                  <span className="truncate">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick Action Buttons in Mobile Drawer */}
+          <div className="pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs">
+            <button
+              onClick={() => {
+                onOpenFriends();
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-indigo-300 hover:bg-slate-700 font-semibold"
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Buddies</span>
+            </button>
+            <button
+              onClick={() => {
+                onOpenNotifications();
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold"
+            >
+              <Bell className="w-3.5 h-3.5" />
+              <span>Alerts {unreadNotifications > 0 ? `(${unreadNotifications})` : ''}</span>
+            </button>
+            <button
+              onClick={() => {
+                logout();
+                setMobileMenuOpen(false);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 font-semibold"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Navigation Tabs Bar */}
       <div className="border-t border-slate-800/80 bg-slate-950/40">
