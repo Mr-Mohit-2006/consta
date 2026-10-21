@@ -676,7 +676,11 @@ function seedData() {
     }
   }
 
-  // Seed Sample Users if empty
+  // Seed Sample Users if empty (only in test environment or when explicitly enabled)
+  if (process.env.NODE_ENV !== 'test' && process.env.SEED_SAMPLE_USERS !== 'true') {
+    return;
+  }
+
   const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
   if (userCount.count === 0) {
     const pwHash = bcrypt.hashSync('password123', 8);
@@ -831,9 +835,50 @@ function seedData() {
   }
 }
 
+function clearAllUserData() {
+  db.exec(`
+    PRAGMA foreign_keys = OFF;
+    DELETE FROM study_challenge_participants;
+    DELETE FROM study_challenges;
+    DELETE FROM message_attachments;
+    DELETE FROM chat_messages;
+    DELETE FROM chat_rooms;
+    DELETE FROM feedback_helpful_votes;
+    DELETE FROM feedback_messages;
+    DELETE FROM feedback_threads;
+    DELETE FROM review_comments;
+    DELETE FROM submission_reviews;
+    DELETE FROM submission_attachments;
+    DELETE FROM submission_versions;
+    DELETE FROM study_submissions;
+    DELETE FROM study_task_assignments;
+    DELETE FROM study_tasks;
+    DELETE FROM study_room_memberships;
+    DELETE FROM study_rooms;
+    DELETE FROM study_session_objectives;
+    DELETE FROM study_sessions;
+    DELETE FROM xp_transactions;
+    DELETE FROM user_achievements;
+    DELETE FROM daily_activity_logs;
+    DELETE FROM streak_records;
+    DELETE FROM reported_messages;
+    DELETE FROM appeals;
+    DELETE FROM notifications;
+    DELETE FROM notification_preferences;
+    DELETE FROM password_resets;
+    DELETE FROM user_follows;
+    DELETE FROM friendships;
+    DELETE FROM user_profiles;
+    DELETE FROM users;
+    DELETE FROM sqlite_sequence WHERE name NOT IN ('level_definitions', 'learning_achievements', 'review_rubrics', 'review_criteria');
+    PRAGMA foreign_keys = ON;
+  `);
+}
+
 initDatabase();
 
 module.exports = {
   db,
-  initDatabase
+  initDatabase,
+  clearAllUserData
 };
