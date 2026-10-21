@@ -93,7 +93,13 @@ router.post('/submit', authenticateToken, (req, res) => {
     ai_disclaimer
   } = req.body;
 
-  if (!submission_id || !version_id || !decision) {
+  let effectiveVersionId = version_id;
+  if (!effectiveVersionId && submission_id) {
+    const latestVer = db.prepare('SELECT id FROM submission_versions WHERE submission_id = ? ORDER BY version_number DESC LIMIT 1').get(submission_id);
+    if (latestVer) effectiveVersionId = latestVer.id;
+  }
+
+  if (!submission_id || !effectiveVersionId || !decision) {
     return res.status(400).json({ error: 'submission_id, version_id, and decision are required.' });
   }
 

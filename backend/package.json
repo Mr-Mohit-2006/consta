@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "test": "node --test tests/api.test.js",
+    "clean": "node -e \"require('./src/db/database').clearAllUserData(); console.log('Clean complete: All user, group, and task data removed completely.');\"",
     "clear-data": "node -e \"require('./src/db/database').clearAllUserData(); console.log('All user data cleared!');\""
   },
   "keywords": [],

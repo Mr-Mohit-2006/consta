@@ -6,7 +6,7 @@ const { authenticateToken, optionalToken } = require('../middleware/auth');
 const XPService = require('../services/xp_service');
 const StreakService = require('../services/streak_service');
 
-// Get current logged-in user profile with friends, followers, following, streaks, and settings
+// Get current logged-in user profile with study buddies, streaks, and settings
 router.get('/me', authenticateToken, (req, res) => {
   const userId = req.user.id;
 
@@ -30,20 +30,12 @@ router.get('/me', authenticateToken, (req, res) => {
     portfolio_links: '[]'
   };
 
-  // Friends count
+  // Friends / Buddies count
   const friendCountRow = db.prepare(`
     SELECT COUNT(*) as count FROM friendships
     WHERE (user_id = ? OR friend_id = ?) AND status = 'accepted'
   `).get(userId, userId);
   const friendCount = friendCountRow ? friendCountRow.count : 0;
-
-  // Follower count
-  const followerCountRow = db.prepare('SELECT COUNT(*) as count FROM user_follows WHERE following_id = ?').get(userId);
-  const followerCount = followerCountRow ? followerCountRow.count : 0;
-
-  // Following count
-  const followingCountRow = db.prepare('SELECT COUNT(*) as count FROM user_follows WHERE follower_id = ?').get(userId);
-  const followingCount = followingCountRow ? followingCountRow.count : 0;
 
   // Progression & Level
   const progression = XPService.getUserProgression(userId);
@@ -70,8 +62,7 @@ router.get('/me', authenticateToken, (req, res) => {
     },
     counts: {
       friends: friendCount,
-      followers: followerCount,
-      following: followingCount
+      buddies: friendCount
     },
     progression,
     streaks,
@@ -136,26 +127,6 @@ router.post('/reset-password', authenticateToken, (req, res) => {
   res.json({ success: true, message: 'Password updated successfully!' });
 });
 
-// Follow / Unfollow user
-router.post('/:targetUserId/follow', authenticateToken, (req, res) => {
-  const followerId = req.user.id;
-  const targetId = Number(req.params.targetUserId);
-
-  if (followerId === targetId) {
-    return res.status(400).json({ error: 'You cannot follow yourself.' });
-  }
-
-  const existing = db.prepare('SELECT id FROM user_follows WHERE follower_id = ? AND following_id = ?').get(followerId, targetId);
-
-  if (existing) {
-    db.prepare('DELETE FROM user_follows WHERE follower_id = ? AND following_id = ?').run(followerId, targetId);
-    return res.json({ following: false, message: 'Unfollowed user.' });
-  } else {
-    db.prepare('INSERT INTO user_follows (follower_id, following_id) VALUES (?, ?)').run(followerId, targetId);
-    return res.json({ following: true, message: 'Now following user!' });
-  }
-});
-
 // Get user profile by username with privacy check (Private mode = Only Friends Can See)
 router.get('/:username', optionalToken, (req, res) => {
   const username = req.params.username;
@@ -180,7 +151,7 @@ router.get('/:username', optionalToken, (req, res) => {
 
   const isOwner = viewerId === targetUser.id;
 
-  // Check if viewer is an accepted friend
+  // Check if viewer is an accepted friend/buddy
   let isFriend = false;
   if (viewerId && !isOwner) {
     const friendRow = db.prepare(`
@@ -189,13 +160,6 @@ router.get('/:username', optionalToken, (req, res) => {
         AND status = 'accepted'
     `).get(viewerId, targetUser.id, targetUser.id, viewerId);
     if (friendRow) isFriend = true;
-  }
-
-  // Follow check
-  let isFollowing = false;
-  if (viewerId && !isOwner) {
-    const followRow = db.prepare('SELECT id FROM user_follows WHERE follower_id = ? AND following_id = ?').get(viewerId, targetUser.id);
-    if (followRow) isFollowing = true;
   }
 
   // If private and not owner and not friend, block private details
@@ -210,23 +174,19 @@ router.get('/:username', optionalToken, (req, res) => {
       },
       counts: {
         friends: null,
-        followers: null,
-        following: null
+        buddies: null
       },
       isFriend,
-      isFollowing,
-      message: 'This profile is Private. Only confirmed friends can see full details, streaks, and progress.'
+      is_buddy: isFriend,
+      message: 'This profile is Private. Only confirmed study buddies can see full details, streaks, and progress.'
     });
   }
 
-  // Friends, followers, following counts
+  // Friends / Buddies count
   const friendCountRow = db.prepare(`
     SELECT COUNT(*) as count FROM friendships
     WHERE (user_id = ? OR friend_id = ?) AND status = 'accepted'
   `).get(targetUser.id, targetUser.id);
-
-  const followerCountRow = db.prepare('SELECT COUNT(*) as count FROM user_follows WHERE following_id = ?').get(targetUser.id);
-  const followingCountRow = db.prepare('SELECT COUNT(*) as count FROM user_follows WHERE follower_id = ?').get(targetUser.id);
 
   // Progression & Level
   const progression = XPService.getUserProgression(targetUser.id);
@@ -270,14 +230,13 @@ router.get('/:username', optionalToken, (req, res) => {
     user: targetUser,
     isOwner,
     isFriend,
-    isFollowing,
+    is_buddy: isFriend,
     profile: {
       is_public: Boolean(profile.is_public)
     },
     counts: {
       friends: friendCountRow ? friendCountRow.count : 0,
-      followers: followerCountRow ? followerCountRow.count : 0,
-      following: followingCountRow ? followingCountRow.count : 0
+      buddies: friendCountRow ? friendCountRow.count : 0
     },
     progression,
     streaks,

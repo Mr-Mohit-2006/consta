@@ -3,7 +3,7 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   Users, UserPlus, Flame, Check, X, Clock, Sparkles, Send, ArrowRight,
-  Search, Copy, CheckCircle2, AlertCircle, Hash
+  Search, Copy, CheckCircle2, AlertCircle, Hash, Trash2
 } from 'lucide-react';
 
 export default function FriendsModal({ isOpen, onClose, onNavigateToTask }) {
@@ -75,6 +75,19 @@ export default function FriendsModal({ isOpen, onClose, onNavigateToTask }) {
       alert(err.message);
     } finally {
       setAddLoading(false);
+    }
+  }
+
+  async function handleRemoveBuddy(friendId, friendName) {
+    if (!window.confirm(`Are you sure you want to remove ${friendName || 'this buddy'} from your study buddies?`)) return;
+    try {
+      await apiRequest(`/friends/${friendId}`, { method: 'DELETE' });
+      await loadFriendsData();
+      if (searchResult && searchResult.user?.id === friendId) {
+        setSearchResult(prev => ({ ...prev, is_friend: false }));
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to remove buddy.');
     }
   }
 
@@ -160,9 +173,19 @@ export default function FriendsModal({ isOpen, onClose, onNavigateToTask }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-1.5 text-amber-400 text-xs font-bold bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20 shrink-0">
-                    <Flame className="w-3.5 h-3.5 fill-amber-400" />
-                    <span>{f.study_streak || 0}d</span>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <div className="flex items-center space-x-1.5 text-amber-400 text-xs font-bold bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20">
+                      <Flame className="w-3.5 h-3.5 fill-amber-400" />
+                      <span>{f.study_streak || 0}d</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveBuddy(f.id, f.full_name)}
+                      className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 border border-slate-800 hover:border-rose-500/30 transition cursor-pointer"
+                      title="Remove study buddy"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -305,10 +328,19 @@ export default function FriendsModal({ isOpen, onClose, onNavigateToTask }) {
                         (This is your own account)
                       </span>
                     ) : searchResult.is_friend ? (
-                      <span className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Already Study Buddies</span>
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Connected Study Buddy</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveBuddy(searchResult.user.id, searchResult.user.full_name)}
+                          className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition cursor-pointer"
+                        >
+                          Remove Buddy
+                        </button>
+                      </div>
                     ) : (
                       <button
                         type="button"

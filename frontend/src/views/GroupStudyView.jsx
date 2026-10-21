@@ -5,10 +5,10 @@ import {
   Users, Plus, Lock, Globe, Key, ShieldCheck, CheckCircle, ArrowRight,
   MessageSquare, CheckSquare, Award, Clock, BarChart3, UserCheck,
   Crown, Trash2, UserPlus, AlertCircle, ChevronLeft, LogOut, LogIn,
-  Search, Calendar, Square, Check, UserX, ShieldAlert
+  Search, Calendar, Square, Check, UserX, ShieldAlert, Trophy, Zap, Flame, Timer, Hourglass, Send, RefreshCw, ExternalLink
 } from 'lucide-react';
 
-export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom }) {
+export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom, onOpenChallenge }) {
   const { user } = useAuth();
   const [rooms, setRooms] = useState([]);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -33,6 +33,30 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
   const [taskDueDate, setTaskDueDate] = useState('');
   const [taskPriority, setTaskPriority] = useState('medium');
   const [taskSubmitting, setTaskSubmitting] = useState(false);
+
+  // Quick Add Task for Group State
+  const [quickGroupTaskTitle, setQuickGroupTaskTitle] = useState('');
+  const [quickGroupTaskDueDate, setQuickGroupTaskDueDate] = useState('');
+  const [addingGroupQuickTask, setAddingGroupQuickTask] = useState(false);
+
+  // Group Details Navigation & Chat State
+  const [activeGroupTab, setActiveGroupTab] = useState('all'); // 'all' | 'tasks' | 'chat' | 'challenges' | 'members'
+  const [roomChatMessages, setRoomChatMessages] = useState([]);
+  const [roomChatLoading, setRoomChatLoading] = useState(false);
+  const [newRoomMessage, setNewRoomMessage] = useState('');
+  const [sendingRoomMessage, setSendingRoomMessage] = useState(false);
+
+  // Group Challenge Modal & Form State
+  const [showCreateChallengeModal, setShowCreateChallengeModal] = useState(false);
+  const [groupChalTitle, setGroupChalTitle] = useState('');
+  const [groupChalDate, setGroupChalDate] = useState('');
+  const [groupChalDuration, setGroupChalDuration] = useState('weekly'); // 'daily' | 'weekly' | 'monthly'
+  const [groupChalHasTimer, setGroupChalHasTimer] = useState(true);
+  const [groupChalTimerMins, setGroupChalTimerMins] = useState(30);
+  const [groupChalTaskId, setGroupChalTaskId] = useState('');
+  const [groupChalScore, setGroupChalScore] = useState(4.0);
+  const [groupChalXp, setGroupChalXp] = useState(250);
+  const [groupChalSubmitting, setGroupChalSubmitting] = useState(false);
 
   // Group analytics modal
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -65,13 +89,44 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
   }
 
   async function loadRoomDetails(id) {
-    setSelectedRoomId(id);
+    const numId = Number(id);
+    if (!numId || isNaN(numId)) return;
+    setSelectedRoomId(numId);
     setMobileView('details');
     try {
-      const details = await apiRequest(`/study-rooms/${id}`);
+      const details = await apiRequest(`/study-rooms/${numId}`);
       setRoomDetails(details);
+      if (details.chatRoomId) {
+        loadRoomChatMessages(details.chatRoomId);
+      }
     } catch (err) {
-      alert(err.message);
+      // ignore or reset
+    }
+  }
+
+  async function handleQuickAddGroupTask(e) {
+    if (e) e.preventDefault();
+    if (!quickGroupTaskTitle.trim() || !selectedRoomId) return;
+
+    setAddingGroupQuickTask(true);
+    try {
+      await apiRequest('/study-tasks', {
+        method: 'POST',
+        body: {
+          title: quickGroupTaskTitle.trim(),
+          room_id: Number(selectedRoomId),
+          is_group_task: true,
+          subject: roomDetails?.room?.subject || 'General',
+          due_date: quickGroupTaskDueDate || null
+        }
+      });
+      setQuickGroupTaskTitle('');
+      setQuickGroupTaskDueDate('');
+      await loadRoomDetails(selectedRoomId);
+    } catch (err) {
+      alert(err.message || 'Failed to add task.');
+    } finally {
+      setAddingGroupQuickTask(false);
     }
   }
 
@@ -102,7 +157,13 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
   }
 
   async function handleDeleteGroup(roomId) {
-    const targetRoom = rooms.find(r => r.id === roomId) || roomDetails?.room;
+    const id = Number(roomId);
+    if (!id || isNaN(id)) {
+      alert('Invalid group ID.');
+      return;
+    }
+
+    const targetRoom = rooms.find(r => r.id === id) || (roomDetails?.room?.id === id ? roomDetails.room : null);
     const roomName = targetRoom?.name || 'this group';
 
     if (!window.confirm(`⚠️ Are you sure you want to permanently delete "${roomName}"? All tasks and group discussions will be removed.`)) {
@@ -110,9 +171,11 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
     }
 
     try {
-      await apiRequest(`/study-rooms/${roomId}`, { method: 'DELETE' });
-      setSelectedRoomId(null);
-      setRoomDetails(null);
+      await apiRequest(`/study-rooms/${id}`, { method: 'DELETE' });
+      if (selectedRoomId === id) {
+        setSelectedRoomId(null);
+        setRoomDetails(null);
+      }
       await loadRooms();
       alert('Group deleted successfully.');
     } catch (err) {
@@ -228,11 +291,20 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
 
   // Delete Task
   async function handleDeleteTask(taskId, title) {
-    if (!window.confirm(`Are you sure you want to delete task "${title}"?`)) return;
+    const id = Number(taskId);
+    if (!id || isNaN(id)) {
+      alert('Invalid task ID.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete task "${title || 'this task'}"?`)) return;
 
     try {
-      await apiRequest(`/study-tasks/${taskId}`, { method: 'DELETE' });
-      await loadRoomDetails(selectedRoomId);
+      await apiRequest(`/study-tasks/${id}`, { method: 'DELETE' });
+      if (selectedRoomId) {
+        await loadRoomDetails(selectedRoomId);
+      }
+      alert('Task deleted successfully.');
     } catch (err) {
       alert(err.message || 'Failed to delete task.');
     }
@@ -240,13 +312,16 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
 
   // Toggle Task Completion Checkbox
   async function handleToggleTask(taskId, e) {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
+    const id = Number(taskId);
+    if (!id || isNaN(id)) return;
+
     try {
-      const res = await apiRequest(`/study-tasks/${taskId}/toggle`, { method: 'PATCH' });
+      const res = await apiRequest(`/study-tasks/${id}/toggle`, { method: 'PATCH' });
       if (roomDetails?.tasks) {
         setRoomDetails(prev => ({
           ...prev,
-          tasks: prev.tasks.map(t => t.id === taskId ? { ...t, status: res.status } : t)
+          tasks: prev.tasks.map(t => t.id === id ? { ...t, status: res.status } : t)
         }));
       }
     } catch (err) {
@@ -310,6 +385,91 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
       setShowAnalytics(true);
     } catch (err) {
       alert(err.message);
+    }
+  }
+
+  async function handleCreateGroupChallenge(e) {
+    if (e) e.preventDefault();
+    if (!groupChalTitle.trim() || !selectedRoomId) return;
+
+    setGroupChalSubmitting(true);
+    try {
+      const body = {
+        room_id: Number(selectedRoomId),
+        task_id: groupChalTaskId ? Number(groupChalTaskId) : null,
+        title: groupChalTitle.trim(),
+        challenge_scope: 'group',
+        duration_type: groupChalDuration,
+        scheduled_date: groupChalDate || null,
+        time_limit_minutes: groupChalHasTimer ? Number(groupChalTimerMins) : 0,
+        has_timer: groupChalHasTimer,
+        min_score: Number(groupChalScore),
+        xp_reward: Number(groupChalXp)
+      };
+
+      const res = await apiRequest('/challenges', {
+        method: 'POST',
+        body
+      });
+
+      setShowCreateChallengeModal(false);
+      setGroupChalTitle('');
+      setGroupChalDate('');
+      setGroupChalTaskId('');
+      await loadRoomDetails(selectedRoomId);
+      alert(`🏆 Group Challenge "${res.title}" scheduled successfully for ${groupChalDate ? new Date(groupChalDate).toLocaleDateString() : 'today'}! Cohort members have been alerted.`);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setGroupChalSubmitting(false);
+    }
+  }
+
+  async function handleDeleteGroupChallenge(challengeId, title, e) {
+    if (e) e.stopPropagation();
+    if (!window.confirm(`Are you sure you want to delete group challenge "${title}"?`)) return;
+    try {
+      await apiRequest(`/challenges/${challengeId}`, { method: 'DELETE' });
+      await loadRoomDetails(selectedRoomId);
+      alert('Challenge deleted successfully.');
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  async function loadRoomChatMessages(chatRoomId) {
+    if (!chatRoomId) return;
+    setRoomChatLoading(true);
+    try {
+      const msgs = await apiRequest(`/chat/room/${chatRoomId}/messages`);
+      setRoomChatMessages(msgs || []);
+    } catch (e) {
+      // ignore
+    } finally {
+      setRoomChatLoading(false);
+    }
+  }
+
+  async function handleSendRoomMessage(e) {
+    if (e) e.preventDefault();
+    if (!newRoomMessage.trim() || !roomDetails?.chatRoomId) return;
+
+    setSendingRoomMessage(true);
+    try {
+      const formData = new FormData();
+      formData.append('content', newRoomMessage.trim());
+
+      const res = await apiRequest(`/chat/room/${roomDetails.chatRoomId}/messages`, {
+        method: 'POST',
+        body: formData
+      });
+
+      setNewRoomMessage('');
+      setRoomChatMessages(prev => [...prev, res]);
+    } catch (err) {
+      alert(err.message || 'Failed to send message.');
+    } finally {
+      setSendingRoomMessage(false);
     }
   }
 
@@ -433,10 +593,24 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                     {/* Role & Action Badges */}
                     <div className="flex items-center space-x-2">
                       {isOwner ? (
-                        <span className="text-amber-400 font-bold flex items-center space-x-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
-                          <Crown className="w-3 h-3" />
-                          <span>Admin</span>
-                        </span>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="text-amber-400 font-bold flex items-center space-x-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                            <Crown className="w-3 h-3" />
+                            <span>Admin</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteGroup(r.id);
+                            }}
+                            className="text-[10px] text-rose-400 hover:text-rose-300 font-semibold px-1.5 py-0.5 hover:bg-rose-500/20 rounded-md transition cursor-pointer flex items-center space-x-1 border border-rose-500/20"
+                            title="Delete this study group"
+                          >
+                            <Trash2 className="w-2.5 h-2.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
                       ) : isMember ? (
                         <div className="flex items-center space-x-1.5">
                           <span className="text-emerald-400 font-semibold flex items-center space-x-1 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
@@ -483,8 +657,21 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
             })}
 
             {filteredRooms.length === 0 && (
-              <div className="text-center py-10 text-xs text-slate-500 glass-card rounded-2xl p-4">
-                No groups found matching your search.
+              <div className="text-center py-10 text-xs text-slate-400 glass-card rounded-2xl p-6 border border-dashed border-slate-800">
+                <Users className="w-8 h-8 text-indigo-400/60 mx-auto mb-2" />
+                <p className="font-semibold text-slate-300">
+                  {searchQuery ? 'No groups matching search' : 'No study groups created yet'}
+                </p>
+                <p className="text-[11px] text-slate-500 mt-1 mb-4">
+                  {searchQuery ? 'Try clearing your search query' : 'Create a group to start collaborating on tasks and challenges!'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(true)}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                >
+                  + Create Study Group
+                </button>
               </div>
             )}
           </div>
@@ -572,7 +759,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleDeleteGroup(roomDetails.room.id)}
+                          onClick={() => handleDeleteGroup(roomDetails?.room?.id || selectedRoomId)}
                           className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center space-x-1 cursor-pointer"
                           title="Permanently delete this group"
                         >
@@ -596,11 +783,16 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                       {isCurrentRoomMember && (
                         <button
                           type="button"
-                          onClick={() => onOpenChatRoom && onOpenChatRoom(roomDetails.chatRoomId)}
+                          onClick={() => setActiveGroupTab(activeGroupTab === 'chat' ? 'all' : 'chat')}
                           className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
                           <span>Group Chat</span>
+                          {roomChatMessages.length > 0 && (
+                            <span className="ml-1 px-1.5 py-0.2 rounded-full bg-indigo-950/80 text-[10px] text-indigo-200 border border-indigo-400/30 font-bold">
+                              {roomChatMessages.length}
+                            </span>
+                          )}
                         </button>
                       )}
 
@@ -634,6 +826,86 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                     <p className="text-slate-400 leading-relaxed">{roomDetails.room.objectives}</p>
                   </div>
                 )}
+              </div>
+
+              {/* Group Navigation Tabs */}
+              <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
+                <button
+                  type="button"
+                  onClick={() => setActiveGroupTab('all')}
+                  className={`px-3.5 py-2 rounded-xl font-bold transition flex items-center space-x-1.5 whitespace-nowrap cursor-pointer ${
+                    activeGroupTab === 'all'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Overview (All)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveGroupTab('tasks')}
+                  className={`px-3.5 py-2 rounded-xl font-bold transition flex items-center space-x-1.5 whitespace-nowrap cursor-pointer ${
+                    activeGroupTab === 'tasks'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <CheckSquare className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Tasks</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] text-slate-300">
+                    {roomDetails.tasks?.length || 0}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveGroupTab('chat')}
+                  className={`px-3.5 py-2 rounded-xl font-bold transition flex items-center space-x-1.5 whitespace-nowrap cursor-pointer ${
+                    activeGroupTab === 'chat'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Group Chat</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] text-slate-300">
+                    {roomChatMessages.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveGroupTab('challenges')}
+                  className={`px-3.5 py-2 rounded-xl font-bold transition flex items-center space-x-1.5 whitespace-nowrap cursor-pointer ${
+                    activeGroupTab === 'challenges'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Challenges</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] text-slate-300">
+                    {roomDetails.challenges?.length || 0}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveGroupTab('members')}
+                  className={`px-3.5 py-2 rounded-xl font-bold transition flex items-center space-x-1.5 whitespace-nowrap cursor-pointer ${
+                    activeGroupTab === 'members'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Members</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] text-slate-300">
+                    {roomDetails.members?.length || 0}
+                  </span>
+                </button>
               </div>
 
               {/* Pending Join Requests Panel (Admin Only) */}
@@ -689,91 +961,8 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                 </div>
               )}
 
-              {/* Members Section */}
-              <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-300 flex items-center space-x-2">
-                    <div className="p-1 rounded-md bg-indigo-500/20 text-indigo-400">
-                      <Users className="w-3.5 h-3.5" />
-                    </div>
-                    <span>Active Group Members ({roomDetails.members?.length || 0})</span>
-                  </h4>
-
-                  {/* Add Member Button (Admin Only) */}
-                  {isCurrentRoomAdmin && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowAddMemberModal(true);
-                        setMemberActionError('');
-                      }}
-                      className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition cursor-pointer"
-                    >
-                      <UserPlus className="w-3.5 h-3.5" />
-                      <span>+ Invite Member</span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {(roomDetails.members || []).map(m => {
-                    const isAdmin = m.role === 'owner';
-                    return (
-                      <div key={m.user_id} className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
-                        <div className="flex items-center space-x-2.5 min-w-0">
-                          <img
-                            src={m.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}&background=4f46e5&color=fff`}
-                            alt={m.full_name}
-                            className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-700 shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-white truncate">{m.full_name}</div>
-                            <div className="flex items-center space-x-1.5 text-[10px] mt-0.5">
-                              {isAdmin ? (
-                                <span className="text-amber-400 font-extrabold flex items-center space-x-1 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
-                                  <Crown className="w-3 h-3 text-amber-400" />
-                                  <span>Admin</span>
-                                </span>
-                              ) : (
-                                <span className="capitalize text-slate-400 font-semibold bg-slate-800 px-1.5 py-0.2 rounded">
-                                  {m.role}
-                                </span>
-                              )}
-                              <span className="text-slate-400 font-medium">&bull; {m.study_streak || 0}d streak</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Admin controls to manage roles / kick members */}
-                        {isCurrentRoomAdmin && !isAdmin && (
-                          <div className="flex items-center space-x-1 ml-2 shrink-0">
-                            <select
-                              value={m.role}
-                              onChange={e => handleChangeMemberRole(m.user_id, e.target.value)}
-                              className="bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-1.5 py-0.5 text-[10px] focus:outline-hidden"
-                              title="Edit member role"
-                            >
-                              <option value="member">Member</option>
-                              <option value="moderator">Moderator</option>
-                            </select>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveMember(m.user_id, m.full_name)}
-                              className="p-1 hover:bg-rose-500/20 text-rose-400 rounded-lg transition cursor-pointer"
-                              title="Remove member"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Shared Study Tasks & Schedule */}
-              {(isCurrentRoomMember || !isPrivateGroup) && (
+              {/* Shared Study Tasks & Schedule Section */}
+              {(isCurrentRoomMember || !isPrivateGroup) && (activeGroupTab === 'all' || activeGroupTab === 'tasks') && (
                 <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -781,10 +970,13 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                         <div className="p-1 rounded-md bg-purple-500/20 text-purple-400">
                           <CheckSquare className="w-3.5 h-3.5" />
                         </div>
-                        <span>Group Task Schedule & Checkbox</span>
+                        <span>Group Tasks & Schedule</span>
+                        <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 text-[10px] font-bold border border-purple-500/20">
+                          {roomDetails.tasks?.length || 0} tasks
+                        </span>
                       </h4>
                       <p className="text-xs text-slate-400 mt-0.5">
-                        Check off tasks when completed. Tasks with schedules are tracked here.
+                        Track cohort goals, check off completed tasks, and view schedules.
                       </p>
                     </div>
 
@@ -793,13 +985,47 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                       <button
                         type="button"
                         onClick={() => setShowCreateTaskModal(true)}
-                        className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold transition flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold transition flex items-center space-x-1.5 cursor-pointer"
+                        title="Configure advanced task with rubric and resources"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>+ Add Task</span>
+                        <span>+ Detailed Task</span>
                       </button>
                     )}
                   </div>
+
+                  {/* Inline Quick Add Task for Group */}
+                  {isCurrentRoomMember && (
+                    <form onSubmit={handleQuickAddGroupTask} className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 rounded-2xl bg-slate-950/70 border border-indigo-500/30">
+                      <input
+                        type="text"
+                        value={quickGroupTaskTitle}
+                        onChange={e => setQuickGroupTaskTitle(e.target.value)}
+                        placeholder="➕ Quick add task title & checkbox (press Enter)..."
+                        className="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
+                      />
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <div className="flex items-center space-x-1 bg-slate-900 border border-slate-700/80 rounded-xl px-2 py-1.5 text-xs text-slate-300">
+                          <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                          <input
+                            type="date"
+                            value={quickGroupTaskDueDate}
+                            onChange={e => setQuickGroupTaskDueDate(e.target.value)}
+                            className="bg-transparent text-xs text-slate-200 focus:outline-hidden"
+                            title="Schedule / Due date (optional)"
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={addingGroupQuickTask || !quickGroupTaskTitle.trim()}
+                          className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white font-bold text-xs flex items-center space-x-1 shadow-md shadow-indigo-600/20 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>{addingGroupQuickTask ? 'Adding...' : 'Add Task'}</span>
+                        </button>
+                      </div>
+                    </form>
+                  )}
 
                   <div className="space-y-2.5">
                     {(roomDetails.tasks || []).map(t => {
@@ -892,16 +1118,394 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
 
                     {(!roomDetails.tasks || roomDetails.tasks.length === 0) && (
                       <div className="text-center py-8 text-xs text-slate-500 bg-slate-950/30 rounded-2xl border border-dashed border-slate-800">
-                        No tasks scheduled in this group yet. Click <strong>"+ Add Task"</strong> above to schedule one!
+                        No tasks scheduled in this group yet. Click <strong>"+ Detailed Task"</strong> or use the quick form above to add one!
                       </div>
                     )}
                   </div>
                 </div>
               )}
+
+              {/* Group Chat & Live Discussion Section */}
+              {(isCurrentRoomMember || !isPrivateGroup) && (activeGroupTab === 'all' || activeGroupTab === 'chat') && (
+                <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl border border-indigo-500/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                      <h4 className="font-bold text-sm text-white flex items-center space-x-2">
+                        <div className="p-1 rounded-md bg-indigo-500/20 text-indigo-400">
+                          <MessageSquare className="w-3.5 h-3.5" />
+                        </div>
+                        <span>Group Live Chat & Discussion</span>
+                        <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 text-[10px] font-bold border border-indigo-500/20">
+                          {roomChatMessages.length} messages
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Real-time peer chat, study discussions, and resource sharing for this group.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center space-x-2 self-start sm:self-auto">
+                      <button
+                        type="button"
+                        onClick={() => loadRoomChatMessages(roomDetails.chatRoomId)}
+                        disabled={roomChatLoading}
+                        className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
+                        title="Refresh chat messages"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${roomChatLoading ? 'animate-spin' : ''}`} />
+                      </button>
+
+                      {onOpenChatRoom && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenChatRoom(roomDetails.chatRoomId)}
+                          className="px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer"
+                          title="Open dedicated chat screen"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          <span>Full Screen Chat</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Messages Feed */}
+                  <div className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 min-h-[160px] max-h-72 overflow-y-auto space-y-3 mb-3 scrollbar-thin">
+                    {roomChatLoading && roomChatMessages.length === 0 ? (
+                      <div className="py-8 text-center text-xs text-slate-500">Loading messages...</div>
+                    ) : roomChatMessages.length === 0 ? (
+                      <div className="py-8 text-center text-xs text-slate-500">
+                        No messages yet in this group. Say hello to your cohort below!
+                      </div>
+                    ) : (
+                      roomChatMessages.map(msg => {
+                        const isMe = msg.user_id === user?.id;
+                        return (
+                          <div
+                            key={msg.id}
+                            className={`flex items-start space-x-2.5 ${isMe ? 'flex-row-reverse space-x-reverse' : ''}`}
+                          >
+                            <img
+                              src={msg.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.sender_name || 'User')}&background=4f46e5&color=fff`}
+                              alt={msg.sender_name}
+                              className="w-7 h-7 rounded-xl object-cover shrink-0 mt-0.5"
+                            />
+                            <div className={`max-w-[75%] rounded-2xl p-3 text-xs ${
+                              isMe
+                                ? 'bg-indigo-600 text-white rounded-tr-none'
+                                : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'
+                            }`}>
+                              <div className="flex items-center justify-between space-x-2 mb-1">
+                                <span className={`font-bold text-[10px] ${isMe ? 'text-indigo-200' : 'text-indigo-400'}`}>
+                                  {isMe ? 'You' : msg.sender_name}
+                                </span>
+                                <span className={`text-[9px] ${isMe ? 'text-indigo-200/70' : 'text-slate-500'}`}>
+                                  {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                                </span>
+                              </div>
+                              <p className="whitespace-pre-wrap break-words text-xs leading-relaxed">{msg.content}</p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {/* Message Input Form */}
+                  {isCurrentRoomMember ? (
+                    <form onSubmit={handleSendRoomMessage} className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        value={newRoomMessage}
+                        onChange={e => setNewRoomMessage(e.target.value)}
+                        placeholder="Type a message to group members (press Enter)..."
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
+                      />
+                      <button
+                        type="submit"
+                        disabled={sendingRoomMessage || !newRoomMessage.trim()}
+                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer shrink-0"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        <span>{sendingRoomMessage ? 'Sending...' : 'Send'}</span>
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="text-center py-2 text-xs text-slate-500 bg-slate-900/50 rounded-xl border border-slate-800">
+                      Join this group to participate in live discussions and chat.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Group Challenges & Scheduled Competitions Section */}
+              {(isCurrentRoomMember || !isPrivateGroup) && (activeGroupTab === 'all' || activeGroupTab === 'challenges') && (
+                <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl border border-amber-500/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                      <h4 className="font-bold text-sm text-white flex items-center space-x-2">
+                        <div className="p-1 rounded-md bg-amber-500/20 text-amber-400">
+                          <Trophy className="w-3.5 h-3.5" />
+                        </div>
+                        <span>Group Challenges & Scheduled Competitions</span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 text-[10px] font-bold border border-amber-500/20">
+                          {roomDetails.challenges?.length || 0} challenges
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Schedule challenges for specific dates, race against cohort peers, and conquer study goals.
+                      </p>
+                    </div>
+
+                    {isCurrentRoomMember && (
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateChallengeModal(true)}
+                        className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs transition flex items-center space-x-1.5 shadow-md shadow-amber-500/20 cursor-pointer self-start sm:self-auto"
+                      >
+                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Schedule Challenge</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Challenge list */}
+                  <div className="space-y-3">
+                    {(roomDetails.challenges || []).map(c => {
+                      const dType = c.duration_type || 'weekly';
+                      const isOwner = c.creator_id === user?.id || isCurrentRoomAdmin;
+                      const hasScheduledDate = Boolean(c.scheduled_date);
+
+                      let scheduleStatus = 'active';
+                      if (hasScheduledDate) {
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        if (c.scheduled_date > todayStr) {
+                          scheduleStatus = 'upcoming';
+                        } else if (c.scheduled_date === todayStr) {
+                          scheduleStatus = 'today';
+                        } else {
+                          scheduleStatus = 'past';
+                        }
+                      }
+
+                      return (
+                        <div
+                          key={c.id}
+                          className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 transition"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                                <span className="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                                  {dType === 'weekly' ? '📅 Weekly' : dType === 'monthly' ? '🗓️ Monthly' : '⚡ Daily'}
+                                </span>
+
+                                {/* Scheduled Date Badge */}
+                                {hasScheduledDate ? (
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center space-x-1 border ${
+                                    scheduleStatus === 'upcoming'
+                                      ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                                      : scheduleStatus === 'today'
+                                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                                      : 'bg-slate-800 text-slate-300 border-slate-700'
+                                  }`}>
+                                    <Calendar className="w-3 h-3 text-amber-400" />
+                                    <span>
+                                      {scheduleStatus === 'today' ? '🔥 Today' : scheduleStatus === 'upcoming' ? '⏳ Scheduled' : '📅'} : {new Date(c.scheduled_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </span>
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                                    Instant Sprint
+                                  </span>
+                                )}
+
+                                {/* Timer Mode badge */}
+                                <span className="text-[10px] px-2 py-0.5 rounded font-medium bg-slate-900 text-slate-300 border border-slate-800 flex items-center space-x-1">
+                                  {c.has_timer === 1 ? (
+                                    <>
+                                      <Timer className="w-2.5 h-2.5 text-amber-400" />
+                                      <span>{c.time_limit_minutes}m Timer</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Hourglass className="w-2.5 h-2.5 text-indigo-400" />
+                                      <span>Untimed Focus</span>
+                                    </>
+                                  )}
+                                </span>
+
+                                <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                                  +{c.xp_reward} XP
+                                </span>
+                              </div>
+
+                              <h5 className="text-sm font-bold text-white">{c.title}</h5>
+                              <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                                {c.description}
+                              </p>
+
+                              <div className="flex flex-wrap items-center gap-3 mt-2.5 text-[11px] text-slate-400">
+                                <span>Created by <strong className="text-slate-300">{c.creator_name || 'Cohort Admin'}</strong></span>
+                                <span>&bull;</span>
+                                <span>{c.participant_count || 1} participant(s)</span>
+                                {c.my_completed ? (
+                                  <span className="text-emerald-400 font-bold flex items-center space-x-1">
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                    <span>Completed</span>
+                                  </span>
+                                ) : c.my_status === 'in_progress' ? (
+                                  <span className="text-amber-400 font-bold animate-pulse">In Progress</span>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            {/* Challenge Action Button */}
+                            <div className="flex items-center space-x-2 shrink-0 self-end sm:self-center">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (onOpenChallenge) {
+                                    onOpenChallenge(c.id);
+                                  } else if (onNavigate) {
+                                    onNavigate('challenges');
+                                  }
+                                }}
+                                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                              >
+                                <Trophy className="w-3 h-3" />
+                                <span>{c.my_status === 'in_progress' ? 'Resume Sprint' : c.my_completed ? 'View Challenge' : 'Open Challenge'}</span>
+                              </button>
+
+                              {isOwner && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDeleteGroupChallenge(c.id, c.title, e)}
+                                  className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 border border-rose-500/20 transition cursor-pointer"
+                                  title="Delete this group challenge"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {(!roomDetails.challenges || roomDetails.challenges.length === 0) && (
+                      <div className="text-center py-6 text-xs text-slate-500 bg-slate-950/40 rounded-2xl border border-dashed border-slate-800">
+                        No challenges scheduled in this group yet. Click <strong>"Schedule Challenge"</strong> above to schedule a competition for your group on any date!
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Members Section */}
+              {(activeGroupTab === 'all' || activeGroupTab === 'members') && (
+                <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-slate-300 flex items-center space-x-2">
+                      <div className="p-1 rounded-md bg-indigo-500/20 text-indigo-400">
+                        <Users className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Active Group Members ({roomDetails.members?.length || 0})</span>
+                    </h4>
+
+                    {/* Add Member Button (Admin Only) */}
+                    {isCurrentRoomAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddMemberModal(true);
+                          setMemberActionError('');
+                        }}
+                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition cursor-pointer"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>+ Invite Member</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {(roomDetails.members || []).map(m => {
+                      const isAdmin = m.role === 'owner';
+                      return (
+                        <div key={m.user_id} className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+                          <div className="flex items-center space-x-2.5 min-w-0">
+                            <img
+                              src={m.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}&background=4f46e5&color=fff`}
+                              alt={m.full_name}
+                              className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-700 shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-white truncate">{m.full_name}</div>
+                              <div className="flex items-center space-x-1.5 text-[10px] mt-0.5">
+                                {isAdmin ? (
+                                  <span className="text-amber-400 font-extrabold flex items-center space-x-1 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
+                                    <Crown className="w-3 h-3 text-amber-400" />
+                                    <span>Admin</span>
+                                  </span>
+                                ) : (
+                                  <span className="capitalize text-slate-400 font-semibold bg-slate-800 px-1.5 py-0.2 rounded">
+                                    {m.role}
+                                  </span>
+                                )}
+                                <span className="text-slate-400 font-medium">&bull; {m.study_streak || 0}d streak</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Admin controls to manage roles / kick members */}
+                          {isCurrentRoomAdmin && !isAdmin && (
+                            <div className="flex items-center space-x-1 ml-2 shrink-0">
+                              <select
+                                value={m.role}
+                                onChange={e => handleChangeMemberRole(m.user_id, e.target.value)}
+                                className="bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-1.5 py-0.5 text-[10px] focus:outline-hidden"
+                                title="Edit member role"
+                              >
+                                <option value="member">Member</option>
+                                <option value="moderator">Moderator</option>
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMember(m.user_id, m.full_name)}
+                                className="p-1 hover:bg-rose-500/20 text-rose-400 rounded-lg transition cursor-pointer"
+                                title="Remove member"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="glass-panel rounded-3xl p-12 text-center text-slate-400 text-xs">
-              Select a study group from the left to view members, shared assignments, and discussions.
+            <div className="glass-panel rounded-3xl p-10 sm:p-14 text-center text-slate-400 text-xs border border-dashed border-slate-800/80">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/10">
+                <Users className="w-7 h-7" />
+              </div>
+              <h4 className="text-base font-bold text-white mb-1.5">No Group Selected</h4>
+              <p className="text-slate-400 max-w-sm mx-auto mb-5 leading-relaxed text-xs">
+                {rooms.length === 0
+                  ? 'No study groups exist in the system yet. Click below to create the first group as Admin!'
+                  : 'Select a study group from the left to view shared tasks, open live chat discussions, and participate in challenges.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs inline-flex items-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Create Study Group</span>
+              </button>
             </div>
           )}
         </div>
@@ -1227,6 +1831,244 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                   className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 cursor-pointer"
                 >
                   {memberActionLoading ? 'Adding...' : 'Add to Group'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Schedule Group Challenge for Date */}
+      {showCreateChallengeModal && roomDetails?.room && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="glass-panel border-amber-500/30 rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-white mb-1 flex items-center space-x-2">
+              <Trophy className="w-5 h-5 text-amber-400" />
+              <span>Schedule Challenge for "{roomDetails.room.name}"</span>
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Schedule a competitive study challenge for your cohort on a specific date.
+            </p>
+
+            <form onSubmit={handleCreateGroupChallenge} className="space-y-4">
+              <div>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Challenge Title</label>
+                <input
+                  type="text"
+                  required
+                  value={groupChalTitle}
+                  onChange={e => setGroupChalTitle(e.target.value)}
+                  placeholder="e.g. Saturday Algorithm Sprint / Weekly Goal"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-amber-500"
+                />
+              </div>
+
+              {/* Schedule For Date Section */}
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-white flex items-center space-x-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Schedule For Date</span>
+                  </label>
+                  <span className="text-[11px] font-semibold text-amber-300">
+                    {groupChalDate ? `Scheduled: ${new Date(groupChalDate).toLocaleDateString()}` : 'Starts immediately today'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="date"
+                    value={groupChalDate}
+                    onChange={e => setGroupChalDate(e.target.value)}
+                    className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-amber-500"
+                  />
+                  {groupChalDate && (
+                    <button
+                      type="button"
+                      onClick={() => setGroupChalDate('')}
+                      className="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[
+                    { label: 'Today', offset: 0 },
+                    { label: 'Tomorrow', offset: 1 },
+                    { label: 'In 3 Days', offset: 3 },
+                    { label: 'In 1 Week', offset: 7 }
+                  ].map(item => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + item.offset);
+                    const iso = d.toISOString().split('T')[0];
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => setGroupChalDate(iso)}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition cursor-pointer ${
+                          groupChalDate === iso
+                            ? 'bg-amber-500 text-slate-950 font-bold border-amber-500'
+                            : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Duration Type */}
+              <div>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Duration Period</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'daily', label: 'Daily Sprint', desc: '24 Hours' },
+                    { id: 'weekly', label: 'Weekly Quest', desc: '7 Days' },
+                    { id: 'monthly', label: 'Monthly Marathon', desc: '30 Days' }
+                  ].map(dur => (
+                    <button
+                      key={dur.id}
+                      type="button"
+                      onClick={() => {
+                        setGroupChalDuration(dur.id);
+                        if (dur.id === 'weekly') {
+                          setGroupChalXp(250);
+                          setGroupChalTimerMins(45);
+                        } else if (dur.id === 'monthly') {
+                          setGroupChalXp(600);
+                          setGroupChalTimerMins(60);
+                        } else {
+                          setGroupChalXp(100);
+                          setGroupChalTimerMins(25);
+                        }
+                      }}
+                      className={`p-2.5 rounded-xl border text-center transition cursor-pointer ${
+                        groupChalDuration === dur.id
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <div className="text-xs font-semibold">{dur.label}</div>
+                      <div className="text-[10px] text-slate-500">{dur.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Optional Link to Task */}
+              {roomDetails.tasks?.length > 0 && (
+                <div>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Tie to Group Task (Optional)</label>
+                  <select
+                    value={groupChalTaskId}
+                    onChange={e => setGroupChalTaskId(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-hidden focus:border-amber-500"
+                  >
+                    <option value="">General Group Challenge (No specific task)</option>
+                    {roomDetails.tasks.map(t => (
+                      <option key={t.id} value={t.id}>Task: {t.title}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Timer Option */}
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={groupChalHasTimer}
+                      onChange={e => setGroupChalHasTimer(e.target.checked)}
+                      className="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700 focus:ring-amber-500"
+                    />
+                    <span>Add Timer to this Challenge?</span>
+                  </label>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${groupChalHasTimer ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'}`}>
+                    {groupChalHasTimer ? 'Timed Sprint' : 'Untimed Focus'}
+                  </span>
+                </div>
+
+                {groupChalHasTimer ? (
+                  <div className="space-y-2 pt-1 border-t border-slate-900">
+                    <div className="flex items-center space-x-2">
+                      <Timer className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="text-xs text-slate-400">Duration (mins):</span>
+                      <input
+                        type="number"
+                        min="5"
+                        max="240"
+                        value={groupChalTimerMins}
+                        onChange={e => setGroupChalTimerMins(e.target.value)}
+                        className="w-24 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[15, 25, 45, 60, 90].map(mins => (
+                        <button
+                          key={mins}
+                          type="button"
+                          onClick={() => setGroupChalTimerMins(mins)}
+                          className={`px-2 py-0.5 rounded text-[11px] border transition cursor-pointer ${
+                            Number(groupChalTimerMins) === mins
+                              ? 'bg-amber-500 text-slate-950 font-bold border-amber-500'
+                              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                          }`}
+                        >
+                          {mins}m
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 italic">
+                    Untimed — group members complete at their own pace without timer pressure.
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Bonus XP</label>
+                  <input
+                    type="number"
+                    min="10"
+                    max="1000"
+                    value={groupChalXp}
+                    onChange={e => setGroupChalXp(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Min Score</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="5"
+                    value={groupChalScore}
+                    onChange={e => setGroupChalScore(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateChallengeModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={groupChalSubmitting}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 cursor-pointer"
+                >
+                  {groupChalSubmitting ? 'Scheduling...' : 'Schedule & Launch'}
                 </button>
               </div>
             </form>

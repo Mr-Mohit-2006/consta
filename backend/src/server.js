@@ -26,7 +26,9 @@ app.use('/uploads', express.static(uploadsDir));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/study-sessions', require('./routes/study_sessions'));
 app.use('/api/study-rooms', require('./routes/study_rooms'));
+app.use('/api/rooms', require('./routes/study_rooms')); // alias to prevent 404
 app.use('/api/study-tasks', require('./routes/study_tasks'));
+app.use('/api/tasks', require('./routes/study_tasks')); // alias to prevent 404
 app.use('/api/submissions', require('./routes/submissions'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/feedback', require('./routes/feedback'));

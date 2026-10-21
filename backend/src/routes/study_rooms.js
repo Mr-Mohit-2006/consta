@@ -121,7 +121,16 @@ router.get('/:id', authenticateToken, (req, res) => {
       ORDER BY t.created_at DESC
     `).all(roomId);
 
-    challenges = db.prepare('SELECT * FROM study_challenges WHERE room_id = ? ORDER BY created_at DESC').all(roomId);
+    challenges = db.prepare(`
+      SELECT c.*, u.full_name as creator_name,
+             (SELECT COUNT(*) FROM study_challenge_participants p WHERE p.challenge_id = c.id) as participant_count,
+             (SELECT status FROM study_challenge_participants p WHERE p.challenge_id = c.id AND p.user_id = ?) as my_status,
+             (SELECT is_completed FROM study_challenge_participants p WHERE p.challenge_id = c.id AND p.user_id = ?) as my_completed
+      FROM study_challenges c
+      LEFT JOIN users u ON c.creator_id = u.id
+      WHERE c.room_id = ?
+      ORDER BY COALESCE(c.scheduled_date, c.start_date) ASC, c.created_at DESC
+    `).all(userId, userId, roomId);
   }
 
   // If Admin, query pending join requests
@@ -408,6 +417,10 @@ router.delete('/:id', authenticateToken, (req, res) => {
   const roomId = req.params.id;
   const userId = req.user.id;
 
+  if (!roomId || roomId === 'undefined' || roomId === 'null' || isNaN(Number(roomId))) {
+    return res.status(400).json({ error: 'Valid group ID is required.' });
+  }
+
   const room = db.prepare('SELECT owner_id, name FROM study_rooms WHERE id = ?').get(roomId);
   if (!room) return res.status(404).json({ error: 'Study group not found.' });
 
@@ -415,11 +428,30 @@ router.delete('/:id', authenticateToken, (req, res) => {
     return res.status(403).json({ error: 'Only the Group Admin can delete this study group.' });
   }
 
+  // Clean up tasks and their chat rooms
+  const tasks = db.prepare('SELECT id FROM study_tasks WHERE room_id = ?').all(roomId);
+  for (const t of tasks) {
+    const taskChat = db.prepare("SELECT id FROM chat_rooms WHERE room_type = 'task_discussion' AND reference_id = ?").get(t.id);
+    if (taskChat) {
+      db.prepare('DELETE FROM chat_messages WHERE chat_room_id = ?').run(taskChat.id);
+      db.prepare('DELETE FROM chat_rooms WHERE id = ?').run(taskChat.id);
+    }
+    db.prepare('DELETE FROM study_task_assignments WHERE task_id = ?').run(t.id);
+    db.prepare('DELETE FROM study_challenges WHERE task_id = ?').run(t.id);
+    db.prepare('DELETE FROM study_submissions WHERE task_id = ?').run(t.id);
+  }
+
+  // Clean up study room chat
+  const roomChat = db.prepare("SELECT id FROM chat_rooms WHERE room_type = 'study_room' AND reference_id = ?").get(roomId);
+  if (roomChat) {
+    db.prepare('DELETE FROM chat_messages WHERE chat_room_id = ?').run(roomChat.id);
+    db.prepare('DELETE FROM chat_rooms WHERE id = ?').run(roomChat.id);
+  }
+
   // Clean up related rows
   db.prepare('DELETE FROM study_room_memberships WHERE room_id = ?').run(roomId);
   db.prepare('DELETE FROM study_tasks WHERE room_id = ?').run(roomId);
   db.prepare('DELETE FROM study_challenges WHERE room_id = ?').run(roomId);
-  db.prepare("DELETE FROM chat_rooms WHERE room_type = 'study_room' AND reference_id = ?").run(roomId);
   db.prepare('DELETE FROM study_rooms WHERE id = ?').run(roomId);
 
   res.json({ success: true, message: `Group "${room.name}" deleted successfully.` });

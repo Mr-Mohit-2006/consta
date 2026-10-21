@@ -3,11 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../api';
 import {
   Sparkles, BookOpen, Users, CheckSquare, Flame, Award, ArrowRight,
-  Clock, CheckCircle, AlertCircle, PlusCircle, HelpCircle, Activity
+  Clock, CheckCircle, AlertCircle, PlusCircle, HelpCircle, Activity,
+  Check, Square
 } from 'lucide-react';
 
 export default function DashboardView({ onNavigate }) {
-  const { user, streaks, progression } = useAuth();
+  const { user, streaks, progression, refreshUserData } = useAuth();
   const [summary, setSummary] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [activeSession, setActiveSession] = useState(null);
@@ -36,6 +37,19 @@ export default function DashboardView({ onNavigate }) {
       // ignore
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleToggleTask(taskId, e) {
+    if (e) e.stopPropagation();
+    const id = Number(taskId);
+    if (!id || isNaN(id)) return;
+    try {
+      const res = await apiRequest(`/study-tasks/${id}/toggle`, { method: 'PATCH' });
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, status: res.status } : t));
+      if (refreshUserData) await refreshUserData();
+    } catch (err) {
+      // ignore
     }
   }
 
@@ -213,40 +227,71 @@ export default function DashboardView({ onNavigate }) {
             </div>
           ) : (
             <div className="space-y-2.5">
-              {tasks.map(t => (
-                <div
-                  key={t.id}
-                  onClick={() => onNavigate('tasks')}
-                  className="p-3.5 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 rounded-2xl flex items-center justify-between cursor-pointer transition group"
-                >
-                  <div className="min-w-0 pr-4">
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
-                        t.priority === 'urgent' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                        t.priority === 'high' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                        'bg-slate-800 text-slate-300'
-                      }`}>
-                        {t.priority}
-                      </span>
-                      <span className="text-xs font-semibold text-slate-200 group-hover:text-white transition truncate">{t.title}</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1 truncate">
-                      {t.subject} &bull; {t.topic}
-                    </p>
-                  </div>
+              {tasks.map(t => {
+                const isTaskCompleted = t.status === 'completed' || t.status === 'approved';
+                return (
+                  <div
+                    key={t.id}
+                    onClick={() => onNavigate('tasks')}
+                    className={`p-3.5 border rounded-2xl flex items-center justify-between cursor-pointer transition group ${
+                      isTaskCompleted
+                        ? 'bg-slate-950/40 border-slate-800/60 opacity-80'
+                        : 'bg-slate-900/60 hover:bg-slate-800/80 border-slate-800/80'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3 min-w-0 pr-4">
+                      {/* Checkbox button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleToggleTask(t.id, e)}
+                        className={`p-1 rounded-lg border transition cursor-pointer shrink-0 ${
+                          isTaskCompleted
+                            ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-400'
+                            : 'bg-slate-950 border-slate-700 text-slate-500 hover:text-indigo-400 hover:border-indigo-500'
+                        }`}
+                        title={isTaskCompleted ? "Mark incomplete" : "Click checkbox to mark completed"}
+                      >
+                        {isTaskCompleted ? (
+                          <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                        ) : (
+                          <Square className="w-4 h-4" />
+                        )}
+                      </button>
 
-                  <div className="text-right shrink-0">
-                    <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold capitalize ${
-                      t.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                      t.status === 'revision_requested' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
-                      t.status === 'under_review' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                      'bg-slate-800 text-slate-400'
-                    }`}>
-                      {t.status.replace('_', ' ')}
-                    </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                            t.priority === 'urgent' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                            t.priority === 'high' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                            'bg-slate-800 text-slate-300'
+                          }`}>
+                            {t.priority}
+                          </span>
+                          <span className={`text-xs font-semibold transition truncate ${
+                            isTaskCompleted ? 'line-through text-slate-400' : 'text-slate-200 group-hover:text-white'
+                          }`}>
+                            {t.title}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-1 truncate">
+                          {t.room_id ? '👥 Group' : '👤 Self'} &bull; {t.subject} &bull; {t.topic || 'General'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold capitalize ${
+                        isTaskCompleted ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                        t.status === 'revision_requested' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                        t.status === 'under_review' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                        'bg-slate-800 text-slate-400'
+                      }`}>
+                        {isTaskCompleted ? '✓ Completed' : t.status.replace('_', ' ')}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

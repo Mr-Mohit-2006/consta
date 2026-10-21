@@ -26,8 +26,18 @@ router.post('/', authenticateToken, (req, res) => {
     assigned_user_ids // array of user IDs
   } = req.body;
 
-  if (!title || !instructions || !subject) {
-    return res.status(400).json({ error: 'Title, instructions, and subject are required.' });
+  if (!title || !title.trim()) {
+    return res.status(400).json({ error: 'Task title is required.' });
+  }
+
+  const cleanTitle = title.trim();
+  const cleanInstructions = (instructions && instructions.trim()) || '';
+  let cleanSubject = (subject && subject.trim()) || 'General';
+
+  // If assigned to a room and subject is General, inherit room's subject
+  if (room_id && cleanSubject === 'General') {
+    const room = db.prepare('SELECT subject FROM study_rooms WHERE id = ?').get(room_id);
+    if (room && room.subject) cleanSubject = room.subject;
   }
 
   const validPriority = ['low', 'medium', 'high', 'urgent'].includes(priority) ? priority : 'medium';
@@ -40,6 +50,8 @@ router.post('/', authenticateToken, (req, res) => {
     if (defaultRub) selectedRubricId = defaultRub.id;
   }
 
+  const isGroup = Boolean(is_group_task || room_id);
+
   const taskRes = db.prepare(`
     INSERT INTO study_tasks (
       title, instructions, subject, topic, creator_id, room_id,
@@ -47,9 +59,9 @@ router.post('/', authenticateToken, (req, res) => {
       allowed_submission_types, review_type, rubric_id, status, is_group_task
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_started', ?)
   `).run(
-    title,
-    instructions,
-    subject,
+    cleanTitle,
+    cleanInstructions,
+    cleanSubject,
     topic || '',
     userId,
     room_id || null,
@@ -60,7 +72,7 @@ router.post('/', authenticateToken, (req, res) => {
     JSON.stringify(allowed_submission_types || ['text', 'image', 'multi_image', 'document', 'link']),
     validReview,
     selectedRubricId,
-    is_group_task ? 1 : 0
+    isGroup ? 1 : 0
   );
 
   const taskId = Number(taskRes.lastInsertRowid);
@@ -74,7 +86,7 @@ router.post('/', authenticateToken, (req, res) => {
   // Assign users
   const assignees = new Set(Array.isArray(assigned_user_ids) ? assigned_user_ids : []);
   // If solo task or creator assigned themself
-  if (!is_group_task || assignees.size === 0) {
+  if (!isGroup || assignees.size === 0) {
     assignees.add(userId);
   }
 
@@ -86,7 +98,7 @@ router.post('/', authenticateToken, (req, res) => {
         uid,
         'task',
         'New Study Task Assigned',
-        `You have been assigned to task: "${title}"`,
+        `You have been assigned to task: "${cleanTitle}"`,
         `/tasks/${taskId}`
       );
     }
@@ -307,9 +319,13 @@ router.put('/:id/status', authenticateToken, (req, res) => {
 });
 
 // Toggle task completion (Checkbox functionality)
-router.patch('/:id/toggle', authenticateToken, (req, res) => {
+function handleToggleTask(req, res) {
   const taskId = req.params.id;
   const userId = req.user.id;
+
+  if (!taskId || taskId === 'undefined' || taskId === 'null' || isNaN(Number(taskId))) {
+    return res.status(400).json({ error: 'Valid task ID is required.' });
+  }
 
   const task = db.prepare('SELECT * FROM study_tasks WHERE id = ?').get(taskId);
   if (!task) return res.status(404).json({ error: 'Task not found.' });
@@ -335,12 +351,19 @@ router.patch('/:id/toggle', authenticateToken, (req, res) => {
     status: newStatus,
     is_completed: newStatus === 'completed'
   });
-});
+}
+
+router.patch('/:id/toggle', authenticateToken, handleToggleTask);
+router.put('/:id/toggle', authenticateToken, handleToggleTask);
 
 // Delete task (Creator or Group Admin only)
 router.delete('/:id', authenticateToken, (req, res) => {
   const taskId = req.params.id;
   const userId = req.user.id;
+
+  if (!taskId || taskId === 'undefined' || taskId === 'null' || isNaN(Number(taskId))) {
+    return res.status(400).json({ error: 'Valid task ID is required.' });
+  }
 
   const task = db.prepare(`
     SELECT t.*, r.owner_id as room_owner_id
@@ -358,10 +381,16 @@ router.delete('/:id', authenticateToken, (req, res) => {
     return res.status(403).json({ error: 'Only the task creator or group admin can delete this task.' });
   }
 
-  // Clean up related rows
+  // Clean up related rows safely
+  const taskChat = db.prepare("SELECT id FROM chat_rooms WHERE room_type = 'task_discussion' AND reference_id = ?").get(taskId);
+  if (taskChat) {
+    db.prepare('DELETE FROM chat_messages WHERE chat_room_id = ?').run(taskChat.id);
+    db.prepare('DELETE FROM chat_rooms WHERE id = ?').run(taskChat.id);
+  }
+
   db.prepare('DELETE FROM study_task_assignments WHERE task_id = ?').run(taskId);
   db.prepare('DELETE FROM study_challenges WHERE task_id = ?').run(taskId);
-  db.prepare('DELETE FROM chat_rooms WHERE room_type = \'task_discussion\' AND reference_id = ?').run(taskId);
+  db.prepare('DELETE FROM study_submissions WHERE task_id = ?').run(taskId);
   db.prepare('DELETE FROM study_tasks WHERE id = ?').run(taskId);
 
   res.json({ success: true, message: 'Task deleted successfully.' });

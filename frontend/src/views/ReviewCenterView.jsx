@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
-  ShieldCheck, Sparkles, CheckCircle2, AlertTriangle, XCircle, FileText,
-  ExternalLink, Send, Award, HelpCircle, ChevronRight, Check, ChevronLeft
+  ShieldCheck, Sparkles, CheckCircle, CheckCircle2, AlertTriangle, XCircle, FileText,
+  ExternalLink, Send, Award, HelpCircle, ChevronRight, Check, ChevronLeft, ThumbsUp, RefreshCw
 } from 'lucide-react';
 
 export default function ReviewCenterView({ initialTaskId }) {
@@ -35,19 +35,26 @@ export default function ReviewCenterView({ initialTaskId }) {
     loadReviewCenter();
   }, [user]);
 
+  useEffect(() => {
+    if (initialTaskId) {
+      setSelectedTaskId(initialTaskId);
+      loadTaskSubmissions(initialTaskId);
+    }
+  }, [initialTaskId]);
+
   async function loadReviewCenter() {
     try {
       const taskList = await apiRequest('/study-tasks');
-      setTasks(taskList);
+      setTasks(taskList || []);
 
       const rubList = await apiRequest('/reviews/rubrics');
-      setRubrics(rubList);
-      if (rubList.length > 0) setActiveRubric(rubList[0]);
+      setRubrics(rubList || []);
+      if (rubList && rubList.length > 0) setActiveRubric(rubList[0]);
 
-      const tId = selectedTaskId || (taskList.length > 0 ? taskList[0].id : null);
+      const tId = initialTaskId || selectedTaskId || (taskList && taskList.length > 0 ? taskList[0].id : null);
       if (tId) {
         setSelectedTaskId(tId);
-        loadTaskSubmissions(tId);
+        await loadTaskSubmissions(tId);
       }
     } catch (e) {
       // ignore
@@ -55,11 +62,12 @@ export default function ReviewCenterView({ initialTaskId }) {
   }
 
   async function loadTaskSubmissions(tId) {
+    if (!tId) return;
     setSelectedTaskId(tId);
     try {
       const subs = await apiRequest(`/submissions/${tId}/all`);
-      setSubmissions(subs);
-      if (subs.length > 0) {
+      setSubmissions(subs || []);
+      if (subs && subs.length > 0) {
         selectSubmission(subs[0]);
       } else {
         setSelectedSub(null);
@@ -257,8 +265,26 @@ export default function ReviewCenterView({ initialTaskId }) {
             })}
 
             {submissions.length === 0 && (
-              <div className="text-center py-12 text-xs text-slate-500">
-                No submissions found for this task yet.
+              <div className="text-center py-8 text-xs text-slate-400 glass-card rounded-2xl p-5 space-y-3">
+                <FileText className="w-8 h-8 text-slate-600 mx-auto" />
+                <p>No submissions found for this task yet.</p>
+                {tasks.length > 1 && (
+                  <div className="pt-2 border-t border-slate-800">
+                    <span className="text-[11px] text-slate-500 font-semibold block mb-2">Switch to another task:</span>
+                    <div className="flex flex-col gap-1.5">
+                      {tasks.filter(t => t.id !== selectedTaskId).map(t => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => loadTaskSubmissions(t.id)}
+                          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs text-left truncate transition cursor-pointer"
+                        >
+                          {t.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -291,9 +317,22 @@ export default function ReviewCenterView({ initialTaskId }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
-                    <CheckCircle className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>Peer & Mentor Evaluation Mode</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={runAiEvaluation}
+                      disabled={aiLoading}
+                      className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-purple-600/20 transition cursor-pointer"
+                      title="Run AI review to evaluate submission against rubric criteria"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                      <span>{aiLoading ? 'AI Evaluating...' : 'Run AI Evaluation'}</span>
+                    </button>
+
+                    <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+                      <CheckCircle className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Evaluation Mode</span>
+                    </div>
                   </div>
                 </div>
 
@@ -321,7 +360,52 @@ export default function ReviewCenterView({ initialTaskId }) {
                     </a>
                   </div>
                 )}
+
+                {/* Attachments */}
+                {selectedSub.attachments && selectedSub.attachments.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-slate-800/80">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                      Attachments ({selectedSub.attachments.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedSub.attachments.map(att => (
+                        <a
+                          key={att.id}
+                          href={att.file_path}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-xs text-slate-300 flex items-center space-x-1.5 transition"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                          <span className="truncate max-w-[180px]">{att.original_name}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* AI Evaluation Suggestion Banner */}
+              {aiEvaluation && (
+                <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Sparkles className="w-4 h-4 text-purple-400" />
+                      <span className="text-xs font-bold text-white">AI-Assisted Evaluation Recommendation</span>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
+                      aiEvaluation.decision === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                      aiEvaluation.decision === 'revision_requested' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                      'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                    }`}>
+                      Rec: {aiEvaluation.decision.replace('_', ' ')} ({Math.round((aiEvaluation.ai_confidence || 0.85) * 100)}% confidence)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    AI evaluation scores and feedback have been populated into the scorecard below. You can adjust scores, edit feedback, and set the final decision before submitting.
+                  </p>
+                </div>
+              )}
 
               {/* Review Scorecard Form */}
               <form onSubmit={handleSubmitReview} className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">

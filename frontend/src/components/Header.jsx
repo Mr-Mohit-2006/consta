@@ -37,25 +37,25 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
         {/* Brand */}
         <div
-          className="flex items-center space-x-3 cursor-pointer group"
+          className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0"
           onClick={() => setActiveTab('dashboard')}
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
-            <GraduationCap className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
+            <GraduationCap className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-black text-lg tracking-wider text-white">CONSTA</span>
-              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
+              <span className="font-black text-base sm:text-lg tracking-wider text-white">CONSTA</span>
+              <span className="hidden sm:inline-flex text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
                 Study Network
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">Collaborative Study & Personal Growth Platform</p>
+            <p className="text-[11px] text-slate-400 hidden lg:block">Collaborative Study & Personal Growth Platform</p>
           </div>
         </div>
 
         {/* Right Section: Level, Streaks, Notifications, Profile */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-1.5 sm:space-x-2.5">
           {/* Level Progress Widget */}
           <div
             onClick={() => setActiveTab('gamification')}
@@ -191,7 +191,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
             <span>Navigation Sections</span>
             <span className="text-indigo-400 font-mono">User ID #{user?.id}</span>
           </div>
-          <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -252,7 +252,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
 
       {/* Navigation Tabs Bar for Desktop & Tablet */}
       <div className="border-t border-slate-800/60 bg-slate-950/60 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1.5 overflow-x-auto py-1.5 scrollbar-none">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1.5 overflow-x-auto py-1.5 scrollbar-none touch-pan-x">
           {tabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;

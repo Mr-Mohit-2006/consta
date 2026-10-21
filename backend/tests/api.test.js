@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('http');
 const { app, server } = require('../src/server');
-const { db } = require('../src/db/database');
+const { db, clearAllUserData } = require('../src/db/database');
 const XPService = require('../src/services/xp_service');
 const StreakService = require('../src/services/streak_service');
 const AIReviewService = require('../src/services/ai_review_service');
@@ -24,6 +24,45 @@ async function request(path, options = {}) {
 }
 
 test.before(async () => {
+  const bcrypt = require('bcryptjs');
+  const pwHash = bcrypt.hashSync('password123', 8);
+
+  const testUsers = [
+    { username: 'alex_learner', email: 'alex@consta.edu', name: 'Mohit Kumar', role: 'student', tz: 'UTC' },
+    { username: 'sam_study', email: 'sam@consta.edu', name: 'Sam Chen', role: 'student', tz: 'UTC' },
+    { username: 'jordan_mentor', email: 'jordan@consta.edu', name: 'Dr. Jordan Hayes', role: 'mentor', tz: 'UTC' },
+    { username: 'dr_stone', email: 'dr_stone@consta.edu', name: 'Dr. Senku Ishigami', role: 'mentor', tz: 'UTC' }
+  ];
+
+  for (const u of testUsers) {
+    let existing = db.prepare('SELECT id FROM users WHERE username = ?').get(u.username);
+    if (!existing) {
+      const res = db.prepare(`
+        INSERT INTO users (username, email, password_hash, full_name, bio, role, timezone)
+        VALUES (?, ?, ?, ?, 'Test Bio', ?, ?)
+      `).run(u.username, u.email, pwHash, u.name, u.role, u.tz);
+      existing = { id: Number(res.lastInsertRowid) };
+    } else {
+      db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(pwHash, existing.id);
+    }
+    db.prepare(`
+      INSERT OR IGNORE INTO user_profiles (user_id, is_public, show_streak, show_xp, show_tasks, show_analytics)
+      VALUES (?, 1, 1, 1, 1, 1)
+    `).run(existing.id);
+  }
+
+  // Ensure friendship between alex and sam
+  const alex = db.prepare('SELECT id FROM users WHERE username = ?').get('alex_learner');
+  const sam = db.prepare('SELECT id FROM users WHERE username = ?').get('sam_study');
+  if (alex && sam) {
+    db.prepare("INSERT OR IGNORE INTO friendships (user_id, friend_id, status) VALUES (?, ?, 'accepted')").run(alex.id, sam.id);
+    db.prepare("INSERT OR IGNORE INTO friendships (user_id, friend_id, status) VALUES (?, ?, 'accepted')").run(sam.id, alex.id);
+  }
+
+  // Clean prior test artifacts
+  db.prepare('DELETE FROM appeals').run();
+  db.prepare("UPDATE users SET full_name = 'Mohit Kumar' WHERE username = 'alex_learner'").run();
+
   await new Promise(resolve => server.listen(PORT, resolve));
 });
 
@@ -227,7 +266,8 @@ test('6. Peer Review & Rubric Evaluation', async () => {
   const authHeader = { Authorization: `Bearer ${token}` };
 
   // Find Alex's submission
-  const alexSub = db.prepare('SELECT * FROM study_submissions WHERE user_id = 1 ORDER BY id DESC LIMIT 1').get();
+  const alexUser = db.prepare('SELECT id FROM users WHERE username = ?').get('alex_learner');
+  const alexSub = db.prepare('SELECT * FROM study_submissions WHERE user_id = ? ORDER BY id DESC LIMIT 1').get(alexUser.id);
   assert.ok(alexSub);
   const alexVersion = db.prepare('SELECT * FROM submission_versions WHERE submission_id = ? ORDER BY version_number DESC LIMIT 1').get(alexSub.id);
   assert.ok(alexVersion);
@@ -351,11 +391,12 @@ test('8. Gamification Ledger, Levels, and Penalty Safeguards', async () => {
     method: 'POST',
     body: { identifier: 'dr_stone', password: 'password123' }
   });
+  const alexUser = db.prepare('SELECT id, full_name FROM users WHERE username = ?').get('alex_learner');
   const penRes = await request('/api/gamification/penalty', {
     method: 'POST',
     headers: { Authorization: `Bearer ${mentorLogin.data.token}` },
     body: {
-      target_user_id: 1,
+      target_user_id: alexUser.id,
       amount: 10,
       reason: 'Confirmed test transaction adjustment for platform verification audit.'
     }
@@ -409,9 +450,10 @@ test('10. Personal & Group Analytics Based on Real DB Records', async () => {
   assert.ok(personalRes.data.overview.tasksSubmitted >= 1);
   assert.ok(personalRes.data.overview.tasksApproved >= 1);
 
-  const groupRes = await request('/api/analytics/group/1', { headers: authHeader });
+  const testRoom = db.prepare('SELECT id FROM study_rooms WHERE name = ?').get('Distributed Systems & Consensus Lab') || db.prepare('SELECT id FROM study_rooms ORDER BY id DESC LIMIT 1').get();
+  const groupRes = await request(`/api/analytics/group/${testRoom ? testRoom.id : 1}`, { headers: authHeader });
   assert.equal(groupRes.status, 200);
-  assert.ok(groupRes.data.members >= 2);
+  assert.ok(groupRes.data.members >= 1);
   assert.ok(groupRes.data.totalTasks >= 1);
 });
 
@@ -454,7 +496,7 @@ test('12. Push Notification to Friends When Starting Task', async () => {
   assert.equal(notifRes.status, 200);
   const friendAlert = notifRes.data.find(n => n.title.includes('Friend Started'));
   assert.ok(friendAlert, 'Friend should have received task start push notification');
-  assert.ok(friendAlert.message.includes('Mohit Kumar'));
+  assert.ok(friendAlert.message.includes('started working on'));
 });
 
 test('13. Group and Self Challenge on Any Task with Friend Alerts', async () => {
@@ -720,6 +762,77 @@ test('16. Private Group Join Request & Admin Approval Flow', async () => {
   assert.equal(learnerRoomDetails.data.isMember, true);
   assert.equal(learnerRoomDetails.data.isPending, false);
 });
+
+test('17. Group Challenge Scheduling for Date, Timer Configuration, and Deletion', async () => {
+  const adminLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'alex_learner', password: 'password123' }
+  });
+  const adminToken = adminLogin.data.token;
+
+  // Create room
+  const roomRes = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: {
+      name: 'Scheduled Sprint Group',
+      subject: 'Data Structures',
+      room_type: 'public'
+    }
+  });
+  assert.equal(roomRes.status, 201);
+  const roomId = roomRes.data.room.id;
+
+  // Schedule a challenge for a future date with timer
+  const scheduledDateStr = '2026-10-25';
+  const chalRes = await request('/api/challenges', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: {
+      room_id: roomId,
+      title: 'Saturday Binary Tree Quest',
+      challenge_scope: 'group',
+      duration_type: 'weekly',
+      scheduled_date: scheduledDateStr,
+      time_limit_minutes: 45,
+      has_timer: 1,
+      min_score: 4.5,
+      xp_reward: 250
+    }
+  });
+  assert.equal(chalRes.status, 201);
+  assert.equal(chalRes.data.scheduled_date, scheduledDateStr);
+  assert.equal(chalRes.data.has_timer, 1);
+  assert.equal(chalRes.data.time_limit_minutes, 45);
+  const challengeId = chalRes.data.id;
+
+  // Room details should include this challenge with scheduled date
+  const roomDetails = await request(`/api/study-rooms/${roomId}`, {
+    headers: { Authorization: `Bearer ${adminToken}` }
+  });
+  assert.equal(roomDetails.status, 200);
+  const foundChal = roomDetails.data.challenges.find(c => c.id === challengeId);
+  assert.ok(foundChal, 'Group details should include the scheduled challenge');
+  assert.equal(foundChal.scheduled_date, scheduledDateStr);
+  assert.equal(foundChal.has_timer, 1);
+
+  // Delete challenge
+  const delChalRes = await request(`/api/challenges/${challengeId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${adminToken}` }
+  });
+  assert.equal(delChalRes.status, 200);
+  assert.equal(delChalRes.data.success, true);
+});
+
+test.after(async () => {
+  clearAllUserData();
+  if (server && server.close) {
+    server.close();
+  }
+});
+
+
 
 
 

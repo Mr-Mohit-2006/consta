@@ -23,6 +23,7 @@ function AppContent() {
   const [friendsOpen, setFriendsOpen] = useState(false);
   const [deepTaskId, setDeepTaskId] = useState(null);
   const [deepChatRoomId, setDeepChatRoomId] = useState(null);
+  const [deepChallengeId, setDeepChallengeId] = useState(null);
 
   if (loading) {
     return (
@@ -59,6 +60,11 @@ function AppContent() {
     setActiveTab('chat');
   }
 
+  function handleOpenChallenge(challengeId) {
+    setDeepChallengeId(challengeId);
+    setActiveTab('challenges');
+  }
+
   function handleNotificationClick(link) {
     setNotificationsOpen(false);
     if (link.startsWith('/tasks/')) {
@@ -89,17 +95,21 @@ function AppContent() {
             onNavigate={handleNavigate}
             onOpenTask={handleOpenTask}
             onOpenChatRoom={handleOpenChatRoom}
+            onOpenChallenge={handleOpenChallenge}
           />
         )}
         {activeTab === 'tasks' && (
           <TasksSubmissionsView
             initialTaskId={deepTaskId}
             onOpenReview={handleOpenReview}
-            onOpenChallenge={() => setActiveTab('challenges')}
+            onOpenChallenge={handleOpenChallenge}
           />
         )}
         {activeTab === 'challenges' && (
-          <ChallengesView onOpenTask={handleOpenTask} />
+          <ChallengesView
+            initialChallengeId={deepChallengeId}
+            onOpenTask={handleOpenTask}
+          />
         )}
         {activeTab === 'reviews' && (
           <ReviewCenterView initialTaskId={deepTaskId} />

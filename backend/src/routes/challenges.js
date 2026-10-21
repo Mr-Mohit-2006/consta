@@ -20,7 +20,9 @@ router.post('/', authenticateToken, (req, res) => {
     min_score,
     target_criteria,
     xp_reward,
-    duration_type // 'daily' | 'weekly' | 'monthly'
+    duration_type, // 'daily' | 'weekly' | 'monthly'
+    has_timer, // boolean or 1/0
+    scheduled_date // YYYY-MM-DD or date string
   } = req.body;
 
   if (!title || !title.trim()) {
@@ -29,6 +31,8 @@ router.post('/', authenticateToken, (req, res) => {
 
   const validDuration = ['daily', 'weekly', 'monthly'].includes(duration_type) ? duration_type : 'daily';
   const scope = ['self', 'group', 'friends'].includes(challenge_scope) ? challenge_scope : 'group';
+  const hasTimer = has_timer === undefined ? 1 : (has_timer ? 1 : 0);
+  const schedDate = scheduled_date && scheduled_date.trim() ? scheduled_date.trim() : null;
 
   let timeLimit = Number(time_limit_minutes);
   let xpBonus = Number(xp_reward);
@@ -60,8 +64,14 @@ router.post('/', authenticateToken, (req, res) => {
     INSERT INTO study_challenges (
       room_id, task_id, creator_id, title, description, challenge_scope,
       time_limit_minutes, min_score, target_criteria, xp_reward, status,
-      duration_type, start_date, end_date
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, datetime('now', '${daysModifier}'))
+      duration_type, has_timer, scheduled_date, start_date, end_date
+    ) VALUES (
+      ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, 'active',
+      ?, ?, ?,
+      COALESCE(?, CURRENT_TIMESTAMP),
+      datetime(COALESCE(?, CURRENT_TIMESTAMP), '${daysModifier}')
+    )
   `).run(
     room_id || null,
     task_id || null,
@@ -73,7 +83,11 @@ router.post('/', authenticateToken, (req, res) => {
     scoreReq,
     target_criteria || `${validDuration} goal target`,
     xpBonus,
-    validDuration
+    validDuration,
+    hasTimer,
+    schedDate,
+    schedDate,
+    schedDate
   );
 
   const challengeId = Number(chalRes.lastInsertRowid);
@@ -314,6 +328,28 @@ router.post('/:id/complete', authenticateToken, (req, res) => {
     score_achieved: score,
     xpReward
   });
+});
+
+// Delete challenge (creator, group admin, or system admin)
+router.delete('/:id', authenticateToken, (req, res) => {
+  const challengeId = req.params.id;
+  const userId = req.user.id;
+  const challenge = db.prepare('SELECT * FROM study_challenges WHERE id = ?').get(challengeId);
+  if (!challenge) return res.status(404).json({ error: 'Challenge not found.' });
+
+  let canDelete = challenge.creator_id === userId;
+  if (!canDelete && challenge.room_id) {
+    const room = db.prepare('SELECT owner_id FROM study_rooms WHERE id = ?').get(challenge.room_id);
+    if (room && room.owner_id === userId) canDelete = true;
+  }
+  if (!canDelete && req.user.role === 'admin') canDelete = true;
+
+  if (!canDelete) {
+    return res.status(403).json({ error: 'Not authorized to delete this challenge.' });
+  }
+
+  db.prepare('DELETE FROM study_challenges WHERE id = ?').run(challengeId);
+  res.json({ success: true, message: 'Challenge deleted successfully.' });
 });
 
 module.exports = router;

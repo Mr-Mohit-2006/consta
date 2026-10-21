@@ -4,7 +4,7 @@ import { apiRequest } from '../api';
 import {
   User, Lock, Shield, Eye, Flame, Award, Users, UserPlus,
   CheckCircle2, Globe, Settings, Key, AlertCircle, RefreshCw,
-  Calendar, Edit3, ShieldAlert, Check, Sparkles
+  Calendar, Edit3, ShieldAlert, Check, Sparkles, Trash2, Plus, UserX
 } from 'lucide-react';
 
 export default function ProfileView({ onOpenFriends }) {
@@ -12,6 +12,11 @@ export default function ProfileView({ onOpenFriends }) {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'friends' | 'settings'
+
+  // Study Buddies Add State
+  const [newBuddyIdentifier, setNewBuddyIdentifier] = useState('');
+  const [addingBuddy, setAddingBuddy] = useState(false);
+  const [buddyActionMsg, setBuddyActionMsg] = useState(null);
 
   // Settings State: Reset Password
   const [currentPassword, setCurrentPassword] = useState('');
@@ -128,6 +133,36 @@ export default function ProfileView({ onOpenFriends }) {
     }
   }
 
+  async function handleAddBuddy(e) {
+    if (e) e.preventDefault();
+    if (!newBuddyIdentifier.trim()) return;
+    setAddingBuddy(true);
+    setBuddyActionMsg(null);
+    try {
+      await apiRequest('/friends', {
+        method: 'POST',
+        body: { identifier: newBuddyIdentifier.trim() }
+      });
+      setNewBuddyIdentifier('');
+      setBuddyActionMsg({ type: 'success', text: 'Study buddy connected successfully!' });
+      await loadProfile();
+    } catch (err) {
+      setBuddyActionMsg({ type: 'error', text: err.message || 'Failed to add buddy.' });
+    } finally {
+      setAddingBuddy(false);
+    }
+  }
+
+  async function handleRemoveBuddy(friendId, friendName) {
+    if (!window.confirm(`Are you sure you want to remove ${friendName || 'this buddy'} from your study buddies?`)) return;
+    try {
+      await apiRequest(`/friends/${friendId}`, { method: 'DELETE' });
+      await loadProfile();
+    } catch (err) {
+      alert(err.message || 'Failed to remove buddy.');
+    }
+  }
+
   if (loading && !profileData) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-slate-400">
@@ -141,7 +176,7 @@ export default function ProfileView({ onOpenFriends }) {
   const isPublic = profileData?.profile?.is_public ?? true;
   const progression = profileData?.progression || contextProgression;
   const streaks = profileData?.streaks || contextStreaks;
-  const counts = profileData?.counts || { friends: 0, followers: 0, following: 0 };
+  const counts = profileData?.counts || { friends: 0, buddies: 0 };
   const friendsList = profileData?.friends || [];
 
   return (
@@ -234,7 +269,7 @@ export default function ProfileView({ onOpenFriends }) {
         </div>
       </div>
 
-      {/* 4 Core Metrics Cards: Level, Streak, Friends, Followers */}
+      {/* 4 Core Metrics Cards: Level, Streak, Buddies, Achievements */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Level & XP */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
@@ -282,7 +317,7 @@ export default function ProfileView({ onOpenFriends }) {
           </div>
         </div>
 
-        {/* Card 3: Friends Count */}
+        {/* Card 3: Study Buddies Count */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Study Buddies</span>
@@ -291,7 +326,7 @@ export default function ProfileView({ onOpenFriends }) {
             </div>
           </div>
           <div className="text-2xl font-black text-white">
-            {counts.friends}
+            {counts.buddies || counts.friends || 0}
           </div>
           <div className="text-xs text-slate-400 mt-1 mb-3">
             Confirmed friends & study partners
@@ -300,31 +335,30 @@ export default function ProfileView({ onOpenFriends }) {
             onClick={() => setActiveTab('friends')}
             className="w-full py-1.5 px-2 text-center rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 text-xs font-bold transition cursor-pointer"
           >
-            Manage Buddies ({counts.friends})
+            Manage Buddies ({counts.buddies || counts.friends || 0})
           </button>
         </div>
 
-        {/* Card 4: Followers & Following */}
+        {/* Card 4: Milestones & Badges */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Community Network</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Achievements</span>
             <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
-              <UserPlus className="w-4 h-4" />
+              <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 mt-1">
-            <div>
-              <div className="text-2xl font-black text-white">{counts.followers}</div>
-              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Followers</div>
-            </div>
-            <div>
-              <div className="text-2xl font-black text-white">{counts.following}</div>
-              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Following</div>
-            </div>
+          <div className="text-2xl font-black text-white">
+            {profileData?.achievements?.length || 0}
           </div>
-          <div className="mt-3 text-[11px] text-purple-300/80 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-xl text-center">
-            Peer learning connections
+          <div className="text-xs text-slate-400 mt-1 mb-3">
+            Unlocked milestone badges
           </div>
+          <button
+            onClick={() => setActiveTab('overview')}
+            className="w-full py-1.5 px-2 text-center rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-300 text-xs font-bold transition cursor-pointer"
+          >
+            View Badges ({profileData?.achievements?.length || 0})
+          </button>
         </div>
       </div>
 
@@ -332,7 +366,7 @@ export default function ProfileView({ onOpenFriends }) {
       <div className="flex space-x-2 border-b border-slate-800 pb-2">
         {[
           { id: 'overview', label: 'Overview & Achievements', icon: Award },
-          { id: 'friends', label: `My Friends (${counts.friends})`, icon: Users },
+          { id: 'friends', label: `Study Buddies (${counts.buddies || counts.friends || 0})`, icon: Users },
           { id: 'settings', label: 'Settings & Reset Password', icon: Settings }
         ].map(tab => {
           const Icon = tab.icon;
@@ -387,20 +421,61 @@ export default function ProfileView({ onOpenFriends }) {
         </div>
       )}
 
-      {/* Tab 2: Friends List */}
+      {/* Tab 2: Study Buddies List & Add/Remove Manager */}
       {activeTab === 'friends' && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
               <h3 className="text-base font-bold text-white flex items-center space-x-2">
                 <Users className="w-5 h-5 text-indigo-400" />
-                <span>Confirmed Study Friends</span>
+                <span>Confirmed Study Buddies ({friendsList.length})</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Friends can view your private profile and study streaks, and receive notifications when you start a task.
+                Buddies can view your private profile and study streaks, and receive alerts when you start a task or challenge sprint.
               </p>
             </div>
+
+            {onOpenFriends && (
+              <button
+                type="button"
+                onClick={onOpenFriends}
+                className="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-bold text-xs flex items-center space-x-1.5 transition cursor-pointer self-start sm:self-auto"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Open Buddy Network</span>
+              </button>
+            )}
           </div>
+
+          {/* Quick Add Buddy Form */}
+          <form onSubmit={handleAddBuddy} className="mb-6 p-4 rounded-2xl bg-slate-950/70 border border-indigo-500/30">
+            <div className="text-xs font-bold text-white mb-2 flex items-center space-x-1.5">
+              <UserPlus className="w-4 h-4 text-indigo-400" />
+              <span>Add New Study Buddy</span>
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <input
+                type="text"
+                value={newBuddyIdentifier}
+                onChange={e => setNewBuddyIdentifier(e.target.value)}
+                placeholder="Enter User ID, username, or email to add as buddy..."
+                className="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
+              />
+              <button
+                type="submit"
+                disabled={addingBuddy || !newBuddyIdentifier.trim()}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-indigo-600/20 transition cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                <span>{addingBuddy ? 'Connecting...' : 'Add Study Buddy'}</span>
+              </button>
+            </div>
+            {buddyActionMsg && (
+              <div className={`mt-2.5 text-xs font-semibold ${buddyActionMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {buddyActionMsg.text}
+              </div>
+            )}
+          </form>
 
           {friendsList.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -409,20 +484,36 @@ export default function ProfileView({ onOpenFriends }) {
                   key={friend.id}
                   className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between"
                 >
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 min-w-0 pr-2">
                     <img
                       src={friend.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(friend.full_name)}&background=4f46e5&color=fff`}
                       alt={friend.full_name}
-                      className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-700"
+                      className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-700 shrink-0"
                     />
-                    <div>
-                      <div className="text-xs font-bold text-white">{friend.full_name}</div>
-                      <div className="text-[11px] text-indigo-400 font-mono">@{friend.username}</div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-white truncate">{friend.full_name}</div>
+                      <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 mt-0.5">
+                        <span className="text-indigo-400 font-mono">@{friend.username}</span>
+                        <span>&bull;</span>
+                        <span className="text-[10px] text-slate-400 font-mono">ID #{friend.id}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-1 text-amber-400 bg-amber-500/10 px-2 py-1 rounded-xl text-[11px] font-bold">
-                    <Flame className="w-3.5 h-3.5 fill-amber-400" />
-                    <span>{friend.study_streak || 0}d</span>
+
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <div className="flex items-center space-x-1 text-amber-400 bg-amber-500/10 px-2 py-1 rounded-xl text-[11px] font-bold border border-amber-500/20">
+                      <Flame className="w-3.5 h-3.5 fill-amber-400" />
+                      <span>{friend.study_streak || 0}d</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveBuddy(friend.id, friend.full_name)}
+                      className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 border border-slate-800 hover:border-rose-500/30 transition cursor-pointer"
+                      title="Remove buddy"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -430,8 +521,8 @@ export default function ProfileView({ onOpenFriends }) {
           ) : (
             <div className="text-center py-10 bg-slate-950 rounded-2xl border border-slate-800 text-slate-400 text-xs">
               <Users className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-              <p>No confirmed study buddies yet.</p>
-              <p className="text-[11px] text-slate-500 mt-1">Use the Study Buddies modal in the header to connect by username or email!</p>
+              <p className="font-semibold text-slate-300">No study buddies connected yet.</p>
+              <p className="text-[11px] text-slate-500 mt-1">Use the search box above to connect with peers by User ID, username, or email!</p>
             </div>
           )}
         </div>

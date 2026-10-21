@@ -4,10 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import {
   Trophy, Flame, Clock, Play, CheckCircle2, Plus, Users, User,
   Sparkles, Award, ArrowRight, ShieldCheck, Square, Check, ChevronLeft,
-  Calendar, Zap, CalendarDays
+  Calendar, Zap, CalendarDays, Pause, RotateCcw, Timer, Eye, EyeOff, Hourglass, Trash2
 } from 'lucide-react';
 
-export default function ChallengesView({ onOpenTask }) {
+export default function ChallengesView({ initialChallengeId, onOpenTask }) {
   const { user, refreshUserData } = useAuth();
   const [challenges, setChallenges] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -27,18 +27,29 @@ export default function ChallengesView({ onOpenTask }) {
   const [chalDesc, setChalDesc] = useState('');
   const [chalScope, setChalScope] = useState('self'); // 'self' | 'group' | 'friends'
   const [chalDuration, setChalDuration] = useState('weekly'); // 'daily' | 'weekly' | 'monthly'
+  const [chalScheduledDate, setChalScheduledDate] = useState(''); // Schedule for specific date
   const [timeLimit, setTimeLimit] = useState(10080); // 7 days in minutes
+  const [includeTimer, setIncludeTimer] = useState(true); // User wants timer or not
+  const [customTimerMinutes, setCustomTimerMinutes] = useState(25);
   const [minScore, setMinScore] = useState(4.0);
   const [xpBonus, setXpBonus] = useState(250);
 
   // Active Sprint timer
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
+  const [timerMode, setTimerMode] = useState('stopwatch'); // 'stopwatch' | 'countdown'
+  const [showWorkspaceTimer, setShowWorkspaceTimer] = useState(true);
   const timerRef = useRef(null);
 
   useEffect(() => {
     loadData();
   }, [user]);
+
+  useEffect(() => {
+    if (initialChallengeId) {
+      loadChallengeDetails(initialChallengeId);
+    }
+  }, [initialChallengeId]);
 
   useEffect(() => {
     if (timerRunning) {
@@ -71,7 +82,9 @@ export default function ChallengesView({ onOpenTask }) {
         setSelectedRoomId(roomList[0].id);
       }
 
-      if (chalList.length > 0 && !selectedChallenge) {
+      if (initialChallengeId) {
+        loadChallengeDetails(initialChallengeId);
+      } else if (chalList.length > 0 && !selectedChallenge) {
         loadChallengeDetails(chalList[0].id);
       }
     } catch (e) {
@@ -87,6 +100,13 @@ export default function ChallengesView({ onOpenTask }) {
       const details = await apiRequest(`/challenges/${id}`);
       setSelectedChallenge(details.challenge);
       setChallengeDetails(details);
+
+      // Determine default timer visibility based on challenge configuration
+      if (details.challenge.has_timer === 0) {
+        setShowWorkspaceTimer(false);
+      } else {
+        setShowWorkspaceTimer(true);
+      }
 
       // Check if user is in progress
       if (details.myRecord?.status === 'in_progress') {
@@ -107,14 +127,17 @@ export default function ChallengesView({ onOpenTask }) {
     setChalDuration(dur);
     if (dur === 'weekly') {
       setTimeLimit(7 * 24 * 60);
+      setCustomTimerMinutes(45);
       setXpBonus(250);
       if (!chalTitle) setChalTitle('7-Day Study Mastery Sprint');
     } else if (dur === 'monthly') {
       setTimeLimit(30 * 24 * 60);
+      setCustomTimerMinutes(60);
       setXpBonus(600);
       if (!chalTitle) setChalTitle('30-Day Cohort Marathon Quest');
     } else {
       setTimeLimit(60);
+      setCustomTimerMinutes(25);
       setXpBonus(100);
       if (!chalTitle) setChalTitle('Quick 60-Minute Focus Challenge');
     }
@@ -125,6 +148,7 @@ export default function ChallengesView({ onOpenTask }) {
     if (!chalTitle.trim()) return;
 
     try {
+      const finalTimeLimit = includeTimer ? Number(customTimerMinutes || timeLimit) : 0;
       const res = await apiRequest('/challenges', {
         method: 'POST',
         body: {
@@ -134,7 +158,9 @@ export default function ChallengesView({ onOpenTask }) {
           description: chalDesc.trim(),
           challenge_scope: chalScope,
           duration_type: chalDuration,
-          time_limit_minutes: Number(timeLimit),
+          scheduled_date: chalScheduledDate || null,
+          time_limit_minutes: finalTimeLimit,
+          has_timer: includeTimer,
           min_score: Number(minScore),
           xp_reward: Number(xpBonus)
         }
@@ -143,9 +169,26 @@ export default function ChallengesView({ onOpenTask }) {
       setShowCreateModal(false);
       setChalTitle('');
       setChalDesc('');
+      setChalScheduledDate('');
       await loadData();
       loadChallengeDetails(res.id);
       alert('Challenge launched successfully! Notifications dispatched to participants.');
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  async function handleDeleteChallenge(chalId, e) {
+    if (e) e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this challenge?')) return;
+    try {
+      await apiRequest(`/challenges/${chalId}`, { method: 'DELETE' });
+      await loadData();
+      if (selectedChallenge?.id === chalId) {
+        setSelectedChallenge(null);
+        setChallengeDetails(null);
+      }
+      alert('Challenge removed successfully.');
     } catch (err) {
       alert(err.message);
     }
@@ -156,11 +199,21 @@ export default function ChallengesView({ onOpenTask }) {
       await apiRequest(`/challenges/${challengeId}/start`, { method: 'POST' });
       setTimerSeconds(0);
       setTimerRunning(true);
+      setShowWorkspaceTimer(true);
       await loadChallengeDetails(challengeId);
       alert(`⚡ Challenge started! Push notifications sent to your friends to cheer you on.`);
     } catch (err) {
       alert(err.message);
     }
+  }
+
+  function handleToggleTimer() {
+    setTimerRunning(prev => !prev);
+  }
+
+  function handleResetTimer() {
+    setTimerRunning(false);
+    setTimerSeconds(0);
   }
 
   async function handleCompleteChallenge(challengeId) {
@@ -178,7 +231,11 @@ export default function ChallengesView({ onOpenTask }) {
       await loadChallengeDetails(challengeId);
       await loadData();
 
-      alert(`🎉 Congratulations! Challenge completed in ${Math.floor(timerSeconds / 60)}m ${timerSeconds % 60}s! You earned +${res.xpReward} bonus XP! Friends have been notified.`);
+      const timeMsg = timerSeconds > 0
+        ? `completed in ${Math.floor(timerSeconds / 60)}m ${timerSeconds % 60}s`
+        : `completed successfully`;
+
+      alert(`🎉 Congratulations! Challenge ${timeMsg}! You earned +${res.xpReward} bonus XP! Friends have been notified.`);
     } catch (err) {
       alert(err.message);
     }
@@ -193,9 +250,26 @@ export default function ChallengesView({ onOpenTask }) {
     return true;
   });
 
-  const mins = Math.floor(timerSeconds / 60);
-  const secs = timerSeconds % 60;
-  const timeFormatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  // Calculate stopwatch vs countdown values
+  const targetMinutes = (selectedChallenge?.time_limit_minutes && selectedChallenge.time_limit_minutes > 0 && selectedChallenge.time_limit_minutes <= 1440)
+    ? selectedChallenge.time_limit_minutes
+    : (selectedChallenge?.has_timer === 0 ? 0 : 25);
+
+  const targetTotalSeconds = targetMinutes * 60;
+  const remainingCountdownSeconds = Math.max(0, targetTotalSeconds - timerSeconds);
+
+  // Stopwatch formatted (counts up)
+  const swMins = Math.floor(timerSeconds / 60);
+  const swSecs = timerSeconds % 60;
+  const stopwatchFormatted = `${swMins.toString().padStart(2, '0')}:${swSecs.toString().padStart(2, '0')}`;
+
+  // Countdown formatted (counts down)
+  const cdMins = Math.floor(remainingCountdownSeconds / 60);
+  const cdSecs = remainingCountdownSeconds % 60;
+  const countdownFormatted = `${cdMins.toString().padStart(2, '0')}:${cdSecs.toString().padStart(2, '0')}`;
+
+  const displayTime = timerMode === 'countdown' && targetMinutes > 0 ? countdownFormatted : stopwatchFormatted;
+  const countdownPercent = targetTotalSeconds > 0 ? Math.min(100, Math.round((timerSeconds / targetTotalSeconds) * 100)) : 0;
 
   function formatTimeRemaining(c) {
     if (c.end_date) {
@@ -208,7 +282,7 @@ export default function ChallengesView({ onOpenTask }) {
     }
     if (c.duration_type === 'weekly') return '7-Day window';
     if (c.duration_type === 'monthly') return '30-Day window';
-    return `${c.time_limit_minutes}m target`;
+    return c.time_limit_minutes > 0 ? `${c.time_limit_minutes}m target` : 'Untimed challenge';
   }
 
   return (
@@ -358,6 +432,16 @@ export default function ChallengesView({ onOpenTask }) {
                 </div>
 
                 <h4 className="font-bold text-sm text-white mt-2 line-clamp-1">{c.title}</h4>
+
+                {c.scheduled_date && (
+                  <div className="mt-1 flex items-center space-x-1.5">
+                    <span className="text-[10px] text-amber-300 flex items-center space-x-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 font-medium">
+                      <Calendar className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                      <span>Scheduled: {new Date(c.scheduled_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    </span>
+                  </div>
+                )}
+
                 <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{c.description}</p>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
@@ -411,13 +495,31 @@ export default function ChallengesView({ onOpenTask }) {
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
                         {selectedChallenge.duration_type || 'weekly'} Duration
                       </span>
+                      {selectedChallenge.scheduled_date && (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center space-x-1">
+                          <Calendar className="w-3 h-3 text-amber-400" />
+                          <span>Scheduled: {new Date(selectedChallenge.scheduled_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </span>
+                      )}
                       {selectedChallenge.task_subject && (
                         <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">
                           {selectedChallenge.task_subject}
                         </span>
                       )}
                     </div>
-                    <h3 className="text-xl font-bold text-white mt-2">{selectedChallenge.title}</h3>
+                    <div className="flex items-center space-x-3 mt-2">
+                      <h3 className="text-xl font-bold text-white">{selectedChallenge.title}</h3>
+                      {(selectedChallenge.creator_id === user?.id || user?.role === 'admin') && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteChallenge(selectedChallenge.id, e)}
+                          className="p-1 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 border border-rose-500/20 transition cursor-pointer"
+                          title="Delete this challenge"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-300 mt-1 leading-relaxed">{selectedChallenge.description}</p>
                   </div>
 
@@ -446,43 +548,165 @@ export default function ChallengesView({ onOpenTask }) {
                   </div>
                 )}
 
-                {/* Sprint Timer & Action Control */}
-                <div className="mt-6 p-6 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-mono text-xl font-black ${
-                      timerRunning
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse'
-                        : 'bg-slate-900 text-slate-400 border border-slate-800'
-                    }`}>
-                      <Clock className="w-6 h-6" />
+                {/* Sprint Timer & Action Control Workspace */}
+                <div className="mt-6 rounded-2xl bg-slate-950/80 border border-slate-800/80 p-5 sm:p-6 shadow-inner space-y-4">
+                  {/* Timer Header & User Preference Controls */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
+                    <div className="flex items-center space-x-2.5">
+                      <div className={`p-2 rounded-xl transition ${timerRunning ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-900 text-slate-400'}`}>
+                        <Timer className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-xs text-white">Focus Timer</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                            {timerMode === 'countdown' && targetMinutes > 0 ? `Countdown (${targetMinutes}m)` : 'Stopwatch (Count Up)'}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400">
+                          {showWorkspaceTimer
+                            ? 'Timer is active for this study sprint. You can pause or reset anytime.'
+                            : 'Timer hidden — focus at your own relaxed pace.'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-slate-400">Sprint Stopwatch</div>
-                      <div className="text-2xl font-black text-white font-mono tracking-wider">{timeFormatted}</div>
+
+                    <div className="flex items-center space-x-2 self-start sm:self-auto">
+                      {/* Stopwatch vs Countdown Mode Selector */}
+                      {showWorkspaceTimer && (
+                        <div className="flex rounded-xl bg-slate-900 p-0.5 border border-slate-800 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => setTimerMode('stopwatch')}
+                            className={`px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer ${
+                              timerMode === 'stopwatch'
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                            title="Count up elapsed time"
+                          >
+                            Stopwatch
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTimerMode('countdown')}
+                            className={`px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer ${
+                              timerMode === 'countdown'
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                            title="Count down from target focus duration"
+                          >
+                            Countdown
+                          </button>
+                        </div>
+                      )}
+
+                      {/* User Toggle: Enable or hide timer */}
+                      <button
+                        type="button"
+                        onClick={() => setShowWorkspaceTimer(prev => !prev)}
+                        className="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center space-x-1 transition cursor-pointer"
+                        title={showWorkspaceTimer ? "Hide timer if you prefer untimed study" : "Show focus timer"}
+                      >
+                        {showWorkspaceTimer ? <EyeOff className="w-3.5 h-3.5 text-slate-400" /> : <Eye className="w-3.5 h-3.5 text-amber-400" />}
+                        <span className="hidden sm:inline">{showWorkspaceTimer ? 'Hide Timer' : 'Show Timer'}</span>
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3 w-full sm:w-auto">
-                    {challengeDetails.myRecord?.is_completed ? (
-                      <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center space-x-2">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Completed! Earned +{selectedChallenge.xp_reward} XP</span>
+                  {/* Timer Display & Playback Row */}
+                  {showWorkspaceTimer ? (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-mono text-xl font-black ${
+                          timerRunning
+                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse'
+                            : 'bg-slate-900 text-slate-400 border border-slate-800'
+                        }`}>
+                          <Clock className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="text-xs text-slate-400 font-medium flex items-center space-x-1.5">
+                            <span>{timerMode === 'countdown' ? 'Remaining Time' : 'Time Elapsed'}</span>
+                            {timerRunning && (
+                              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                            )}
+                          </div>
+                          <div className="text-3xl font-black text-white font-mono tracking-wider">
+                            {displayTime}
+                          </div>
+                        </div>
                       </div>
-                    ) : timerRunning ? (
+
+                      {/* Timer Playback Buttons */}
+                      <div className="flex items-center space-x-2">
+                        {!timerRunning ? (
+                          <button
+                            type="button"
+                            onClick={handleToggleTimer}
+                            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center space-x-1.5 shadow-md shadow-amber-500/20 transition cursor-pointer"
+                          >
+                            <Play className="w-4 h-4 fill-slate-950" />
+                            <span>{timerSeconds > 0 ? 'Resume Timer' : 'Start Timer'}</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={handleToggleTimer}
+                            className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md transition cursor-pointer"
+                          >
+                            <Pause className="w-4 h-4" />
+                            <span>Pause</span>
+                          </button>
+                        )}
+
+                        {timerSeconds > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleResetTimer}
+                            className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+                            title="Reset Timer to 00:00"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+                      <span className="flex items-center space-x-2">
+                        <CheckCircle2 className="w-4 h-4 text-indigo-400" />
+                        <span>Untimed Focus Mode: Work at your own pace without ticking timer pressure.</span>
+                      </span>
                       <button
-                        onClick={() => handleCompleteChallenge(selectedChallenge.id)}
-                        className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition cursor-pointer"
+                        type="button"
+                        onClick={() => setShowWorkspaceTimer(true)}
+                        className="text-amber-400 hover:underline font-semibold cursor-pointer shrink-0 ml-2"
                       >
-                        <Check className="w-4 h-4 stroke-[3]" />
-                        <span>Finish & Submit Solution</span>
+                        Enable Timer
                       </button>
+                    </div>
+                  )}
+
+                  {/* Complete & Submit Action Row */}
+                  <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span className="text-xs text-slate-400">
+                      Finished your work? Click complete to claim your <strong className="text-amber-300 font-bold">+{selectedChallenge.xp_reward} XP</strong> bonus!
+                    </span>
+
+                    {challengeDetails.myRecord?.is_completed ? (
+                      <div className="px-4 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center space-x-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Challenge Completed!</span>
+                      </div>
                     ) : (
                       <button
-                        onClick={() => handleStartChallenge(selectedChallenge.id)}
-                        className="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/30 transition cursor-pointer"
+                        onClick={() => handleCompleteChallenge(selectedChallenge.id)}
+                        className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-extrabold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition cursor-pointer shrink-0"
                       >
-                        <Play className="w-4 h-4 fill-slate-950" />
-                        <span>Start Challenge Timer</span>
+                        <Check className="w-4 h-4 stroke-[3]" />
+                        <span>Finish & Complete Challenge (+{selectedChallenge.xp_reward} XP)</span>
                       </button>
                     )}
                   </div>
@@ -559,8 +783,24 @@ export default function ChallengesView({ onOpenTask }) {
               </div>
             </div>
           ) : (
-            <div className="glass-panel rounded-3xl p-12 text-center text-slate-500 text-xs">
-              Select a challenge to view sprint workspace and leaderboard.
+            <div className="glass-panel rounded-3xl p-10 sm:p-14 text-center text-slate-400 text-xs border border-dashed border-slate-800/80">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/10">
+                <Trophy className="w-7 h-7" />
+              </div>
+              <h4 className="text-base font-bold text-white mb-1.5">No Challenge Selected</h4>
+              <p className="text-slate-400 max-w-sm mx-auto mb-5 leading-relaxed text-xs">
+                {challenges.length === 0
+                  ? 'No challenges scheduled yet. Launch a new Daily, Weekly, or Monthly focus sprint on any task!'
+                  : 'Select a challenge from the list to view sprint goals, timer controls, and leaderboard.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs inline-flex items-center space-x-1.5 shadow-lg shadow-amber-500/20 transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Launch Challenge</span>
+              </button>
             </div>
           )}
         </div>
@@ -669,6 +909,122 @@ export default function ChallengesView({ onOpenTask }) {
                   placeholder="e.g. 7-Day Algorithm Marathon Challenge"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                 />
+              </div>
+
+              {/* Schedule For Date (Optional or Specific Date) */}
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-white flex items-center space-x-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Schedule For Date</span>
+                  </label>
+                  <span className="text-[11px] font-semibold text-amber-300">
+                    {chalScheduledDate ? `Scheduled: ${new Date(chalScheduledDate).toLocaleDateString()}` : 'Starts immediately today'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="date"
+                    value={chalScheduledDate}
+                    onChange={e => setChalScheduledDate(e.target.value)}
+                    className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-indigo-500"
+                  />
+                  {chalScheduledDate && (
+                    <button
+                      type="button"
+                      onClick={() => setChalScheduledDate('')}
+                      className="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[
+                    { label: 'Today', offset: 0 },
+                    { label: 'Tomorrow', offset: 1 },
+                    { label: 'In 3 Days', offset: 3 },
+                    { label: 'In 1 Week', offset: 7 }
+                  ].map(item => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + item.offset);
+                    const iso = d.toISOString().split('T')[0];
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => setChalScheduledDate(iso)}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition cursor-pointer ${
+                          chalScheduledDate === iso
+                            ? 'bg-indigo-600 text-white border-indigo-500'
+                            : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Timer Configuration (User can add timer if they want) */}
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2.5">
+                    <div className={`p-2 rounded-xl transition ${includeTimer ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-900 text-slate-500'}`}>
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-white block">Add Timer (If you want)?</label>
+                      <span className="text-[11px] text-slate-400">
+                        {includeTimer ? 'Focus countdown & stopwatch will be provided' : 'Untimed goal — complete at your own pace'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={includeTimer}
+                      onChange={e => setIncludeTimer(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-slate-800 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                {includeTimer && (
+                  <div className="pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs text-slate-300 font-medium">Session Focus Timer:</span>
+                    <div className="flex items-center space-x-1.5">
+                      {[15, 25, 45, 60].map(m => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setCustomTimerMinutes(m)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                            customTimerMinutes === m
+                              ? 'bg-amber-500 text-slate-950 font-bold'
+                              : 'bg-slate-900 border border-slate-700 text-slate-300 hover:text-white'
+                          }`}
+                        >
+                          {m}m
+                        </button>
+                      ))}
+                      <div className="flex items-center space-x-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1">
+                        <input
+                          type="number"
+                          min="1"
+                          max="1440"
+                          value={customTimerMinutes}
+                          onChange={e => setCustomTimerMinutes(Math.max(1, Number(e.target.value)))}
+                          className="w-12 bg-transparent text-xs text-white focus:outline-hidden text-right font-bold"
+                        />
+                        <span className="text-[11px] text-slate-400">min</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

@@ -206,7 +206,14 @@ router.get('/:taskId/all', authenticateToken, (req, res) => {
     ORDER BY s.updated_at DESC
   `).all(taskId);
 
-  res.json(submissions);
+  const submissionsWithAttachments = submissions.map(s => {
+    const attachments = s.latest_version_id
+      ? db.prepare('SELECT * FROM submission_attachments WHERE version_id = ?').all(s.latest_version_id)
+      : [];
+    return { ...s, attachments };
+  });
+
+  res.json(submissionsWithAttachments);
 });
 
 module.exports = router;

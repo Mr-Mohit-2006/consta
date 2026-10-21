@@ -327,6 +327,9 @@ function initDatabase() {
       target_criteria TEXT DEFAULT '',
       xp_reward INTEGER DEFAULT 100,
       status TEXT CHECK(status IN ('active', 'completed', 'expired')) DEFAULT 'active',
+      duration_type TEXT DEFAULT 'daily',
+      has_timer INTEGER DEFAULT 1,
+      scheduled_date TEXT,
       start_date DATETIME,
       end_date DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -362,17 +365,6 @@ function initDatabase() {
       UNIQUE(user_id, friend_id),
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
-    );
-
-    -- User Follows (Followers and Following)
-    CREATE TABLE IF NOT EXISTS user_follows (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      follower_id INTEGER NOT NULL,
-      following_id INTEGER NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(follower_id, following_id),
-      FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
-      FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
     -- Gamification: XP Transactions Ledger (Immutable Audit Log)
@@ -549,6 +541,12 @@ function runMigrations() {
     if (!challengeCols.includes('duration_type')) {
       db.exec("ALTER TABLE study_challenges ADD COLUMN duration_type TEXT DEFAULT 'daily';");
     }
+    if (!challengeCols.includes('has_timer')) {
+      db.exec("ALTER TABLE study_challenges ADD COLUMN has_timer INTEGER DEFAULT 1;");
+    }
+    if (!challengeCols.includes('scheduled_date')) {
+      db.exec("ALTER TABLE study_challenges ADD COLUMN scheduled_date TEXT;");
+    }
 
     const partCols = db.prepare('PRAGMA table_info(study_challenge_participants)').all().map(c => c.name);
     if (!partCols.includes('status')) {
@@ -595,17 +593,7 @@ function runMigrations() {
     }
 
     db.exec(`
-      CREATE TABLE IF NOT EXISTS user_follows (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        follower_id INTEGER NOT NULL,
-        following_id INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(follower_id, following_id),
-        FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE
-      );
-      CREATE INDEX IF NOT EXISTS idx_follows_following ON user_follows(following_id);
-      CREATE INDEX IF NOT EXISTS idx_follows_follower ON user_follows(follower_id);
+      DROP TABLE IF EXISTS user_follows;
 
       CREATE TABLE IF NOT EXISTS password_resets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -698,8 +686,8 @@ function seedData() {
     }
   }
 
-  // Seed Sample Users if empty (only in test environment or when explicitly enabled)
-  if (process.env.NODE_ENV !== 'test' && process.env.SEED_SAMPLE_USERS !== 'true') {
+  // Seed Sample Users if empty (only when explicitly enabled via SEED_SAMPLE_USERS=true)
+  if (process.env.SEED_SAMPLE_USERS !== 'true') {
     return;
   }
 
@@ -888,7 +876,6 @@ function clearAllUserData() {
     DELETE FROM notifications;
     DELETE FROM notification_preferences;
     DELETE FROM password_resets;
-    DELETE FROM user_follows;
     DELETE FROM friendships;
     DELETE FROM user_profiles;
     DELETE FROM users;

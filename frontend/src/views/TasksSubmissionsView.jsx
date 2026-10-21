@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import {
   CheckSquare, Plus, Clock, FileText, Image as ImageIcon, Link as LinkIcon,
   CheckCircle2, AlertCircle, RefreshCw, ChevronRight, Eye, Send, UploadCloud,
-  FileCheck, Shield, ExternalLink, Trophy, Play, Flame, Zap, ChevronLeft
+  FileCheck, Shield, ExternalLink, Trophy, Play, Flame, Zap, ChevronLeft,
+  Trash2, Check, Square, Users, User, Calendar
 } from 'lucide-react';
 
 export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOpenChallenge }) {
@@ -16,15 +17,25 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
   const [loading, setLoading] = useState(true);
   const [mobileView, setMobileView] = useState('details'); // 'list' | 'details' for mobile responsiveness
 
+  // Quick Add Task State (Self or Group with just title & checkbox)
+  const [quickTaskTitle, setQuickTaskTitle] = useState('');
+  const [quickTaskScope, setQuickTaskScope] = useState('self'); // 'self' | 'group'
+  const [quickTaskRoomId, setQuickTaskRoomId] = useState('');
+  const [quickTaskDueDate, setQuickTaskDueDate] = useState('');
+  const [userRooms, setUserRooms] = useState([]);
+  const [addingQuickTask, setAddingQuickTask] = useState(false);
+
   // Challenge modal for this task
   const [showTaskChallengeModal, setShowTaskChallengeModal] = useState(false);
   const [taskChalTitle, setTaskChalTitle] = useState('');
   const [taskChalScope, setTaskChalScope] = useState('self'); // 'self' | 'group' | 'friends'
   const [taskChalTime, setTaskChalTime] = useState(25);
+  const [taskChalHasTimer, setTaskChalHasTimer] = useState(true);
+  const [taskChalScheduledDate, setTaskChalScheduledDate] = useState('');
   const [taskChalScore, setTaskChalScore] = useState(4.5);
   const [taskChalXp, setTaskChalXp] = useState(80);
 
-  // New task modal
+  // New task modal (advanced)
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [title, setTitle] = useState('');
   const [instructions, setInstructions] = useState('');
@@ -45,7 +56,20 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
 
   useEffect(() => {
     loadTasks();
+    loadUserRooms();
   }, [user]);
+
+  async function loadUserRooms() {
+    try {
+      const data = await apiRequest('/study-rooms');
+      setUserRooms(data || []);
+      if (data?.length > 0 && !quickTaskRoomId) {
+        setQuickTaskRoomId(data[0].id);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
 
   useEffect(() => {
     if (initialTaskId) {
@@ -57,8 +81,8 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
     setLoading(true);
     try {
       const data = await apiRequest('/study-tasks');
-      setTasks(data);
-      if (data.length > 0 && !selectedTask && !initialTaskId) {
+      setTasks(data || []);
+      if (data?.length > 0 && !selectedTask && !initialTaskId) {
         loadTaskDetails(data[0].id);
       }
     } catch (e) {
@@ -69,13 +93,98 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
   }
 
   async function loadTaskDetails(id) {
+    const numId = Number(id);
+    if (!numId || isNaN(numId)) return;
     setMobileView('details');
     try {
-      const details = await apiRequest(`/study-tasks/${id}`);
+      const details = await apiRequest(`/study-tasks/${numId}`);
       setSelectedTask(details.task);
       setTaskDetails(details);
     } catch (err) {
-      alert(err.message);
+      // silently ignore or reset if not found
+    }
+  }
+
+  // Quick Add Task with just title (for Self or Group)
+  async function handleQuickAddTask(e) {
+    if (e) e.preventDefault();
+    if (!quickTaskTitle.trim()) return;
+
+    setAddingQuickTask(true);
+    try {
+      const isGroup = quickTaskScope === 'group';
+      const body = {
+        title: quickTaskTitle.trim(),
+        is_group_task: isGroup,
+        room_id: isGroup && quickTaskRoomId ? Number(quickTaskRoomId) : null,
+        due_date: quickTaskDueDate || null
+      };
+
+      const created = await apiRequest('/study-tasks', {
+        method: 'POST',
+        body
+      });
+
+      setQuickTaskTitle('');
+      setQuickTaskDueDate('');
+      await loadTasks();
+      if (created?.id) {
+        await loadTaskDetails(created.id);
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to add task.');
+    } finally {
+      setAddingQuickTask(false);
+    }
+  }
+
+  // Toggle task completion (Checkbox functionality)
+  async function handleToggleTask(taskId, e) {
+    if (e) e.stopPropagation();
+    const id = Number(taskId);
+    if (!id || isNaN(id)) return;
+
+    try {
+      const res = await apiRequest(`/study-tasks/${id}/toggle`, { method: 'PATCH' });
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, status: res.status } : t));
+      if (selectedTask?.id === id) {
+        setSelectedTask(prev => prev ? { ...prev, status: res.status } : null);
+        if (taskDetails?.task) {
+          setTaskDetails(prev => ({
+            ...prev,
+            task: { ...prev.task, status: res.status }
+          }));
+        }
+      }
+      await refreshUserData();
+    } catch (err) {
+      alert(err.message || 'Failed to toggle task.');
+    }
+  }
+
+  // Delete task
+  async function handleDeleteTask(taskId, taskTitle, e) {
+    if (e) e.stopPropagation();
+    const id = Number(taskId);
+    if (!id || isNaN(id)) {
+      alert('Invalid task ID.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete task "${taskTitle || 'this task'}"?`)) {
+      return;
+    }
+
+    try {
+      await apiRequest(`/study-tasks/${id}`, { method: 'DELETE' });
+      setTasks(prev => prev.filter(t => t.id !== id));
+      if (selectedTask?.id === id) {
+        setSelectedTask(null);
+        setTaskDetails(null);
+      }
+      alert('Task deleted successfully.');
+    } catch (err) {
+      alert(err.message || 'Failed to delete task.');
     }
   }
 
@@ -184,7 +293,9 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
           room_id: selectedTask.room_id || null,
           title: taskChalTitle.trim(),
           challenge_scope: taskChalScope,
-          time_limit_minutes: Number(taskChalTime),
+          scheduled_date: taskChalScheduledDate || null,
+          time_limit_minutes: taskChalHasTimer ? Number(taskChalTime) : 0,
+          has_timer: taskChalHasTimer,
           min_score: Number(taskChalScore),
           xp_reward: Number(taskChalXp)
         }
@@ -217,17 +328,108 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
             <span>Study Tasks & Submissions</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Submit multi-format answers (text, handwritten photos, code, documents, links) with full versioning.
+            Quickly add tasks for yourself or study groups with interactive checklist completion.
           </p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition self-start"
+          className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-xs flex items-center space-x-2 transition self-start cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Create Study Task</span>
+          <span>+ Detailed Task</span>
         </button>
+      </div>
+
+      {/* Quick Add Task Bar (Self or Group with just title & checkbox) */}
+      <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-indigo-500/30 shadow-xl bg-gradient-to-r from-slate-900/90 to-indigo-950/40">
+        <form onSubmit={handleQuickAddTask} className="space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
+            <div className="flex items-center space-x-2">
+              <span className="text-indigo-300 font-bold flex items-center space-x-1">
+                <CheckSquare className="w-4 h-4 text-indigo-400" />
+                <span>Quick Add Task:</span>
+              </span>
+              <div className="flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setQuickTaskScope('self')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer ${
+                    quickTaskScope === 'self'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <User className="w-3 h-3" />
+                  <span>Self (Personal)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuickTaskScope('group')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer ${
+                    quickTaskScope === 'group'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Users className="w-3 h-3" />
+                  <span>Group</span>
+                </button>
+              </div>
+            </div>
+
+            {quickTaskScope === 'group' && userRooms.length > 0 && (
+              <div className="flex items-center space-x-2">
+                <label className="text-slate-400 text-xs">Target Group:</label>
+                <select
+                  value={quickTaskRoomId}
+                  onChange={e => setQuickTaskRoomId(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:outline-hidden focus:border-indigo-500"
+                >
+                  {userRooms.map(r => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} ({r.subject})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={quickTaskTitle}
+                onChange={e => setQuickTaskTitle(e.target.value)}
+                placeholder={quickTaskScope === 'group' ? "e.g. Solve Chapter 4 problems together..." : "e.g. Read 20 pages of Operating Systems..."}
+                className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-300">
+                <Calendar className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <input
+                  type="date"
+                  value={quickTaskDueDate}
+                  onChange={e => setQuickTaskDueDate(e.target.value)}
+                  className="bg-transparent text-xs text-slate-200 focus:outline-hidden"
+                  title="Due Date / Schedule (optional)"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={addingQuickTask || !quickTaskTitle.trim()}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-indigo-600/25 transition cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                <span>{addingQuickTask ? 'Adding...' : '+ Add Task'}</span>
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
 
       {/* Filter Tabs */}
@@ -275,48 +477,110 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
         <div className={`space-y-2.5 ${mobileView === 'list' ? 'block' : 'hidden lg:block'}`}>
           {filteredTasks.map(t => {
             const isSelected = selectedTask?.id === t.id;
+            const isTaskCompleted = t.status === 'completed' || t.status === 'approved';
+            const isGroup = Boolean(t.room_id || t.is_group_task);
+
             return (
               <div
                 key={t.id}
                 onClick={() => loadTaskDetails(t.id)}
-                className={`p-4 rounded-2xl border transition cursor-pointer ${
+                className={`p-3.5 sm:p-4 rounded-2xl border transition cursor-pointer group ${
                   isSelected
                     ? 'bg-indigo-950/40 border-indigo-500/50 shadow-lg'
+                    : isTaskCompleted
+                    ? 'bg-slate-950/40 border-slate-800/60 opacity-80'
                     : 'bg-slate-900 border-slate-800 hover:border-slate-700'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${
-                    t.priority === 'urgent' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                    t.priority === 'high' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                    'bg-slate-800 text-slate-300'
-                  }`}>
-                    {t.priority}
-                  </span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded font-semibold capitalize ${
-                    t.status === 'approved' ? 'text-emerald-400 bg-emerald-500/10' :
-                    t.status === 'revision_requested' ? 'text-rose-400 bg-rose-500/10' :
-                    t.status === 'under_review' ? 'text-amber-400 bg-amber-500/10' :
-                    'text-slate-400 bg-slate-800'
-                  }`}>
-                    {t.status.replace('_', ' ')}
-                  </span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${
+                      isGroup ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30' : 'bg-slate-800 text-slate-300 border border-slate-700/60'
+                    }`}>
+                      {isGroup ? '👥 Group' : '👤 Self'}
+                    </span>
+
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${
+                      t.priority === 'urgent' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                      t.priority === 'high' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                      'bg-slate-800 text-slate-300'
+                    }`}>
+                      {t.priority}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-1.5">
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-semibold capitalize ${
+                      isTaskCompleted ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' :
+                      t.status === 'revision_requested' ? 'text-rose-400 bg-rose-500/10' :
+                      t.status === 'under_review' ? 'text-amber-400 bg-amber-500/10' :
+                      'text-slate-400 bg-slate-800'
+                    }`}>
+                      {isTaskCompleted ? '✓ Completed' : t.status.replace('_', ' ')}
+                    </span>
+
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteTask(t.id, t.title, e)}
+                      className="p-1 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 rounded-lg transition cursor-pointer"
+                      title="Delete task"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
-                <h4 className="font-bold text-sm text-white mt-2 line-clamp-1">{t.title}</h4>
-                <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{t.instructions}</p>
+                <div className="flex items-start space-x-3 mt-2.5">
+                  {/* Interactive Checkbox */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleToggleTask(t.id, e)}
+                    className={`mt-0.5 p-1 rounded-lg border transition cursor-pointer shrink-0 ${
+                      isTaskCompleted
+                        ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-400'
+                        : 'bg-slate-950 border-slate-700 text-slate-500 hover:text-indigo-400 hover:border-indigo-500'
+                    }`}
+                    title={isTaskCompleted ? "Mark incomplete" : "Click checkbox to mark completed"}
+                  >
+                    {isTaskCompleted ? (
+                      <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                    ) : (
+                      <Square className="w-4 h-4" />
+                    )}
+                  </button>
+
+                  <div className="min-w-0 flex-1">
+                    <h4 className={`font-bold text-sm transition line-clamp-1 ${
+                      isTaskCompleted ? 'line-through text-slate-400' : 'text-white group-hover:text-indigo-200'
+                    }`}>
+                      {t.title}
+                    </h4>
+
+                    {t.instructions ? (
+                      <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{t.instructions}</p>
+                    ) : null}
+                  </div>
+                </div>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
                   <span>{t.subject}</span>
-                  <span className="capitalize">{t.review_type} review</span>
+                  {t.due_date ? (
+                    <span className="text-amber-300 flex items-center space-x-1">
+                      <Calendar className="w-3 h-3 text-amber-400" />
+                      <span>Due: {new Date(t.due_date).toLocaleDateString()}</span>
+                    </span>
+                  ) : (
+                    <span className="capitalize">{t.review_type} review</span>
+                  )}
                 </div>
               </div>
             );
           })}
 
           {filteredTasks.length === 0 && (
-            <div className="text-center py-12 text-xs text-slate-500">
-              No tasks found matching filter.
+            <div className="text-center py-12 text-xs text-slate-500 glass-card rounded-2xl p-4">
+              No tasks found. Use the quick add bar above to create one!
             </div>
           )}
         </div>
@@ -340,29 +604,61 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
                         <span>Tasks</span>
                       </button>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                        {selectedTask.subject} &bull; {selectedTask.topic}
+                        {selectedTask.subject} &bull; {selectedTask.topic || 'General'}
                       </span>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                        selectedTask.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                        (selectedTask.status === 'completed' || selectedTask.status === 'approved') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                         selectedTask.status === 'revision_requested' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
                         'bg-slate-800 text-slate-300'
                       }`}>
-                        {selectedTask.status.replace('_', ' ')}
+                        {(selectedTask.status === 'completed' || selectedTask.status === 'approved') ? '✓ Completed' : selectedTask.status.replace('_', ' ')}
                       </span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-white mt-2.5">{selectedTask.title}</h3>
+                    <div className="flex items-center space-x-3 mt-3">
+                      {/* Checkbox button directly in details */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleToggleTask(selectedTask.id, e)}
+                        className={`p-1.5 rounded-xl border transition cursor-pointer shrink-0 flex items-center space-x-1.5 px-3 ${
+                          (selectedTask.status === 'completed' || selectedTask.status === 'approved')
+                            ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold text-xs'
+                            : 'bg-slate-950 border-slate-700 text-slate-300 hover:border-indigo-500 hover:text-indigo-300 text-xs font-semibold'
+                        }`}
+                        title="Click to toggle task completed/not completed"
+                      >
+                        {(selectedTask.status === 'completed' || selectedTask.status === 'approved') ? (
+                          <>
+                            <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                            <span>Completed</span>
+                          </>
+                        ) : (
+                          <>
+                            <Square className="w-4 h-4" />
+                            <span>Mark Completed</span>
+                          </>
+                        )}
+                      </button>
+
+                      <h3 className={`text-xl font-bold transition ${
+                        (selectedTask.status === 'completed' || selectedTask.status === 'approved')
+                          ? 'line-through text-slate-400'
+                          : 'text-white'
+                      }`}>
+                        {selectedTask.title}
+                      </h3>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2 shrink-0">
                     {selectedTask.status === 'not_started' && (
                       <button
                         onClick={() => handleStartTask(selectedTask.id)}
-                        className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center space-x-1.5 shadow-lg shadow-emerald-600/20 transition"
+                        className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center space-x-1.5 shadow-lg shadow-emerald-600/20 transition cursor-pointer"
                         title="Start task and push notification to study buddies"
                       >
                         <Play className="w-3.5 h-3.5 fill-white" />
-                        <span>Start Task (Notify Buddies)</span>
+                        <span>Start (Alert Friends)</span>
                       </button>
                     )}
 
@@ -371,16 +667,16 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
                         setTaskChalTitle(`${selectedTask.title} Sprint`);
                         setShowTaskChallengeModal(true);
                       }}
-                      className="px-3.5 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-semibold text-xs flex items-center space-x-1.5 transition"
+                      className="px-3.5 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-semibold text-xs flex items-center space-x-1.5 transition cursor-pointer"
                       title="Turn this task into a self or group sprint challenge"
                     >
                       <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                      <span>⚡ Turn into Challenge</span>
+                      <span>⚡ Challenge</span>
                     </button>
 
                     <button
                       onClick={() => setShowSubmitModal(true)}
-                      className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition"
+                      className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition cursor-pointer"
                     >
                       <UploadCloud className="w-4 h-4" />
                       <span>{taskDetails.mySubmission ? 'Submit Revision' : 'Submit Work'}</span>
@@ -388,13 +684,29 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
 
                     {onOpenReview && (
                       <button
+                        type="button"
                         onClick={() => onOpenReview(selectedTask.id)}
-                        className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center space-x-1.5 transition"
+                        className={`px-3.5 py-2.5 rounded-xl border font-semibold text-xs flex items-center space-x-1.5 transition cursor-pointer ${
+                          selectedTask.status === 'submitted' || selectedTask.status === 'under_review'
+                            ? 'bg-indigo-600 hover:bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-600/30'
+                            : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                        }`}
+                        title="Evaluate submissions for this task in the Review Center"
                       >
-                        <Shield className="w-4 h-4 text-indigo-400" />
-                        <span>Review Center</span>
+                        <Shield className="w-4 h-4 text-indigo-300" />
+                        <span>Review Task</span>
                       </button>
                     )}
+
+                    {/* Delete Task Button */}
+                    <button
+                      onClick={(e) => handleDeleteTask(selectedTask.id, selectedTask.title, e)}
+                      className="px-3 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 font-semibold text-xs flex items-center space-x-1.5 transition cursor-pointer"
+                      title="Permanently delete this task"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                      <span className="hidden sm:inline">Delete Task</span>
+                    </button>
                   </div>
                 </div>
 
@@ -539,6 +851,22 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
                             ))}
                           </div>
                         )}
+
+                        {(!v.reviews || v.reviews.length === 0) && (
+                          <div className="mt-3 pt-2.5 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <span className="text-slate-400 text-[11px] italic">No review completed on this version yet.</span>
+                            {onOpenReview && (
+                              <button
+                                type="button"
+                                onClick={() => onOpenReview(selectedTask.id)}
+                                className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold flex items-center space-x-1 cursor-pointer transition"
+                              >
+                                <Shield className="w-3 h-3 text-indigo-400" />
+                                <span>Evaluate in Review Center &rarr;</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -550,8 +878,24 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
               </div>
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center text-slate-500 text-xs">
-              Select a study task from the left to inspect instructions and submit work.
+            <div className="glass-panel rounded-3xl p-10 sm:p-14 text-center text-slate-400 text-xs border border-dashed border-slate-800/80">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/10">
+                <CheckSquare className="w-7 h-7" />
+              </div>
+              <h4 className="text-base font-bold text-white mb-1.5">No Task Selected</h4>
+              <p className="text-slate-400 max-w-sm mx-auto mb-5 leading-relaxed text-xs">
+                {tasks.length === 0
+                  ? 'No tasks created yet. Use the Quick Add bar above or configure a detailed task with rubrics!'
+                  : 'Select a study task from the list to view instructions, rubric criteria, and submit solutions.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs inline-flex items-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Create Detailed Task</span>
+              </button>
             </div>
           )}
         </div>
@@ -801,18 +1145,92 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-xs text-slate-400 block mb-1">Time Limit (mins)</label>
-                  <input
-                    type="number"
-                    min="5"
-                    max="180"
-                    value={taskChalTime}
-                    onChange={e => setTaskChalTime(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
+              {/* Schedule For Date */}
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Schedule For Date (Optional)</span>
+                  </label>
+                  <span className="text-[10px] text-amber-300">
+                    {taskChalScheduledDate ? `Scheduled: ${new Date(taskChalScheduledDate).toLocaleDateString()}` : 'Starts today'}
+                  </span>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="date"
+                    value={taskChalScheduledDate}
+                    onChange={e => setTaskChalScheduledDate(e.target.value)}
+                    className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-hidden focus:border-amber-500"
+                  />
+                  {taskChalScheduledDate && (
+                    <button
+                      type="button"
+                      onClick={() => setTaskChalScheduledDate('')}
+                      className="px-2 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-[11px] font-semibold"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Optional Timer Selector */}
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={taskChalHasTimer}
+                      onChange={e => setTaskChalHasTimer(e.target.checked)}
+                      className="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700 focus:ring-amber-500"
+                    />
+                    <span>Add Timer to this Challenge?</span>
+                  </label>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${taskChalHasTimer ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'}`}>
+                    {taskChalHasTimer ? 'Timed Sprint' : 'Untimed Focus'}
+                  </span>
+                </div>
+
+                {taskChalHasTimer ? (
+                  <div className="space-y-2 pt-1 border-t border-slate-900">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="text-xs text-slate-400">Duration (mins):</span>
+                      <input
+                        type="number"
+                        min="5"
+                        max="180"
+                        value={taskChalTime}
+                        onChange={e => setTaskChalTime(e.target.value)}
+                        className="w-24 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[15, 25, 45, 60, 90].map(mins => (
+                        <button
+                          key={mins}
+                          type="button"
+                          onClick={() => setTaskChalTime(mins)}
+                          className={`px-2 py-0.5 rounded text-[11px] border transition ${
+                            Number(taskChalTime) === mins
+                              ? 'bg-amber-500 text-slate-950 font-bold border-amber-500'
+                              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                          }`}
+                        >
+                          {mins}m
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 italic">
+                    Untimed — complete at your own pace without timer pressure or countdown limits.
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-slate-400 block mb-1">Min Score</label>
                   <input
