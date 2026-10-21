@@ -3,7 +3,8 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   Trophy, Flame, Clock, Play, CheckCircle2, Plus, Users, User,
-  Sparkles, Award, ArrowRight, ShieldCheck, Square, Check, ChevronLeft
+  Sparkles, Award, ArrowRight, ShieldCheck, Square, Check, ChevronLeft,
+  Calendar, Zap, CalendarDays
 } from 'lucide-react';
 
 export default function ChallengesView({ onOpenTask }) {
@@ -14,8 +15,9 @@ export default function ChallengesView({ onOpenTask }) {
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [challengeDetails, setChallengeDetails] = useState(null);
   const [scopeFilter, setScopeFilter] = useState('all');
+  const [durationFilter, setDurationFilter] = useState('all'); // 'all' | 'daily' | 'weekly' | 'monthly'
   const [loading, setLoading] = useState(true);
-  const [mobileView, setMobileView] = useState('details'); // 'list' | 'details' for mobile responsiveness
+  const [mobileView, setMobileView] = useState('details'); // 'list' | 'details'
 
   // New challenge modal
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -24,9 +26,10 @@ export default function ChallengesView({ onOpenTask }) {
   const [chalTitle, setChalTitle] = useState('');
   const [chalDesc, setChalDesc] = useState('');
   const [chalScope, setChalScope] = useState('self'); // 'self' | 'group' | 'friends'
-  const [timeLimit, setTimeLimit] = useState(30);
+  const [chalDuration, setChalDuration] = useState('weekly'); // 'daily' | 'weekly' | 'monthly'
+  const [timeLimit, setTimeLimit] = useState(10080); // 7 days in minutes
   const [minScore, setMinScore] = useState(4.0);
-  const [xpBonus, setXpBonus] = useState(80);
+  const [xpBonus, setXpBonus] = useState(250);
 
   // Active Sprint timer
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -100,6 +103,23 @@ export default function ChallengesView({ onOpenTask }) {
     }
   }
 
+  function handleSelectDuration(dur) {
+    setChalDuration(dur);
+    if (dur === 'weekly') {
+      setTimeLimit(7 * 24 * 60);
+      setXpBonus(250);
+      if (!chalTitle) setChalTitle('7-Day Study Mastery Sprint');
+    } else if (dur === 'monthly') {
+      setTimeLimit(30 * 24 * 60);
+      setXpBonus(600);
+      if (!chalTitle) setChalTitle('30-Day Cohort Marathon Quest');
+    } else {
+      setTimeLimit(60);
+      setXpBonus(100);
+      if (!chalTitle) setChalTitle('Quick 60-Minute Focus Challenge');
+    }
+  }
+
   async function handleCreateChallenge(e) {
     e.preventDefault();
     if (!chalTitle.trim()) return;
@@ -113,6 +133,7 @@ export default function ChallengesView({ onOpenTask }) {
           title: chalTitle.trim(),
           description: chalDesc.trim(),
           challenge_scope: chalScope,
+          duration_type: chalDuration,
           time_limit_minutes: Number(timeLimit),
           min_score: Number(minScore),
           xp_reward: Number(xpBonus)
@@ -132,7 +153,7 @@ export default function ChallengesView({ onOpenTask }) {
 
   async function handleStartChallenge(challengeId) {
     try {
-      const res = await apiRequest(`/challenges/${challengeId}/start`, { method: 'POST' });
+      await apiRequest(`/challenges/${challengeId}/start`, { method: 'POST' });
       setTimerSeconds(0);
       setTimerRunning(true);
       await loadChallengeDetails(challengeId);
@@ -164,61 +185,115 @@ export default function ChallengesView({ onOpenTask }) {
   }
 
   const filteredChallenges = challenges.filter(c => {
-    if (scopeFilter === 'all') return true;
-    return c.challenge_scope === scopeFilter;
+    if (scopeFilter !== 'all' && c.challenge_scope !== scopeFilter) return false;
+    if (durationFilter !== 'all') {
+      const dType = c.duration_type || (c.time_limit_minutes >= 20000 ? 'monthly' : c.time_limit_minutes >= 1440 ? 'weekly' : 'daily');
+      if (dType !== durationFilter) return false;
+    }
+    return true;
   });
 
   const mins = Math.floor(timerSeconds / 60);
   const secs = timerSeconds % 60;
   const timeFormatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
+  function formatTimeRemaining(c) {
+    if (c.end_date) {
+      const msLeft = new Date(c.end_date) - new Date();
+      if (msLeft > 0) {
+        const days = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+        return `${days}d remaining`;
+      }
+      return 'Expiring soon';
+    }
+    if (c.duration_type === 'weekly') return '7-Day window';
+    if (c.duration_type === 'monthly') return '30-Day window';
+    return `${c.time_limit_minutes}m target`;
+  }
+
   return (
     <div className="space-y-6">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-            <Trophy className="w-5 h-5 text-amber-400" />
-            <span>Study Challenges & Sprints</span>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white flex items-center space-x-2.5">
+            <div className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
+              <Trophy className="w-5 h-5" />
+            </div>
+            <span>Study Challenges & Quests</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Turn any study task into a personal sprint or cohort race. Friends receive push alerts when you start!
+            Tackle Daily Sprints, Weekly Milestones (7 Days), or Monthly Quests (30 Days). Earn massive XP bonuses!
           </p>
         </div>
 
         <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center space-x-2 shadow-lg shadow-amber-500/20 transition self-start"
+          onClick={() => {
+            setShowCreateModal(true);
+            handleSelectDuration('weekly');
+          }}
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs flex items-center space-x-2 shadow-lg shadow-amber-500/20 transition self-start cursor-pointer"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>Launch Challenge on Task</span>
         </button>
       </div>
 
-      {/* Scope Filter Tabs */}
-      <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-none">
-        {[
-          { id: 'all', label: 'All Challenges' },
-          { id: 'self', label: 'Self Sprints' },
-          { id: 'group', label: 'Cohort Challenges' },
-          { id: 'friends', label: 'Study Buddy Challenges' }
-        ].map(item => (
-          <button
-            key={item.id}
-            onClick={() => setScopeFilter(item.id)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition whitespace-nowrap ${
-              scopeFilter === item.id
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+      {/* Filter Tabs: Scope and Duration */}
+      <div className="space-y-2.5">
+        {/* Scope Filters */}
+        <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 shrink-0">Scope:</span>
+          {[
+            { id: 'all', label: 'All Challenges' },
+            { id: 'self', label: 'Self Sprints' },
+            { id: 'group', label: 'Cohort Challenges' },
+            { id: 'friends', label: 'Study Buddy Challenges' }
+          ].map(item => (
+            <button
+              key={item.id}
+              onClick={() => setScopeFilter(item.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition whitespace-nowrap cursor-pointer ${
+                scopeFilter === item.id
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Duration Filters */}
+        <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 shrink-0">Duration:</span>
+          {[
+            { id: 'all', label: 'All Durations', icon: Clock },
+            { id: 'daily', label: 'Daily Sprints', icon: Zap },
+            { id: 'weekly', label: 'Weekly (7 Days)', icon: Calendar },
+            { id: 'monthly', label: 'Monthly (30 Days)', icon: CalendarDays }
+          ].map(item => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setDurationFilter(item.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition whitespace-nowrap flex items-center space-x-1.5 cursor-pointer ${
+                  durationFilter === item.id
+                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/20'
+                    : 'bg-slate-900/80 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Mobile Screen Segmented Switcher */}
-      <div className="flex lg:hidden rounded-2xl bg-slate-900 p-1 border border-slate-800">
+      <div className="flex lg:hidden rounded-2xl bg-slate-900/90 p-1 border border-slate-800">
         <button
           onClick={() => setMobileView('list')}
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
@@ -239,12 +314,14 @@ export default function ChallengesView({ onOpenTask }) {
         </button>
       </div>
 
-      {/* Two Column Layout: Challenge List vs Details & Sprint Timer */}
+      {/* Two Column Layout: Challenge List vs Details & Timer */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Challenge List */}
         <div className={`space-y-2.5 ${mobileView === 'list' ? 'block' : 'hidden lg:block'}`}>
           {filteredChallenges.map(c => {
             const isSelected = selectedChallenge?.id === c.id;
+            const dType = c.duration_type || (c.time_limit_minutes >= 20000 ? 'monthly' : c.time_limit_minutes >= 1440 ? 'weekly' : 'daily');
+
             return (
               <div
                 key={c.id}
@@ -252,17 +329,29 @@ export default function ChallengesView({ onOpenTask }) {
                 className={`p-4 rounded-2xl border transition cursor-pointer ${
                   isSelected
                     ? 'bg-amber-950/20 border-amber-500/50 shadow-lg'
-                    : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                    : 'glass-card glass-card-hover'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${
-                    c.challenge_scope === 'self' ? 'bg-indigo-500/20 text-indigo-300' :
-                    c.challenge_scope === 'group' ? 'bg-cyan-500/20 text-cyan-300' :
-                    'bg-amber-500/20 text-amber-300'
-                  }`}>
-                    {c.challenge_scope}
-                  </span>
+                  <div className="flex items-center space-x-1.5">
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${
+                      c.challenge_scope === 'self' ? 'bg-indigo-500/20 text-indigo-300' :
+                      c.challenge_scope === 'group' ? 'bg-cyan-500/20 text-cyan-300' :
+                      'bg-amber-500/20 text-amber-300'
+                    }`}>
+                      {c.challenge_scope}
+                    </span>
+
+                    {/* Duration Badge */}
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${
+                      dType === 'weekly' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
+                      dType === 'monthly' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                      'bg-amber-500/10 text-amber-300 border border-amber-500/20'
+                    }`}>
+                      {dType === 'weekly' ? '📅 Weekly' : dType === 'monthly' ? '🗓️ Monthly' : '⚡ Daily'}
+                    </span>
+                  </div>
+
                   <span className="text-xs font-mono font-bold text-amber-400">
                     +{c.xp_reward} XP
                   </span>
@@ -272,9 +361,9 @@ export default function ChallengesView({ onOpenTask }) {
                 <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{c.description}</p>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                  <span className="flex items-center space-x-1">
+                  <span className="flex items-center space-x-1 text-slate-400">
                     <Clock className="w-3 h-3 text-slate-500" />
-                    <span>{c.time_limit_minutes}m target</span>
+                    <span>{formatTimeRemaining(c)}</span>
                   </span>
                   {c.my_completed ? (
                     <span className="text-emerald-400 font-bold flex items-center space-x-1">
@@ -292,8 +381,8 @@ export default function ChallengesView({ onOpenTask }) {
           })}
 
           {filteredChallenges.length === 0 && (
-            <div className="text-center py-12 text-xs text-slate-500">
-              No challenges found. Click "Launch Challenge on Task" to start one!
+            <div className="text-center py-12 text-xs text-slate-500 glass-card rounded-2xl p-6">
+              No challenges found in this filter. Click "Launch Challenge on Task" to start a Weekly or Monthly challenge!
             </div>
           )}
         </div>
@@ -303,21 +392,24 @@ export default function ChallengesView({ onOpenTask }) {
           {selectedChallenge && challengeDetails ? (
             <div className="space-y-6">
               {/* Challenge Workspace Card */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+              <div className="glass-panel rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setMobileView('list')}
-                        className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-amber-400 text-xs font-bold flex items-center space-x-1 border border-slate-700"
+                        className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-amber-400 text-xs font-bold flex items-center space-x-1 border border-slate-700 cursor-pointer"
                         title="Back to Challenges List"
                       >
                         <ChevronLeft className="w-4 h-4" />
-                        <span>Challenges</span>
+                        <span>All Challenges</span>
                       </button>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         {selectedChallenge.challenge_scope} sprint
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                        {selectedChallenge.duration_type || 'weekly'} Duration
                       </span>
                       {selectedChallenge.task_subject && (
                         <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">
@@ -331,7 +423,7 @@ export default function ChallengesView({ onOpenTask }) {
 
                   <div className="text-left sm:text-right shrink-0">
                     <div className="text-2xl font-black text-amber-400 font-mono">+{selectedChallenge.xp_reward} XP</div>
-                    <div className="text-xs text-slate-400 mt-0.5">Time limit: {selectedChallenge.time_limit_minutes}m</div>
+                    <div className="text-xs text-slate-400 mt-0.5">{formatTimeRemaining(selectedChallenge)}</div>
                   </div>
                 </div>
 
@@ -354,159 +446,199 @@ export default function ChallengesView({ onOpenTask }) {
                   </div>
                 )}
 
-                {/* Live Sprint Timer */}
-                <div className="my-8 text-center bg-slate-950/40 p-6 rounded-2xl border border-slate-800/80">
-                  <div className="font-mono text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-white to-amber-400 tracking-wider">
-                    {timeFormatted}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-2 flex items-center justify-center space-x-2">
-                    <span className={`w-2 h-2 rounded-full ${timerRunning ? 'bg-amber-400 animate-ping' : 'bg-slate-500'}`} />
-                    <span>
-                      {timerRunning
-                        ? 'Sprint timer running (Friends alerted!)'
-                        : challengeDetails.myRecord?.is_completed
-                        ? 'Challenge completed!'
-                        : 'Ready to start'}
-                    </span>
+                {/* Sprint Timer & Action Control */}
+                <div className="mt-6 p-6 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-mono text-xl font-black ${
+                      timerRunning
+                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse'
+                        : 'bg-slate-900 text-slate-400 border border-slate-800'
+                    }`}>
+                      <Clock className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-400">Sprint Stopwatch</div>
+                      <div className="text-2xl font-black text-white font-mono tracking-wider">{timeFormatted}</div>
+                    </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center justify-center space-x-3 mt-6">
-                    {!timerRunning && !challengeDetails.myRecord?.is_completed && (
-                      <button
-                        onClick={() => handleStartChallenge(selectedChallenge.id)}
-                        className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center space-x-2 shadow-lg shadow-amber-500/20 transition"
-                      >
-                        <Play className="w-4 h-4 fill-slate-950" />
-                        <span>Start Challenge (Notify Friends)</span>
-                      </button>
-                    )}
-
-                    {timerRunning && (
+                  <div className="flex items-center space-x-3 w-full sm:w-auto">
+                    {challengeDetails.myRecord?.is_completed ? (
+                      <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center space-x-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Completed! Earned +{selectedChallenge.xp_reward} XP</span>
+                      </div>
+                    ) : timerRunning ? (
                       <button
                         onClick={() => handleCompleteChallenge(selectedChallenge.id)}
-                        className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center space-x-2 shadow-lg shadow-emerald-600/30 transition"
+                        className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition cursor-pointer"
                       >
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Complete & Claim +{selectedChallenge.xp_reward} XP</span>
+                        <Check className="w-4 h-4 stroke-[3]" />
+                        <span>Finish & Submit Solution</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleStartChallenge(selectedChallenge.id)}
+                        className="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/30 transition cursor-pointer"
+                      >
+                        <Play className="w-4 h-4 fill-slate-950" />
+                        <span>Start Challenge Timer</span>
                       </button>
                     )}
-
-                    {challengeDetails.myRecord?.is_completed ? (
-                      <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 font-bold text-xs border border-emerald-500/20 flex items-center space-x-2">
-                        <Check className="w-4 h-4 stroke-[3]" />
-                        <span>Challenge Conquered! You earned +{selectedChallenge.xp_reward} XP</span>
-                      </div>
-                    ) : null}
                   </div>
                 </div>
               </div>
 
-              {/* Leaderboard Table Card */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <div className="flex items-center space-x-2">
-                    <Trophy className="w-4 h-4 text-amber-400" />
-                    <h4 className="font-bold text-sm text-white">Participants & Challenge Leaderboard</h4>
-                  </div>
-                  <span className="text-[11px] text-slate-500 font-mono">
-                    {challengeDetails.participants?.length || 0} participants
+              {/* Leaderboard Table */}
+              <div className="glass-panel rounded-3xl p-6 shadow-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-bold text-sm text-white flex items-center space-x-2">
+                    <Award className="w-4 h-4 text-amber-400" />
+                    <span>Sprint Participants Leaderboard</span>
+                  </h4>
+                  <span className="text-xs text-slate-400">
+                    {challengeDetails.participants?.length || 0} enrolled
                   </span>
                 </div>
 
-                <div className="space-y-2.5">
-                  {(challengeDetails.participants || []).map((p, idx) => (
-                    <div
-                      key={p.user_id}
-                      className="p-3.5 rounded-2xl bg-slate-950/40 border border-slate-800 flex items-center justify-between"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs ${
-                          idx === 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'
-                        }`}>
-                          {idx + 1}
-                        </span>
-                        <img
-                          src={p.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
-                          alt={p.full_name}
-                          className="w-8 h-8 rounded-xl object-cover ring-1 ring-slate-700"
-                        />
-                        <div>
-                          <span className="font-semibold text-xs text-white">{p.full_name}</span>
-                          <div className="text-[10px] text-slate-500 capitalize">{p.status}</div>
+                <div className="space-y-2">
+                  {(challengeDetails.participants || []).map((p, idx) => {
+                    const isWinner = idx === 0 && p.is_completed;
+                    const pMins = Math.floor((p.time_taken_seconds || 0) / 60);
+                    const pSecs = (p.time_taken_seconds || 0) % 60;
+
+                    return (
+                      <div
+                        key={p.user_id}
+                        className={`p-3 rounded-xl border flex items-center justify-between ${
+                          isWinner
+                            ? 'bg-amber-500/10 border-amber-500/30'
+                            : 'bg-slate-950/60 border-slate-800'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className={`w-6 text-center text-xs font-bold ${
+                            idx === 0 ? 'text-amber-400' : 'text-slate-500'
+                          }`}>
+                            #{idx + 1}
+                          </span>
+                          <img
+                            src={p.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.full_name)}&background=4f46e5&color=fff`}
+                            alt={p.full_name}
+                            className="w-7 h-7 rounded-lg object-cover ring-1 ring-slate-700"
+                          />
+                          <div>
+                            <div className="text-xs font-semibold text-white flex items-center space-x-1.5">
+                              <span>{p.full_name}</span>
+                              {p.user_id === user?.id && (
+                                <span className="text-[10px] text-amber-400 bg-amber-500/10 px-1.5 rounded">You</span>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-slate-500 font-mono">@{p.username}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          {p.is_completed ? (
+                            <div>
+                              <div className="text-xs font-bold text-emerald-400 font-mono">
+                                {pMins}m {pSecs}s
+                              </div>
+                              <div className="text-[10px] text-slate-400">Score: {p.score_achieved}/5.0</div>
+                            </div>
+                          ) : p.status === 'in_progress' ? (
+                            <span className="text-xs text-amber-400 font-bold animate-pulse">Running</span>
+                          ) : (
+                            <span className="text-xs text-slate-500">Joined</span>
+                          )}
                         </div>
                       </div>
-
-                      <div className="text-right font-mono text-xs">
-                        {p.is_completed ? (
-                          <div>
-                            <span className="text-emerald-400 font-bold block">
-                              {Math.floor(p.time_taken_seconds / 60)}m {p.time_taken_seconds % 60}s
-                            </span>
-                            <span className="text-[10px] text-slate-500">{p.score_achieved}/5.0 score</span>
-                          </div>
-                        ) : p.status === 'in_progress' ? (
-                          <span className="text-amber-400 font-bold animate-pulse">Running</span>
-                        ) : (
-                          <span className="text-slate-500">Joined</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center text-slate-500 text-xs">
-              Select a challenge from the list or launch a new challenge on any task.
+            <div className="glass-panel rounded-3xl p-12 text-center text-slate-500 text-xs">
+              Select a challenge to view sprint workspace and leaderboard.
             </div>
           )}
         </div>
       </div>
 
-      {/* Modal: Launch Challenge on Task */}
+      {/* Modal: Launch Challenge */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-white mb-1">Launch Challenge on Task</h3>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-1">Launch Challenge on Task</h3>
             <p className="text-xs text-slate-400 mb-4">
-              Turn any study task into a focused speedrun, cohort challenge, or friendly competition.
+              Set up a Daily, Weekly, or Monthly goal sprint on any study task.
             </p>
 
-            <form onSubmit={handleCreateChallenge} className="space-y-3.5">
+            <form onSubmit={handleCreateChallenge} className="space-y-4">
+              {/* Duration Selector */}
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Select Study Task</label>
+                <label className="text-xs text-slate-300 block mb-1.5 font-medium">Challenge Duration</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'daily', label: '⚡ Daily Sprint', desc: '1 Day · +100 XP' },
+                    { id: 'weekly', label: '📅 Weekly', desc: '7 Days · +250 XP' },
+                    { id: 'monthly', label: '🗓️ Monthly', desc: '30 Days · +600 XP' }
+                  ].map(dur => (
+                    <button
+                      key={dur.id}
+                      type="button"
+                      onClick={() => handleSelectDuration(dur.id)}
+                      className={`p-2.5 rounded-xl border text-center transition cursor-pointer ${
+                        chalDuration === dur.id
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold shadow-xs'
+                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{dur.label}</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">{dur.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Task Selector */}
+              <div>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Select Task</label>
                 <select
                   value={selectedTaskId}
                   onChange={e => setSelectedTaskId(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                 >
                   {tasks.map(t => (
-                    <option key={t.id} value={t.id}>{t.title} ({t.subject})</option>
+                    <option key={t.id} value={t.id}>
+                      [{t.subject}] {t.title}
+                    </option>
                   ))}
                 </select>
               </div>
 
+              {/* Scope Selector */}
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Challenge Scope</label>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Who Can Participate?</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: 'self', label: 'Self Sprint', desc: 'Personal focus' },
-                    { id: 'group', label: 'Cohort Group', desc: 'Study room race' },
-                    { id: 'friends', label: 'Study Buddies', desc: 'Direct friends' }
+                    { id: 'self', label: 'Self Sprint', desc: 'Just for you' },
+                    { id: 'group', label: 'Cohort', desc: 'Entire room' },
+                    { id: 'friends', label: 'Study Buddies', desc: 'Notify friends' }
                   ].map(item => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => setChalScope(item.id)}
-                      className={`p-2.5 rounded-xl border text-center transition ${
+                      className={`p-2.5 rounded-xl border text-center transition cursor-pointer ${
                         chalScope === item.id
-                          ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                          ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300 font-bold'
                           : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
                       }`}
                     >
                       <div className="text-xs font-semibold">{item.label}</div>
-                      <div className="text-[10px] text-slate-500">{item.desc}</div>
+                      <div className="text-[10px] text-slate-400">{item.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -514,7 +646,7 @@ export default function ChallengesView({ onOpenTask }) {
 
               {chalScope === 'group' && (
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Assign to Study Room</label>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Assign to Study Room</label>
                   <select
                     value={selectedRoomId}
                     onChange={e => setSelectedRoomId(e.target.value)}
@@ -528,31 +660,31 @@ export default function ChallengesView({ onOpenTask }) {
               )}
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Challenge Title</label>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Challenge Title</label>
                 <input
                   type="text"
                   required
                   value={chalTitle}
                   onChange={e => setChalTitle(e.target.value)}
-                  placeholder="e.g. 25-Minute LIS Implementation Sprint"
+                  placeholder="e.g. 7-Day Algorithm Marathon Challenge"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Target Time (mins)</label>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Bonus XP Reward</label>
                   <input
                     type="number"
-                    min="5"
-                    max="180"
-                    value={timeLimit}
-                    onChange={e => setTimeLimit(e.target.value)}
+                    min="10"
+                    max="1000"
+                    value={xpBonus}
+                    onChange={e => setXpBonus(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Min Score (pts)</label>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Minimum Passing Score</label>
                   <input
                     type="number"
                     step="0.5"
@@ -563,49 +695,30 @@ export default function ChallengesView({ onOpenTask }) {
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                   />
                 </div>
-                <div>
-                  <label className="text-xs text-slate-400 block mb-1">Bonus XP</label>
-                  <input
-                    type="number"
-                    min="10"
-                    max="500"
-                    value={xpBonus}
-                    onChange={e => setXpBonus(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Description / Rules (Optional)</label>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Description / Rules (Optional)</label>
                 <textarea
                   rows={2}
                   value={chalDesc}
                   onChange={e => setChalDesc(e.target.value)}
-                  placeholder="Provide any sprint constraints or rules..."
+                  placeholder="Provide any rules, guidelines or milestones..."
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
                 />
-              </div>
-
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-relaxed">
-                📢 {chalScope === 'group'
-                  ? 'All members of the selected cohort will receive an instant push notification.'
-                  : chalScope === 'friends'
-                  ? 'All your connected study buddies will receive an instant invite.'
-                  : 'Starting this self challenge will notify your study buddies so they can cheer you on!'}
               </div>
 
               <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold"
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold cursor-pointer"
                 >
                   Launch Challenge
                 </button>

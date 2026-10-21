@@ -582,3 +582,81 @@ test('14. Password Reset via Email Flow', async () => {
   assert.ok(successLogin.data.token);
 });
 
+test('15. Weekly/Monthly Challenges, Group Deletion, Task Toggle & Deletion', async () => {
+  const loginRes = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'alex_learner', password: 'password123' }
+  });
+  const token = loginRes.data.token;
+
+  // 1. Create a test group
+  const createGroupRes = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: {
+      name: 'Temp Test Group',
+      subject: 'Computer Science',
+      description: 'Group for testing delete and task schedule features'
+    }
+  });
+  assert.equal(createGroupRes.status, 201);
+  const roomId = createGroupRes.data.room.id;
+
+  // 2. Add task to group
+  const createTaskRes = await request('/api/study-tasks', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: {
+      title: 'Group Milestone Task',
+      instructions: 'Complete by Friday',
+      subject: 'Computer Science',
+      room_id: roomId,
+      due_date: '2026-10-30',
+      is_group_task: true
+    }
+  });
+  assert.equal(createTaskRes.status, 201);
+  const taskId = createTaskRes.data.id;
+
+  // 3. Toggle task completion (Checkbox)
+  const toggleRes = await request(`/api/study-tasks/${taskId}/toggle`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  assert.equal(toggleRes.status, 200);
+  assert.equal(toggleRes.data.status, 'completed');
+  assert.equal(toggleRes.data.is_completed, true);
+
+  // 4. Create Weekly Challenge on task
+  const weeklyChalRes = await request('/api/challenges', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: {
+      task_id: taskId,
+      room_id: roomId,
+      title: '7-Day Weekly Mastery Challenge',
+      duration_type: 'weekly',
+      challenge_scope: 'group'
+    }
+  });
+  assert.equal(weeklyChalRes.status, 201);
+  assert.equal(weeklyChalRes.data.duration_type, 'weekly');
+
+  // 5. Delete task
+  const delTaskRes = await request(`/api/study-tasks/${taskId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  assert.equal(delTaskRes.status, 200);
+  assert.equal(delTaskRes.data.success, true);
+
+  // 6. Delete group
+  const delGroupRes = await request(`/api/study-rooms/${roomId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  assert.equal(delGroupRes.status, 200);
+  assert.equal(delGroupRes.data.success, true);
+});
+
+
