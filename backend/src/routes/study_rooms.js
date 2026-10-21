@@ -45,92 +45,173 @@ router.get('/', authenticateToken, (req, res) => {
   const userId = req.user.id;
   const { search, subject } = req.query;
 
-  // Auto-seed a default public cohort if total study rooms is 0
+  // Auto-seed default starter cohorts if total study rooms is 0
   const totalRoomsCount = db.prepare('SELECT COUNT(*) as count FROM study_rooms').get()?.count || 0;
   if (totalRoomsCount === 0) {
     try {
-      const roomRes = db.prepare(`
-        INSERT INTO study_rooms (name, subject, description, objectives, room_type, join_code, owner_id)
-        VALUES (?, ?, ?, ?, 'public', 'CS101', ?)
-      `).run(
-        'Computer Science & Engineering Cohort',
-        'Computer Science',
-        'Public collaborative study group for Computer Science, Algorithms, and System Architecture.',
-        'Complete cohort topic checklist, solve doubts in Discord chat, and compete in weekly mastery sprints.',
-        userId
-      );
-
-      const roomId = Number(roomRes.lastInsertRowid);
-
-      db.prepare(`
-        INSERT INTO study_room_memberships (room_id, user_id, role, status)
-        VALUES (?, ?, 'owner', 'active')
-      `).run(roomId, userId);
-
-      const chatRoomRes = db.prepare(`
-        INSERT INTO chat_rooms (room_type, reference_id)
-        VALUES ('study_room', ?)
-      `).run(roomId);
-      const chatRoomId = Number(chatRoomRes.lastInsertRowid);
-
-      db.prepare(`
-        INSERT INTO chat_messages (chat_room_id, sender_id, content)
-        VALUES (?, ?, ?)
-      `).run(
-        chatRoomId,
-        userId,
-        '👋 Welcome to the Computer Science & Engineering Cohort! This is our real-time Discord-style chat. Feel free to discuss tasks, ask questions, or share handwritten notes.'
-      );
-
-      db.prepare(`
-        INSERT INTO study_tasks (
-          creator_id, room_id, title, subject, topic, priority, review_type,
-          instructions, is_group_task, duration_days, topics_checklist, status
-        ) VALUES (?, ?, ?, ?, ?, 'high', 'peer', ?, 1, 3, ?, 'pending')
-      `).run(
-        userId,
-        roomId,
-        'Data Structures & Algorithms Sprint',
-        'Computer Science',
-        'Core Algorithms',
-        'Complete the following topics checklist before the 3-day countdown timer expires. Check off each topic as you master it.',
-        JSON.stringify([
-          { id: 'topic_1', title: 'Arrays, Hashing & Two-Pointer Patterns', completed: false },
-          { id: 'topic_2', title: 'Binary Trees, BST & Graph Traversals', completed: false },
-          { id: 'topic_3', title: 'Dynamic Programming & Memoization', completed: false }
-        ])
-      );
+      const STARTER_SEEDS = [
+        {
+          name: 'Computer Science & Engineering Cohort',
+          subject: 'Computer Science',
+          join_code: 'CS101',
+          description: 'Public collaborative study group for Computer Science, Algorithms, and System Architecture.',
+          objectives: 'Complete cohort topic checklist, solve doubts in Discord chat, and compete in weekly mastery sprints.',
+          taskTitle: 'Data Structures & Algorithms Sprint',
+          topics: [
+            { id: 'cs_t1', title: 'Arrays, Hashing & Two-Pointer Patterns', completed: false },
+            { id: 'cs_t2', title: 'Binary Trees, BST & Graph Traversals', completed: false },
+            { id: 'cs_t3', title: 'Dynamic Programming & Memoization', completed: false }
+          ],
+          chalTitle: 'Weekly Mastery Sprint - Algorithms Challenge',
+          timeLimit: 45,
+          xp: 250
+        },
+        {
+          name: 'Mathematics & Quantitative Problem Solving',
+          subject: 'Mathematics',
+          join_code: 'MATH101',
+          description: 'Advanced problem-solving group for Linear Algebra, Calculus, and Discrete Mathematics.',
+          objectives: 'Weekly math problem sets, peer verification, and rigorous mathematical proofs.',
+          taskTitle: 'Calculus & Linear Algebra Problem Set',
+          topics: [
+            { id: 'm_t1', title: 'Eigenvalues & Matrix Transformations', completed: false },
+            { id: 'm_t2', title: 'Multivariable Derivatives & Integrals', completed: false },
+            { id: 'm_t3', title: 'Differential Equations & Proof Verification', completed: false }
+          ],
+          chalTitle: 'Math Sprint - Solve 10 Proof Problems',
+          timeLimit: 60,
+          xp: 300
+        },
+        {
+          name: 'Physics & Deep Tech Engineering',
+          subject: 'Physics',
+          join_code: 'PHYS101',
+          description: 'Collaborative cohort for Classical Mechanics, Electromagnetism, and Quantum Concepts.',
+          objectives: 'Break down physical concepts, solve textbook problems, and verify solutions.',
+          taskTitle: 'Electromagnetism & Waves Mastery',
+          topics: [
+            { id: 'p_t1', title: 'Gauss Law & Electric Potential', completed: false },
+            { id: 'p_t2', title: 'Magnetic Fields & Ampere Law', completed: false },
+            { id: 'p_t3', title: 'Maxwell Equations & Wave Propagation', completed: false }
+          ],
+          chalTitle: 'Physics Challenge - 45m Timed Problem Solving',
+          timeLimit: 45,
+          xp: 250
+        },
+        {
+          name: 'General Study & Daily Productivity Cohort',
+          subject: 'General Study',
+          join_code: 'STUDY101',
+          description: 'Daily accountability group for focused study sessions, habit consistency, and streak building.',
+          objectives: 'Daily check-ins, Pomodoro sprints, and consistent personal growth.',
+          taskTitle: 'Daily Habit & Focus Sprint',
+          topics: [
+            { id: 'g_t1', title: '2 Hours Deep Focus Study Block', completed: false },
+            { id: 'g_t2', title: 'Problem Logging & Notes Review', completed: false },
+            { id: 'g_t3', title: 'Peer Discussion & Summary Post', completed: false }
+          ],
+          chalTitle: 'Consistency Sprint - 5 Days Streak Target',
+          timeLimit: 30,
+          xp: 200
+        }
+      ];
 
       const todayStr = new Date().toISOString().split('T')[0];
-      db.prepare(`
-        INSERT INTO study_challenges (
-          room_id, creator_id, title, description, challenge_scope,
-          time_limit_minutes, min_score, target_criteria, xp_reward, status,
-          duration_type, has_timer, scheduled_date, start_date, end_date
-        ) VALUES (
-          ?, ?, ?, ?, 'group',
-          45, 4.0, 'Complete sprint task with score >= 4.0', 250, 'active',
-          'weekly', 1, ?, CURRENT_TIMESTAMP, datetime(CURRENT_TIMESTAMP, '+7 days')
-        )
-      `).run(
-        roomId,
-        userId,
-        'Weekly Mastery Sprint - Algorithms Challenge',
-        'Compete with cohort members in this timed 45-minute sprint to solve targeted algorithms.',
-        todayStr
-      );
+
+      STARTER_SEEDS.forEach((seed, idx) => {
+        const roomRes = db.prepare(`
+          INSERT INTO study_rooms (name, subject, description, objectives, room_type, join_code, owner_id)
+          VALUES (?, ?, ?, ?, 'public', ?, ?)
+        `).run(seed.name, seed.subject, seed.description, seed.objectives, seed.join_code, userId);
+
+        const rId = Number(roomRes.lastInsertRowid);
+
+        db.prepare(`
+          INSERT INTO study_room_memberships (room_id, user_id, role, status)
+          VALUES (?, ?, ?, 'active')
+        `).run(rId, userId, idx === 0 ? 'owner' : 'member');
+
+        const chatRes = db.prepare(`
+          INSERT INTO chat_rooms (room_type, reference_id)
+          VALUES ('study_room', ?)
+        `).run(rId);
+        const cRoomId = Number(chatRes.lastInsertRowid);
+
+        db.prepare(`
+          INSERT INTO chat_messages (chat_room_id, sender_id, content)
+          VALUES (?, ?, ?)
+        `).run(
+          cRoomId,
+          userId,
+          `👋 Welcome to the ${seed.name}! This is our real-time Discord-style chat. Feel free to discuss tasks, ask questions, or share handwritten notes.`
+        );
+
+        db.prepare(`
+          INSERT INTO study_tasks (
+            creator_id, room_id, title, subject, topic, priority, review_type,
+            instructions, is_group_task, duration_days, topics_checklist, status
+          ) VALUES (?, ?, ?, ?, ?, 'high', 'peer', ?, 1, 3, ?, 'pending')
+        `).run(
+          userId,
+          rId,
+          seed.taskTitle,
+          seed.subject,
+          'Core Topics',
+          'Complete these cohort checklist topics before the countdown timer expires. Check off each topic as you master it.',
+          JSON.stringify(seed.topics)
+        );
+
+        db.prepare(`
+          INSERT INTO study_challenges (
+            room_id, creator_id, title, description, challenge_scope,
+            time_limit_minutes, min_score, target_criteria, xp_reward, status,
+            duration_type, has_timer, scheduled_date, start_date, end_date
+          ) VALUES (
+            ?, ?, ?, ?, 'group',
+            ?, 4.0, 'Complete sprint task with high score', ?, 'active',
+            'weekly', 1, ?, CURRENT_TIMESTAMP, datetime(CURRENT_TIMESTAMP, '+7 days')
+          )
+        `).run(
+          rId,
+          userId,
+          seed.chalTitle,
+          'Compete with cohort members in this timed mastery challenge to level up together.',
+          seed.timeLimit,
+          seed.xp,
+          todayStr
+        );
+      });
     } catch (e) {
-      console.error('Error auto-seeding initial study room:', e);
+      console.error('Error auto-seeding initial study rooms:', e);
+    }
+  }
+
+  // Ensure current user is at least a member of the first public room if they have 0 memberships
+  const userMembershipsCount = db.prepare(`
+    SELECT COUNT(*) as count FROM study_room_memberships WHERE user_id = ? AND status = 'active'
+  `).get(userId)?.count || 0;
+
+  if (userMembershipsCount === 0) {
+    const firstPublicRoom = db.prepare(`SELECT id FROM study_rooms WHERE room_type = 'public' ORDER BY id ASC LIMIT 1`).get();
+    if (firstPublicRoom) {
+      try {
+        db.prepare(`
+          INSERT OR IGNORE INTO study_room_memberships (room_id, user_id, role, status)
+          VALUES (?, ?, 'member', 'active')
+        `).run(firstPublicRoom.id, userId);
+      } catch (e) {
+        // ignore
+      }
     }
   }
 
   let query = `
-    SELECT r.*, u.full_name as owner_name,
+    SELECT r.*, COALESCE(u.full_name, 'Cohort Admin') as owner_name,
            (SELECT COUNT(*) FROM study_room_memberships m WHERE m.room_id = r.id AND m.status = 'active') as member_count,
            (SELECT role FROM study_room_memberships m WHERE m.room_id = r.id AND m.user_id = ?) as user_role,
            (SELECT status FROM study_room_memberships m WHERE m.room_id = r.id AND m.user_id = ?) as user_status
     FROM study_rooms r
-    JOIN users u ON r.owner_id = u.id
+    LEFT JOIN users u ON r.owner_id = u.id
     WHERE 1=1
   `;
   const params = [userId, userId];
@@ -172,9 +253,9 @@ router.get('/:id', authenticateToken, (req, res) => {
   const userId = req.user.id;
 
   const room = db.prepare(`
-    SELECT r.*, u.full_name as owner_name, u.avatar_url as owner_avatar
+    SELECT r.*, COALESCE(u.full_name, 'Cohort Admin') as owner_name, u.avatar_url as owner_avatar
     FROM study_rooms r
-    JOIN users u ON r.owner_id = u.id
+    LEFT JOIN users u ON r.owner_id = u.id
     WHERE r.id = ?
   `).get(roomId);
 

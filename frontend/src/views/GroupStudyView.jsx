@@ -132,21 +132,21 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     setLoading(true);
     try {
       const data = await apiRequest('/study-rooms');
-      setRooms(data || []);
-      const myRooms = (data || []).filter(r => r.user_status === 'active' || r.user_role);
+      const roomList = Array.isArray(data) ? data : [];
+      setRooms(roomList);
+      const myRooms = roomList.filter(r => r.user_status === 'active' || r.user_role);
       if (myRooms.length > 0) {
         if (!selectedRoomId || !myRooms.some(r => r.id === selectedRoomId)) {
           loadRoomDetails(myRooms[0].id);
         }
-      } else if (data && data.length > 0) {
-        setGroupListFilter('explore');
-        loadRoomDetails(data[0].id);
+      } else if (roomList.length > 0) {
+        loadRoomDetails(roomList[0].id);
       } else {
         setSelectedRoomId(null);
         setRoomDetails(null);
       }
     } catch (e) {
-      // ignore
+      console.error('Failed to load study rooms:', e);
     } finally {
       setLoading(false);
     }
@@ -776,6 +776,14 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     (r.subject || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const myRooms = filteredRooms.filter(r => r.user_status === 'active' || r.user_role);
+  const publicRooms = filteredRooms.filter(r => r.user_status !== 'active' && !r.user_role);
+
+  // If the user selected 'my' but hasn't joined any groups yet, show all available filteredRooms so it is never empty!
+  const displayedRooms = groupListFilter === 'my'
+    ? (myRooms.length > 0 ? myRooms : filteredRooms)
+    : (publicRooms.length > 0 ? publicRooms : filteredRooms);
+
   const isCurrentRoomAdmin = roomDetails?.room?.owner_id === user?.id;
   const isCurrentRoomMember = Boolean(roomDetails?.isMember);
   const isCurrentRoomPending = Boolean(roomDetails?.isPending);
@@ -1077,32 +1085,10 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
               <div className="text-center py-10 text-xs text-slate-400 glass-card rounded-2xl p-6 border border-dashed border-slate-800">
                 <Users className="w-8 h-8 text-indigo-400/60 mx-auto mb-2" />
                 <p className="font-semibold text-slate-300">
-                  {groupListFilter === 'my'
-                    ? "You haven't joined any groups yet"
-                    : "No public groups available"}
-                </p>
-                <p className="text-[11px] text-slate-500 mt-1 mb-4">
-                  {groupListFilter === 'my'
-                    ? "Start fresh! Create your own study group or explore public cohorts."
-                    : "Create the first public study group for your subject!"}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer"
-                >
-                  + Create Study Group
-                </button>
-              </div>
-            )}
-            {false && (
-              <div className="text-center py-10 text-xs text-slate-400 glass-card rounded-2xl p-6 border border-dashed border-slate-800">
-                <Users className="w-8 h-8 text-indigo-400/60 mx-auto mb-2" />
-                <p className="font-semibold text-slate-300">
                   {searchQuery ? 'No groups matching search' : 'No study groups created yet'}
                 </p>
                 <p className="text-[11px] text-slate-500 mt-1 mb-4">
-                  {searchQuery ? 'Try clearing your search query' : 'Create a group to start collaborating on tasks and challenges!'}
+                  {searchQuery ? 'Try clearing your search query' : 'Create a group to start collaborating with Discord chat, topic checklists, and timers!'}
                 </p>
                 <button
                   type="button"
