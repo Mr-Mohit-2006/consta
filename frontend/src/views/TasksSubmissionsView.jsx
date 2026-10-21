@@ -8,7 +8,7 @@ import {
   Trash2, Check, Square, Users, User, Calendar
 } from 'lucide-react';
 
-export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOpenChallenge }) {
+export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge }) {
   const { user, refreshUserData } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -682,22 +682,6 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
                       <span>{taskDetails.mySubmission ? 'Submit Revision' : 'Submit Work'}</span>
                     </button>
 
-                    {onOpenReview && (
-                      <button
-                        type="button"
-                        onClick={() => onOpenReview(selectedTask.id)}
-                        className={`px-3.5 py-2.5 rounded-xl border font-semibold text-xs flex items-center space-x-1.5 transition cursor-pointer ${
-                          selectedTask.status === 'submitted' || selectedTask.status === 'under_review'
-                            ? 'bg-indigo-600 hover:bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-600/30'
-                            : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                        }`}
-                        title="Evaluate submissions for this task in the Review Center"
-                      >
-                        <Shield className="w-4 h-4 text-indigo-300" />
-                        <span>Review Task</span>
-                      </button>
-                    )}
-
                     {/* Delete Task Button */}
                     <button
                       onClick={(e) => handleDeleteTask(selectedTask.id, selectedTask.title, e)}
@@ -853,18 +837,8 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
                         )}
 
                         {(!v.reviews || v.reviews.length === 0) && (
-                          <div className="mt-3 pt-2.5 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <div className="mt-3 pt-2.5 border-t border-slate-800/60 text-xs">
                             <span className="text-slate-400 text-[11px] italic">No review completed on this version yet.</span>
-                            {onOpenReview && (
-                              <button
-                                type="button"
-                                onClick={() => onOpenReview(selectedTask.id)}
-                                className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold flex items-center space-x-1 cursor-pointer transition"
-                              >
-                                <Shield className="w-3 h-3 text-indigo-400" />
-                                <span>Evaluate in Review Center &rarr;</span>
-                              </button>
-                            )}
                           </div>
                         )}
                       </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   BookOpen, Users, CheckSquare, MessageSquare, Flame, Award, BarChart3,
-  User, Bell, ChevronDown, Sparkles, GraduationCap, ShieldCheck, Trophy,
+  User, Bell, ChevronDown, Sparkles, GraduationCap, Trophy,
   Menu, X, LogOut
 } from 'lucide-react';
 
@@ -17,7 +17,6 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
     { id: 'group', label: 'Group Study', icon: Users },
     { id: 'tasks', label: 'Study Tasks', icon: CheckSquare },
     { id: 'challenges', label: 'Challenges', icon: Trophy },
-    { id: 'reviews', label: 'Review Center', icon: ShieldCheck },
     { id: 'chat', label: 'Doubt Chat', icon: MessageSquare },
     { id: 'gamification', label: 'XP & Levels', icon: Award },
     { id: 'streaks', label: 'Streaks', icon: Flame },

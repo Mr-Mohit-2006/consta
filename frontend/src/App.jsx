@@ -9,7 +9,6 @@ import SoloStudyView from './views/SoloStudyView';
 import GroupStudyView from './views/GroupStudyView';
 import TasksSubmissionsView from './views/TasksSubmissionsView';
 import ChallengesView from './views/ChallengesView';
-import ReviewCenterView from './views/ReviewCenterView';
 import ChatDiscussionView from './views/ChatDiscussionView';
 import GamificationView from './views/GamificationView';
 import StreaksView from './views/StreaksView';
@@ -48,11 +47,6 @@ function AppContent() {
   function handleOpenTask(taskId) {
     setDeepTaskId(taskId);
     setActiveTab('tasks');
-  }
-
-  function handleOpenReview(taskId) {
-    setDeepTaskId(taskId);
-    setActiveTab('reviews');
   }
 
   function handleOpenChatRoom(chatRoomId) {
@@ -101,7 +95,6 @@ function AppContent() {
         {activeTab === 'tasks' && (
           <TasksSubmissionsView
             initialTaskId={deepTaskId}
-            onOpenReview={handleOpenReview}
             onOpenChallenge={handleOpenChallenge}
           />
         )}
@@ -110,9 +103,6 @@ function AppContent() {
             initialChallengeId={deepChallengeId}
             onOpenTask={handleOpenTask}
           />
-        )}
-        {activeTab === 'reviews' && (
-          <ReviewCenterView initialTaskId={deepTaskId} />
         )}
         {activeTab === 'chat' && (
           <ChatDiscussionView initialChatRoomId={deepChatRoomId} />
