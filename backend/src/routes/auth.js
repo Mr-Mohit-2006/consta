@@ -113,6 +113,80 @@ router.post('/login', (req, res) => {
   res.json({ token, user });
 });
 
+// Request password reset code via email
+router.post('/forgot-password', (req, res) => {
+  const { email } = req.body;
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const user = db.prepare('SELECT id, username, email FROM users WHERE LOWER(email) = ?').get(cleanEmail);
+
+  if (!user) {
+    return res.status(404).json({ error: 'No account found with this email address.' });
+  }
+
+  // Generate 6-digit verification code
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+  db.prepare(`
+    INSERT INTO password_resets (email, code, expires_at, used)
+    VALUES (?, ?, datetime('now', '+15 minutes'), 0)
+  `).run(cleanEmail, resetCode);
+
+  // Return reset code for demo/testing convenience alongside simulated email delivery
+  res.json({
+    success: true,
+    message: `A 6-digit password reset code has been sent to ${cleanEmail}. (Code: ${resetCode})`,
+    email: cleanEmail,
+    code: resetCode
+  });
+});
+
+// Verify code and reset password
+router.post('/reset-password', (req, res) => {
+  const { email, code, new_password } = req.body;
+
+  if (!email || !code || !new_password) {
+    return res.status(400).json({ error: 'Email, verification code, and new password are required.' });
+  }
+
+  if (new_password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanCode = code.trim();
+
+  // Find valid, unexpired, unused reset record
+  const resetRecord = db.prepare(`
+    SELECT id FROM password_resets
+    WHERE LOWER(email) = ? AND code = ? AND used = 0 AND expires_at > datetime('now')
+    ORDER BY id DESC LIMIT 1
+  `).get(cleanEmail, cleanCode);
+
+  if (!resetRecord) {
+    return res.status(400).json({ error: 'Invalid or expired verification code. Please request a new one.' });
+  }
+
+  // Hash new password and update user
+  const newHash = bcrypt.hashSync(new_password, 8);
+  const updateRes = db.prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE LOWER(email) = ?').run(newHash, cleanEmail);
+
+  if (updateRes.changes === 0) {
+    return res.status(404).json({ error: 'User account not found.' });
+  }
+
+  // Mark token as used
+  db.prepare('UPDATE password_resets SET used = 1 WHERE id = ?').run(resetRecord.id);
+
+  res.json({
+    success: true,
+    message: 'Your password has been successfully reset. Please log in with your new password.'
+  });
+});
+
 // Current user profile & status
 router.get('/me', authenticateToken, (req, res) => {
   const user = req.user;

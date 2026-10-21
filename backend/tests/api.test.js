@@ -529,3 +529,56 @@ test('13. Group and Self Challenge on Any Task with Friend Alerts', async () => 
   assert.equal(groupChalRes.status, 201);
   assert.equal(groupChalRes.data.challenge_scope, 'group');
 });
+
+test('14. Password Reset via Email Flow', async () => {
+  const testEmail = 'reset_user_' + Date.now() + '@example.com';
+  const testUsername = 'reset_user_' + Date.now();
+  
+  // Register user
+  await request('/api/auth/register', {
+    method: 'POST',
+    body: {
+      username: testUsername,
+      email: testEmail,
+      password: 'oldPassword123',
+      full_name: 'Reset Test'
+    }
+  });
+
+  // Request reset code
+  const forgotRes = await request('/api/auth/forgot-password', {
+    method: 'POST',
+    body: { email: testEmail }
+  });
+  assert.equal(forgotRes.status, 200);
+  assert.ok(forgotRes.data.code);
+  const code = forgotRes.data.code;
+
+  // Reset password with code
+  const resetRes = await request('/api/auth/reset-password', {
+    method: 'POST',
+    body: {
+      email: testEmail,
+      code,
+      new_password: 'newPassword123'
+    }
+  });
+  assert.equal(resetRes.status, 200);
+  assert.equal(resetRes.data.success, true);
+
+  // Try logging in with old password (should fail)
+  const failedLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: testEmail, password: 'oldPassword123' }
+  });
+  assert.equal(failedLogin.status, 401);
+
+  // Login with new password (should succeed)
+  const successLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: testEmail, password: 'newPassword123' }
+  });
+  assert.equal(successLogin.status, 200);
+  assert.ok(successLogin.data.token);
+});
+
