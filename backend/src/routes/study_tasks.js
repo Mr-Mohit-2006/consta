@@ -23,7 +23,9 @@ router.post('/', authenticateToken, (req, res) => {
     review_type,
     rubric_id,
     is_group_task,
-    assigned_user_ids // array of user IDs
+    assigned_user_ids, // array of user IDs
+    topics_checklist, // array of string topics or objects { id, topic, completed }
+    duration_days // number of days for task timer
   } = req.body;
 
   if (!title || !title.trim()) {
@@ -34,10 +36,45 @@ router.post('/', authenticateToken, (req, res) => {
   const cleanInstructions = (instructions && instructions.trim()) || '';
   let cleanSubject = (subject && subject.trim()) || 'General';
 
-  // If assigned to a room and subject is General, inherit room's subject
-  if (room_id && cleanSubject === 'General') {
-    const room = db.prepare('SELECT subject FROM study_rooms WHERE id = ?').get(room_id);
-    if (room && room.subject) cleanSubject = room.subject;
+  // If assigned to a room, verify user is an Admin/Moderator of that room
+  if (room_id) {
+    const room = db.prepare('SELECT owner_id, subject FROM study_rooms WHERE id = ?').get(room_id);
+    if (!room) {
+      return res.status(404).json({ error: 'Study group not found.' });
+    }
+    if (cleanSubject === 'General' && room.subject) {
+      cleanSubject = room.subject;
+    }
+
+    const membership = db.prepare("SELECT role FROM study_room_memberships WHERE room_id = ? AND user_id = ? AND status = 'active'").get(room_id, userId);
+    const isAdmin = Number(room.owner_id) === Number(userId) || (membership && (membership.role === 'owner' || membership.role === 'moderator'));
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Only group admins and moderators can add group tasks.' });
+    }
+  }
+
+  // Calculate timer duration and due date
+  const numDays = Math.max(0, parseInt(duration_days, 10) || 0);
+  let calculatedDueDate = due_date || null;
+  if (!calculatedDueDate && numDays > 0) {
+    const d = new Date();
+    d.setDate(d.getDate() + numDays);
+    calculatedDueDate = d.toISOString();
+  }
+
+  // Format topics checklist
+  let checklist = [];
+  if (Array.isArray(topics_checklist)) {
+    checklist = topics_checklist.map((item, idx) => {
+      if (typeof item === 'string') {
+        return { id: idx + 1, topic: item.trim(), completed: false };
+      }
+      return {
+        id: item.id || idx + 1,
+        topic: (item.topic || item.title || '').trim(),
+        completed: Boolean(item.completed)
+      };
+    }).filter(t => t.topic.length > 0);
   }
 
   const validPriority = ['low', 'medium', 'high', 'urgent'].includes(priority) ? priority : 'medium';
@@ -56,8 +93,9 @@ router.post('/', authenticateToken, (req, res) => {
     INSERT INTO study_tasks (
       title, instructions, subject, topic, creator_id, room_id,
       due_date, priority, expected_outcome, reference_materials,
-      allowed_submission_types, review_type, rubric_id, status, is_group_task
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_started', ?)
+      allowed_submission_types, review_type, rubric_id, status, is_group_task,
+      topics_checklist, duration_days, timer_started_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_started', ?, ?, ?, CURRENT_TIMESTAMP)
   `).run(
     cleanTitle,
     cleanInstructions,
@@ -65,14 +103,16 @@ router.post('/', authenticateToken, (req, res) => {
     topic || '',
     userId,
     room_id || null,
-    due_date || null,
+    calculatedDueDate,
     validPriority,
     expected_outcome || '',
     JSON.stringify(reference_materials || []),
     JSON.stringify(allowed_submission_types || ['text', 'image', 'multi_image', 'document', 'link']),
     validReview,
     selectedRubricId,
-    isGroup ? 1 : 0
+    isGroup ? 1 : 0,
+    JSON.stringify(checklist),
+    numDays
   );
 
   const taskId = Number(taskRes.lastInsertRowid);
@@ -105,6 +145,9 @@ router.post('/', authenticateToken, (req, res) => {
   }
 
   const task = db.prepare('SELECT * FROM study_tasks WHERE id = ?').get(taskId);
+  if (task) {
+    task.topics_checklist = JSON.parse(task.topics_checklist || '[]');
+  }
   res.status(201).json(task);
 });
 
@@ -151,6 +194,7 @@ router.get('/', authenticateToken, (req, res) => {
 
   const formatted = tasks.map(t => ({
     ...t,
+    topics_checklist: JSON.parse(t.topics_checklist || '[]'),
     reference_materials: JSON.parse(t.reference_materials || '[]'),
     allowed_submission_types: JSON.parse(t.allowed_submission_types || '[]')
   }));
@@ -174,6 +218,7 @@ router.get('/:id', authenticateToken, (req, res) => {
 
   if (!task) return res.status(404).json({ error: 'Task not found.' });
 
+  task.topics_checklist = JSON.parse(task.topics_checklist || '[]');
   task.reference_materials = JSON.parse(task.reference_materials || '[]');
   task.allowed_submission_types = JSON.parse(task.allowed_submission_types || '[]');
 
@@ -355,6 +400,82 @@ function handleToggleTask(req, res) {
 
 router.patch('/:id/toggle', authenticateToken, handleToggleTask);
 router.put('/:id/toggle', authenticateToken, handleToggleTask);
+
+// Toggle individual topic inside task checklist
+function handleToggleTopic(req, res) {
+  const taskId = req.params.id;
+  const userId = req.user.id;
+  const { topicId, topicIndex } = req.body;
+
+  if (!taskId || taskId === 'undefined' || isNaN(Number(taskId))) {
+    return res.status(400).json({ error: 'Valid task ID is required.' });
+  }
+
+  const task = db.prepare('SELECT * FROM study_tasks WHERE id = ?').get(taskId);
+  if (!task) return res.status(404).json({ error: 'Task not found.' });
+
+  let checklist = [];
+  try {
+    checklist = JSON.parse(task.topics_checklist || '[]');
+  } catch (e) {
+    checklist = [];
+  }
+
+  if (checklist.length === 0) {
+    return res.status(400).json({ error: 'This task has no topic checklist items.' });
+  }
+
+  let found = false;
+  checklist = checklist.map((item, idx) => {
+    const match = (topicId !== undefined && item.id == topicId) || (topicIndex !== undefined && idx === Number(topicIndex));
+    if (match) {
+      found = true;
+      const nextCompleted = !item.completed;
+      return {
+        ...item,
+        completed: nextCompleted,
+        completed_at: nextCompleted ? new Date().toISOString() : null,
+        completed_by: nextCompleted ? req.user.full_name : null
+      };
+    }
+    return item;
+  });
+
+  if (!found && checklist.length > 0 && (topicIndex !== undefined || topicId !== undefined)) {
+    const targetIdx = topicIndex !== undefined ? Number(topicIndex) : 0;
+    if (checklist[targetIdx]) {
+      checklist[targetIdx].completed = !checklist[targetIdx].completed;
+      found = true;
+    }
+  }
+
+  const allCompleted = checklist.length > 0 && checklist.every(item => item.completed);
+  const anyCompleted = checklist.some(item => item.completed);
+  let newStatus = task.status;
+  if (allCompleted) {
+    newStatus = 'completed';
+    StreakService.recordActivity(userId, 'study', 'task_completed', taskId, req.user.timezone);
+  } else if (anyCompleted && (task.status === 'not_started' || task.status === 'completed')) {
+    newStatus = 'in_progress';
+  }
+
+  db.prepare(`
+    UPDATE study_tasks
+    SET topics_checklist = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(JSON.stringify(checklist), newStatus, taskId);
+
+  res.json({
+    success: true,
+    taskId: Number(taskId),
+    status: newStatus,
+    is_completed: newStatus === 'completed',
+    topics_checklist: checklist
+  });
+}
+
+router.patch('/:id/toggle-topic', authenticateToken, handleToggleTopic);
+router.post('/:id/toggle-topic', authenticateToken, handleToggleTopic);
 
 // Delete task (Creator or Group Admin only)
 router.delete('/:id', authenticateToken, (req, res) => {

@@ -518,6 +518,17 @@ function initDatabase() {
 
 function runMigrations() {
   try {
+    const taskCols = db.prepare('PRAGMA table_info(study_tasks)').all().map(c => c.name);
+    if (!taskCols.includes('topics_checklist')) {
+      db.exec("ALTER TABLE study_tasks ADD COLUMN topics_checklist TEXT DEFAULT '[]';");
+    }
+    if (!taskCols.includes('duration_days')) {
+      db.exec("ALTER TABLE study_tasks ADD COLUMN duration_days INTEGER DEFAULT 0;");
+    }
+    if (!taskCols.includes('timer_started_at')) {
+      db.exec("ALTER TABLE study_tasks ADD COLUMN timer_started_at DATETIME;");
+    }
+
     const challengeCols = db.prepare('PRAGMA table_info(study_challenges)').all().map(c => c.name);
     if (!challengeCols.includes('task_id')) {
       db.exec('ALTER TABLE study_challenges ADD COLUMN task_id INTEGER;');
@@ -605,11 +616,6 @@ function runMigrations() {
       );
       CREATE INDEX IF NOT EXISTS idx_resets_email ON password_resets(email);
     `);
-
-    // Update names to Indian personas: Mohit Kumar, Abhijit Sharma, Prof. Abhishek Verma
-    db.prepare("UPDATE users SET full_name = 'Mohit Kumar' WHERE id = 1").run();
-    db.prepare("UPDATE users SET full_name = 'Abhijit Sharma' WHERE id = 2").run();
-    db.prepare("UPDATE users SET full_name = 'Prof. Abhishek Verma' WHERE id = 3").run();
   } catch (e) {
     console.error('Migration notice:', e.message);
   }
@@ -828,20 +834,22 @@ function seedData() {
     `).run(2, 85, 'Initial platform welcome', 'study_session', 'system', 0);
   }
 
-  // Seed default friendships if empty
-  try {
-    const friendCount = db.prepare('SELECT COUNT(*) as count FROM friendships').get();
-    if (friendCount.count === 0) {
-      const insertFriend = db.prepare("INSERT OR IGNORE INTO friendships (user_id, friend_id, status) VALUES (?, ?, 'accepted')");
-      insertFriend.run(1, 2);
-      insertFriend.run(2, 1);
-      insertFriend.run(1, 3);
-      insertFriend.run(3, 1);
-      insertFriend.run(2, 3);
-      insertFriend.run(3, 2);
+  // Seed default friendships if empty (only when SEED_SAMPLE_USERS is enabled)
+  if (process.env.SEED_SAMPLE_USERS === 'true') {
+    try {
+      const friendCount = db.prepare('SELECT COUNT(*) as count FROM friendships').get();
+      if (friendCount.count === 0) {
+        const insertFriend = db.prepare("INSERT OR IGNORE INTO friendships (user_id, friend_id, status) VALUES (?, ?, 'accepted')");
+        insertFriend.run(1, 2);
+        insertFriend.run(2, 1);
+        insertFriend.run(1, 3);
+        insertFriend.run(3, 1);
+        insertFriend.run(2, 3);
+        insertFriend.run(3, 2);
+      }
+    } catch (e) {
+      // ignore
     }
-  } catch (e) {
-    // ignore
   }
 }
 

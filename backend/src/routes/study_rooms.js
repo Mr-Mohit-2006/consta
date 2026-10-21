@@ -119,7 +119,10 @@ router.get('/:id', authenticateToken, (req, res) => {
       JOIN users u ON t.creator_id = u.id
       WHERE t.room_id = ?
       ORDER BY t.created_at DESC
-    `).all(roomId);
+    `).all(roomId).map(t => ({
+      ...t,
+      topics_checklist: JSON.parse(t.topics_checklist || '[]')
+    }));
 
     challenges = db.prepare(`
       SELECT c.*, u.full_name as creator_name,

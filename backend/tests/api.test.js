@@ -825,6 +825,110 @@ test('17. Group Challenge Scheduling for Date, Timer Configuration, and Deletion
   assert.equal(delChalRes.data.success, true);
 });
 
+test('18. Admin Group Task with Topics Checklist, Duration Timer in Days, and Toggle Topic', async () => {
+  const alexLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'alex@consta.edu', password: 'password123' }
+  });
+  const adminToken = alexLogin.data.token;
+
+  const samLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'sam@consta.edu', password: 'password123' }
+  });
+  const memberToken = samLogin.data.token;
+
+  // Create group as Admin
+  const roomRes = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: {
+      name: 'OS Systems Cohort',
+      subject: 'Computer Science',
+      room_type: 'public'
+    }
+  });
+  assert.equal(roomRes.status, 201);
+  const group = roomRes.data.room;
+  assert.ok(group, 'Study group should exist');
+
+  // Non-member / non-admin cannot add a group task
+  const nonAdminRes = await request('/api/study-tasks', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${memberToken}` },
+    body: {
+      title: 'Unauthorized Member Task',
+      room_id: group.id,
+      is_group_task: true,
+      duration_days: 3
+    }
+  });
+  assert.equal(nonAdminRes.status, 403, 'Non-admin member cannot create group task');
+
+  // Admin creates group task with Main Title, Checkbox for each topic, and Duration Timer in Days
+  const adminTaskRes = await request('/api/study-tasks', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: {
+      title: 'Operating Systems Concurrency Sprint',
+      topics_checklist: [
+        'Mutex and Semaphore primitives',
+        'Deadlock detection and avoidance',
+        'Dining Philosophers implementation'
+      ],
+      duration_days: 5,
+      room_id: group.id,
+      is_group_task: true,
+      priority: 'high',
+      instructions: 'Complete all 3 topics within 5 days.'
+    }
+  });
+  assert.equal(adminTaskRes.status, 201);
+  const task = adminTaskRes.data;
+  assert.equal(task.title, 'Operating Systems Concurrency Sprint');
+  assert.equal(task.duration_days, 5);
+  assert.equal(task.topics_checklist.length, 3);
+  assert.equal(task.topics_checklist[0].topic, 'Mutex and Semaphore primitives');
+  assert.equal(task.topics_checklist[0].completed, false);
+  const taskId = task.id;
+
+  // Toggle first topic
+  const toggleTopic1Res = await request(`/api/study-tasks/${taskId}/toggle-topic`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: { topicId: 1 }
+  });
+  assert.equal(toggleTopic1Res.status, 200);
+  assert.equal(toggleTopic1Res.data.topics_checklist[0].completed, true);
+  assert.equal(toggleTopic1Res.data.status, 'in_progress');
+
+  // Toggle remaining topics to verify complete status
+  await request(`/api/study-tasks/${taskId}/toggle-topic`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: { topicId: 2 }
+  });
+  const toggleAllRes = await request(`/api/study-tasks/${taskId}/toggle-topic`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: { topicId: 3 }
+  });
+  assert.equal(toggleAllRes.status, 200);
+  assert.equal(toggleAllRes.data.status, 'completed');
+  assert.equal(toggleAllRes.data.is_completed, true);
+
+  // Group details should include this task with checklist and timer days
+  const groupDetailsRes = await request(`/api/study-rooms/${group.id}`, {
+    headers: { Authorization: `Bearer ${adminToken}` }
+  });
+  assert.equal(groupDetailsRes.status, 200);
+  const foundTask = groupDetailsRes.data.tasks.find(t => t.id === taskId);
+  assert.ok(foundTask);
+  assert.equal(foundTask.duration_days, 5);
+  assert.equal(foundTask.topics_checklist.length, 3);
+  assert.equal(foundTask.status, 'completed');
+});
+
 test.after(async () => {
   clearAllUserData();
   if (server && server.close) {
