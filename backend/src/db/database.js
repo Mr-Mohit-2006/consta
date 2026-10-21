@@ -61,7 +61,7 @@ function initDatabase() {
       room_id INTEGER NOT NULL,
       user_id INTEGER NOT NULL,
       role TEXT CHECK(role IN ('owner', 'moderator', 'member')) DEFAULT 'member',
-      status TEXT CHECK(status IN ('active', 'invited', 'muted', 'banned')) DEFAULT 'active',
+      status TEXT CHECK(status IN ('active', 'invited', 'muted', 'banned', 'pending')) DEFAULT 'active',
       joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       UNIQUE(room_id, user_id),
       FOREIGN KEY (room_id) REFERENCES study_rooms(id) ON DELETE CASCADE,
@@ -567,6 +567,28 @@ function runMigrations() {
     const notifPrefCols = db.prepare('PRAGMA table_info(notification_preferences)').all().map(c => c.name);
     if (!notifPrefCols.includes('friend_activity_alerts')) {
       db.exec('ALTER TABLE notification_preferences ADD COLUMN friend_activity_alerts INTEGER DEFAULT 1;');
+    }
+
+    // Refresh study_room_memberships check constraint for pending status
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS study_room_memberships_v2 (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          room_id INTEGER NOT NULL,
+          user_id INTEGER NOT NULL,
+          role TEXT CHECK(role IN ('owner', 'moderator', 'member')) DEFAULT 'member',
+          status TEXT CHECK(status IN ('active', 'invited', 'muted', 'banned', 'pending')) DEFAULT 'active',
+          joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(room_id, user_id),
+          FOREIGN KEY (room_id) REFERENCES study_rooms(id) ON DELETE CASCADE,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        INSERT OR IGNORE INTO study_room_memberships_v2 SELECT * FROM study_room_memberships;
+        DROP TABLE study_room_memberships;
+        ALTER TABLE study_room_memberships_v2 RENAME TO study_room_memberships;
+      `);
+    } catch (e) {
+      // Table may already be updated
     }
     if (!notifPrefCols.includes('challenge_alerts')) {
       db.exec('ALTER TABLE notification_preferences ADD COLUMN challenge_alerts INTEGER DEFAULT 1;');

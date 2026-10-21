@@ -40,7 +40,7 @@ router.post('/', authenticateToken, (req, res) => {
   res.status(201).json({ room, chat_room_id: Number(chatRoomRes.lastInsertRowid) });
 });
 
-// List rooms (public rooms or rooms user is a member of)
+// List rooms (public rooms, or all rooms user can discover)
 router.get('/', authenticateToken, (req, res) => {
   const userId = req.user.id;
   const { search, subject } = req.query;
@@ -48,12 +48,11 @@ router.get('/', authenticateToken, (req, res) => {
   let query = `
     SELECT r.*, u.full_name as owner_name,
            (SELECT COUNT(*) FROM study_room_memberships m WHERE m.room_id = r.id AND m.status = 'active') as member_count,
-           (SELECT role FROM study_room_memberships m WHERE m.room_id = r.id AND m.user_id = ?) as user_role
+           (SELECT role FROM study_room_memberships m WHERE m.room_id = r.id AND m.user_id = ?) as user_role,
+           (SELECT status FROM study_room_memberships m WHERE m.room_id = r.id AND m.user_id = ?) as user_status
     FROM study_rooms r
     JOIN users u ON r.owner_id = u.id
-    WHERE (r.room_type = 'public' OR r.id IN (
-      SELECT room_id FROM study_room_memberships WHERE user_id = ? AND status = 'active'
-    ))
+    WHERE 1=1
   `;
   const params = [userId, userId];
 
@@ -91,69 +90,120 @@ router.get('/:id', authenticateToken, (req, res) => {
     SELECT * FROM study_room_memberships WHERE room_id = ? AND user_id = ?
   `).get(roomId, userId);
 
-  if (room.room_type !== 'public' && (!userMembership || userMembership.status !== 'active')) {
-    return res.status(403).json({ error: 'This is a private study room. You must join or be invited.' });
+  const isMember = Boolean(userMembership && userMembership.status === 'active');
+  const isPending = Boolean(userMembership && userMembership.status === 'pending');
+  const isAdmin = Boolean(userMembership && userMembership.role === 'owner');
+
+  // Members list (only active members)
+  let members = [];
+  let tasks = [];
+  let challenges = [];
+  let pendingRequests = [];
+
+  if (isMember || room.room_type === 'public') {
+    members = db.prepare(`
+      SELECT m.id as membership_id, m.role, m.status, m.joined_at,
+             u.id as user_id, u.username, u.full_name, u.avatar_url,
+             (SELECT current_streak FROM streak_records sr WHERE sr.user_id = u.id AND sr.category = 'study') as study_streak
+      FROM study_room_memberships m
+      JOIN users u ON m.user_id = u.id
+      WHERE m.room_id = ? AND m.status = 'active'
+      ORDER BY CASE m.role WHEN 'owner' THEN 1 WHEN 'moderator' THEN 2 ELSE 3 END, m.joined_at ASC
+    `).all(roomId);
+
+    tasks = db.prepare(`
+      SELECT t.*, u.full_name as creator_name,
+             (SELECT COUNT(*) FROM study_task_assignments a WHERE a.task_id = t.id) as assigned_count,
+             (SELECT COUNT(*) FROM study_submissions s WHERE s.task_id = t.id AND s.status = 'approved') as approved_count
+      FROM study_tasks t
+      JOIN users u ON t.creator_id = u.id
+      WHERE t.room_id = ?
+      ORDER BY t.created_at DESC
+    `).all(roomId);
+
+    challenges = db.prepare('SELECT * FROM study_challenges WHERE room_id = ? ORDER BY created_at DESC').all(roomId);
   }
 
-  // Members list
-  const members = db.prepare(`
-    SELECT m.id as membership_id, m.role, m.status, m.joined_at,
-           u.id as user_id, u.username, u.full_name, u.avatar_url,
-           (SELECT current_streak FROM streak_records sr WHERE sr.user_id = u.id AND sr.category = 'study') as study_streak
-    FROM study_room_memberships m
-    JOIN users u ON m.user_id = u.id
-    WHERE m.room_id = ? AND m.status = 'active'
-    ORDER BY CASE m.role WHEN 'owner' THEN 1 WHEN 'moderator' THEN 2 ELSE 3 END, m.joined_at ASC
-  `).all(roomId);
+  // If Admin, query pending join requests
+  if (isAdmin) {
+    pendingRequests = db.prepare(`
+      SELECT m.id as membership_id, m.joined_at,
+             u.id as user_id, u.username, u.full_name, u.avatar_url,
+             (SELECT current_streak FROM streak_records sr WHERE sr.user_id = u.id AND sr.category = 'study') as study_streak
+      FROM study_room_memberships m
+      JOIN users u ON m.user_id = u.id
+      WHERE m.room_id = ? AND m.status = 'pending'
+      ORDER BY m.joined_at ASC
+    `).all(roomId);
+  }
 
   // Chat room id
   let chatRoom = db.prepare("SELECT id FROM chat_rooms WHERE room_type = 'study_room' AND reference_id = ?").get(roomId);
-  if (!chatRoom) {
+  if (!chatRoom && (isMember || room.room_type === 'public')) {
     const crRes = db.prepare("INSERT INTO chat_rooms (room_type, reference_id) VALUES ('study_room', ?)").run(roomId);
     chatRoom = { id: Number(crRes.lastInsertRowid) };
   }
 
-  // Active challenges
-  const challenges = db.prepare('SELECT * FROM study_challenges WHERE room_id = ? ORDER BY created_at DESC').all(roomId);
-
-  // Shared tasks
-  const tasks = db.prepare(`
-    SELECT t.*, u.full_name as creator_name,
-           (SELECT COUNT(*) FROM study_task_assignments a WHERE a.task_id = t.id) as assigned_count,
-           (SELECT COUNT(*) FROM study_submissions s WHERE s.task_id = t.id AND s.status = 'approved') as approved_count
-    FROM study_tasks t
-    JOIN users u ON t.creator_id = u.id
-    WHERE t.room_id = ?
-    ORDER BY t.created_at DESC
-  `).all(roomId);
-
   res.json({
     room,
     userRole: userMembership ? userMembership.role : null,
-    isMember: Boolean(userMembership && userMembership.status === 'active'),
-    chatRoomId: chatRoom.id,
+    userStatus: userMembership ? userMembership.status : null,
+    isMember,
+    isPending,
+    pendingRequests,
+    chatRoomId: chatRoom ? chatRoom.id : null,
     members,
     challenges,
     tasks
   });
 });
 
-// Join room
+// Join room (Public: joins immediately; Private: submits join request for Admin approval)
 router.post('/:id/join', authenticateToken, (req, res) => {
   const roomId = req.params.id;
   const userId = req.user.id;
-  const { join_code } = req.body;
+  const NotificationService = require('../services/notification_service');
 
   const room = db.prepare('SELECT * FROM study_rooms WHERE id = ?').get(roomId);
-  if (!room) return res.status(404).json({ error: 'Study room not found.' });
+  if (!room) return res.status(404).json({ error: 'Study group not found.' });
 
-  if (room.room_type === 'private' || room.room_type === 'invite_only') {
-    if (!join_code || join_code.trim().toUpperCase() !== room.join_code) {
-      return res.status(403).json({ error: 'Invalid join code for this private study room.' });
-    }
+  const existingMembership = db.prepare('SELECT * FROM study_room_memberships WHERE room_id = ? AND user_id = ?').get(roomId, userId);
+
+  if (existingMembership && existingMembership.status === 'active') {
+    return res.json({ success: true, status: 'active', message: 'You are already an active member of this group.' });
   }
 
-  // Insert or activate membership
+  if (room.room_type === 'private') {
+    // Private group: requires Admin approval
+    db.prepare(`
+      INSERT INTO study_room_memberships (room_id, user_id, role, status)
+      VALUES (?, ?, 'member', 'pending')
+      ON CONFLICT(room_id, user_id)
+      DO UPDATE SET status = 'pending'
+    `).run(roomId, userId);
+
+    // Notify Group Admin
+    try {
+      NotificationService.notify(
+        room.owner_id,
+        'group_request',
+        '⏳ New Group Join Request',
+        `${req.user.full_name} has requested to join your private group "${room.name}". Approval required.`,
+        `/group`
+      );
+    } catch (e) {
+      // ignore
+    }
+
+    return res.json({
+      success: true,
+      pendingApproval: true,
+      status: 'pending',
+      message: 'Join request submitted! Waiting for Group Admin approval.'
+    });
+  }
+
+  // Public group: join immediately
   db.prepare(`
     INSERT INTO study_room_memberships (room_id, user_id, role, status)
     VALUES (?, ?, 'member', 'active')
@@ -161,7 +211,71 @@ router.post('/:id/join', authenticateToken, (req, res) => {
     DO UPDATE SET status = 'active'
   `).run(roomId, userId);
 
-  res.json({ success: true, message: 'Successfully joined study room.' });
+  res.json({ success: true, status: 'active', message: 'Successfully joined study group.' });
+});
+
+// Approve pending join request (Admin only)
+router.post('/:id/requests/:targetUserId/approve', authenticateToken, (req, res) => {
+  const { id: roomId, targetUserId } = req.params;
+  const userId = req.user.id;
+  const NotificationService = require('../services/notification_service');
+
+  const room = db.prepare('SELECT owner_id, name FROM study_rooms WHERE id = ?').get(roomId);
+  if (!room) return res.status(404).json({ error: 'Study group not found.' });
+
+  if (room.owner_id !== userId) {
+    return res.status(403).json({ error: 'Only the Group Admin can approve join requests.' });
+  }
+
+  const updateRes = db.prepare(`
+    UPDATE study_room_memberships
+    SET status = 'active', joined_at = CURRENT_TIMESTAMP
+    WHERE room_id = ? AND user_id = ? AND status = 'pending'
+  `).run(roomId, targetUserId);
+
+  if (updateRes.changes === 0) {
+    return res.status(404).json({ error: 'No pending join request found for this user.' });
+  }
+
+  // Notify the approved user
+  try {
+    NotificationService.notify(
+      Number(targetUserId),
+      'group_approved',
+      '🎉 Join Request Approved!',
+      `The Group Admin approved your request to join "${room.name}". You are now an active member!`,
+      `/group`
+    );
+  } catch (e) {
+    // ignore
+  }
+
+  res.json({ success: true, message: 'User approved and added to group.' });
+});
+
+// Reject / Decline pending join request (Admin only)
+router.post('/:id/requests/:targetUserId/reject', authenticateToken, (req, res) => {
+  const { id: roomId, targetUserId } = req.params;
+  const userId = req.user.id;
+
+  const room = db.prepare('SELECT owner_id FROM study_rooms WHERE id = ?').get(roomId);
+  if (!room) return res.status(404).json({ error: 'Study group not found.' });
+
+  if (room.owner_id !== userId) {
+    return res.status(403).json({ error: 'Only the Group Admin can decline join requests.' });
+  }
+
+  db.prepare("DELETE FROM study_room_memberships WHERE room_id = ? AND user_id = ? AND status = 'pending'").run(roomId, targetUserId);
+  res.json({ success: true, message: 'Join request declined.' });
+});
+
+// Cancel own pending join request
+router.post('/:id/cancel-request', authenticateToken, (req, res) => {
+  const roomId = req.params.id;
+  const userId = req.user.id;
+
+  db.prepare("DELETE FROM study_room_memberships WHERE room_id = ? AND user_id = ? AND status = 'pending'").run(roomId, userId);
+  res.json({ success: true, message: 'Join request cancelled.' });
 });
 
 // Leave room

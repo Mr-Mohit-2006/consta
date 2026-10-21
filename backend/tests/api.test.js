@@ -660,4 +660,66 @@ test('15. Weekly/Monthly Challenges, Group Deletion, Task Toggle & Deletion', as
   assert.equal(delGroupRes.data.success, true);
 });
 
+test('16. Private Group Join Request & Admin Approval Flow', async () => {
+  // Admin creates private room
+  const adminLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'alex_learner', password: 'password123' }
+  });
+  const adminToken = adminLogin.data.token;
+
+  const privateRoomRes = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: {
+      name: 'Private Research Lab',
+      subject: 'Algorithms',
+      description: 'Exclusive research cohort',
+      room_type: 'private'
+    }
+  });
+  assert.equal(privateRoomRes.status, 201);
+  const roomId = privateRoomRes.data.room.id;
+
+  // Learner requests to join private room
+  const learnerLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: 'sam_study', password: 'password123' }
+  });
+  const learnerToken = learnerLogin.data.token;
+
+  const requestJoinRes = await request(`/api/study-rooms/${roomId}/join`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${learnerToken}` }
+  });
+  assert.equal(requestJoinRes.status, 200);
+  assert.equal(requestJoinRes.data.status, 'pending');
+  assert.equal(requestJoinRes.data.pendingApproval, true);
+
+  // Admin checks room details and sees pending request
+  const adminRoomDetails = await request(`/api/study-rooms/${roomId}`, {
+    headers: { Authorization: `Bearer ${adminToken}` }
+  });
+  assert.equal(adminRoomDetails.status, 200);
+  assert.equal(adminRoomDetails.data.pendingRequests.length, 1);
+  assert.equal(adminRoomDetails.data.pendingRequests[0].user_id, learnerLogin.data.user.id);
+
+  // Admin approves join request
+  const approveRes = await request(`/api/study-rooms/${roomId}/requests/${learnerLogin.data.user.id}/approve`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${adminToken}` }
+  });
+  assert.equal(approveRes.status, 200);
+  assert.equal(approveRes.data.success, true);
+
+  // Learner is now an active member
+  const learnerRoomDetails = await request(`/api/study-rooms/${roomId}`, {
+    headers: { Authorization: `Bearer ${learnerToken}` }
+  });
+  assert.equal(learnerRoomDetails.status, 200);
+  assert.equal(learnerRoomDetails.data.isMember, true);
+  assert.equal(learnerRoomDetails.data.isPending, false);
+});
+
+
 

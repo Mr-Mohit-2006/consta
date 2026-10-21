@@ -5,7 +5,7 @@ import {
   Users, Plus, Lock, Globe, Key, ShieldCheck, CheckCircle, ArrowRight,
   MessageSquare, CheckSquare, Award, Clock, BarChart3, UserCheck,
   Crown, Trash2, UserPlus, AlertCircle, ChevronLeft, LogOut, LogIn,
-  Search, Calendar, Square, Check
+  Search, Calendar, Square, Check, UserX, ShieldAlert
 } from 'lucide-react';
 
 export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom }) {
@@ -23,7 +23,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
   const [subject, setSubject] = useState('Computer Science');
   const [description, setDescription] = useState('');
   const [objectives, setObjectives] = useState('');
-  const [roomType, setRoomType] = useState('public');
+  const [roomType, setRoomType] = useState('public'); // 'public' | 'private'
 
   // New task modal (inside group)
   const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
@@ -33,11 +33,6 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
   const [taskDueDate, setTaskDueDate] = useState('');
   const [taskPriority, setTaskPriority] = useState('medium');
   const [taskSubmitting, setTaskSubmitting] = useState(false);
-
-  // Join code modal
-  const [showJoinModal, setShowJoinModal] = useState(false);
-  const [joinTargetRoom, setJoinTargetRoom] = useState(null);
-  const [joinCode, setJoinCode] = useState('');
 
   // Group analytics modal
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -125,19 +120,16 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
     }
   }
 
-  async function handleJoinRoom(roomId, isPrivate) {
-    if (isPrivate) {
-      const target = rooms.find(r => r.id === roomId) || roomDetails?.room;
-      setJoinTargetRoom(target);
-      setShowJoinModal(true);
-      return;
-    }
-
+  async function handleJoinRoom(roomId) {
     try {
-      await apiRequest(`/study-rooms/${roomId}/join`, {
-        method: 'POST',
-        body: {}
+      const res = await apiRequest(`/study-rooms/${roomId}/join`, {
+        method: 'POST'
       });
+      if (res.pendingApproval) {
+        alert('🔒 Join request sent! As this is a Private group, the Group Admin will review and approve your request.');
+      } else {
+        alert('🎉 Successfully joined study group!');
+      }
       await loadRooms();
       loadRoomDetails(roomId);
     } catch (err) {
@@ -145,21 +137,36 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
     }
   }
 
-  async function submitJoinCode(e) {
-    e.preventDefault();
-    if (!joinTargetRoom) return;
-
+  async function handleCancelRequest(roomId) {
     try {
-      await apiRequest(`/study-rooms/${joinTargetRoom.id}/join`, {
-        method: 'POST',
-        body: { join_code: joinCode.trim() }
-      });
-      setShowJoinModal(false);
-      setJoinCode('');
+      await apiRequest(`/study-rooms/${roomId}/cancel-request`, { method: 'POST' });
       await loadRooms();
-      loadRoomDetails(joinTargetRoom.id);
+      loadRoomDetails(roomId);
     } catch (err) {
       alert(err.message);
+    }
+  }
+
+  async function handleApproveRequest(targetUserId) {
+    try {
+      await apiRequest(`/study-rooms/${selectedRoomId}/requests/${targetUserId}/approve`, {
+        method: 'POST'
+      });
+      await loadRoomDetails(selectedRoomId);
+      await loadRooms();
+    } catch (err) {
+      alert(err.message || 'Failed to approve user.');
+    }
+  }
+
+  async function handleRejectRequest(targetUserId) {
+    try {
+      await apiRequest(`/study-rooms/${selectedRoomId}/requests/${targetUserId}/reject`, {
+        method: 'POST'
+      });
+      await loadRoomDetails(selectedRoomId);
+    } catch (err) {
+      alert(err.message || 'Failed to decline request.');
     }
   }
 
@@ -236,7 +243,6 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
     e.stopPropagation();
     try {
       const res = await apiRequest(`/study-tasks/${taskId}/toggle`, { method: 'PATCH' });
-      // Update local state smoothly
       if (roomDetails?.tasks) {
         setRoomDetails(prev => ({
           ...prev,
@@ -314,6 +320,8 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
 
   const isCurrentRoomAdmin = roomDetails?.room?.owner_id === user?.id;
   const isCurrentRoomMember = Boolean(roomDetails?.isMember);
+  const isCurrentRoomPending = Boolean(roomDetails?.isPending);
+  const isPrivateGroup = roomDetails?.room?.room_type === 'private';
 
   return (
     <div className="space-y-6">
@@ -327,7 +335,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
             <span>Study Groups</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Join groups, schedule tasks, check off completed assignments, and collaborate in group chat.
+            Choose Public or Private groups (Private requires Admin approval). Schedule tasks and collaborate seamlessly.
           </p>
         </div>
 
@@ -391,9 +399,10 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
           <div className="space-y-2.5 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
             {filteredRooms.map(r => {
               const isSelected = r.id === selectedRoomId;
-              const isPrivate = r.room_type !== 'public';
+              const isPrivate = r.room_type === 'private';
               const isOwner = r.owner_id === user?.id;
-              const isMember = Boolean(r.user_role);
+              const isMember = r.user_status === 'active';
+              const isPending = r.user_status === 'pending';
 
               return (
                 <div
@@ -409,14 +418,14 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                     <span className="text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider bg-slate-800/80 text-indigo-300 border border-slate-700/60">
                       {r.subject}
                     </span>
-                    <span className="text-xs text-slate-400 flex items-center space-x-1">
-                      {isPrivate ? <Lock className="w-3.5 h-3.5 text-amber-400" /> : <Globe className="w-3.5 h-3.5 text-emerald-400" />}
-                      <span className="capitalize text-[11px]">{r.room_type}</span>
+                    <span className={`text-xs flex items-center space-x-1 ${isPrivate ? 'text-amber-400' : 'text-emerald-400'}`}>
+                      {isPrivate ? <Lock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+                      <span className="capitalize text-[11px] font-semibold">{isPrivate ? 'Private' : 'Public'}</span>
                     </span>
                   </div>
 
                   <h4 className="font-bold text-sm text-white mt-2 truncate">{r.name}</h4>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{r.description || 'No description provided.'}</p>
+                  <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{r.description || 'Collaborative study cohort.'}</p>
 
                   <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
                     <span className="text-slate-400">{r.member_count} member(s)</span>
@@ -440,23 +449,31 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                               e.stopPropagation();
                               handleLeaveRoom(r.id);
                             }}
-                            className="text-[10px] text-rose-400 hover:text-rose-300 font-semibold hover:underline"
+                            className="text-[10px] text-rose-400 hover:text-rose-300 font-semibold hover:underline cursor-pointer"
                             title="Leave this group"
                           >
                             Leave
                           </button>
                         </div>
+                      ) : isPending ? (
+                        <span className="text-amber-400 text-[10px] font-bold bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/30 animate-pulse">
+                          ⏳ Pending Approval
+                        </span>
                       ) : (
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleJoinRoom(r.id, isPrivate);
+                            handleJoinRoom(r.id);
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-[11px] font-bold transition flex items-center space-x-1 cursor-pointer"
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 cursor-pointer ${
+                            isPrivate
+                              ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30'
+                              : 'bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30'
+                          }`}
                         >
-                          <LogIn className="w-3 h-3" />
-                          <span>Join</span>
+                          {isPrivate ? <Lock className="w-3 h-3" /> : <LogIn className="w-3 h-3" />}
+                          <span>{isPrivate ? 'Request' : 'Join'}</span>
                         </button>
                       )}
                     </div>
@@ -491,22 +508,20 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                         <ChevronLeft className="w-4 h-4" />
                         <span>All Groups</span>
                       </button>
+
                       <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
                         {roomDetails.room.subject}
                       </span>
-                      <span className="text-xs text-slate-300 px-2 py-0.5 rounded-md bg-slate-800/80 border border-slate-700 flex items-center space-x-1">
-                        {roomDetails.room.room_type === 'public' ? (
-                          <Globe className="w-3 h-3 text-emerald-400" />
-                        ) : (
-                          <Lock className="w-3 h-3 text-amber-400" />
-                        )}
-                        <span className="capitalize">{roomDetails.room.room_type} Group</span>
+
+                      {/* Public vs Private with Admin Approval Pill */}
+                      <span className={`text-xs px-2.5 py-1 rounded-full border flex items-center space-x-1.5 font-semibold ${
+                        isPrivateGroup
+                          ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                          : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                      }`}>
+                        {isPrivateGroup ? <Lock className="w-3 h-3 text-amber-400" /> : <Globe className="w-3 h-3 text-emerald-400" />}
+                        <span>{isPrivateGroup ? 'Private (Needs Admin Approval)' : 'Public (Instant Join)'}</span>
                       </span>
-                      {roomDetails.room.room_type !== 'public' && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30">
-                          Code: {roomDetails.room.join_code}
-                        </span>
-                      )}
                     </div>
 
                     <h3 className="text-2xl font-black text-white tracking-tight">{roomDetails.room.name}</h3>
@@ -519,16 +534,36 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
 
                   {/* Header Action Buttons: Join, Leave, Delete Group, Chat, Analytics */}
                   <div className="flex flex-wrap sm:flex-col items-end gap-2 shrink-0">
-                    {/* Join / Leave / Delete Group Button */}
+                    {/* Status Button: Join / Request / Pending / Leave / Admin */}
                     {!isCurrentRoomMember ? (
-                      <button
-                        type="button"
-                        onClick={() => handleJoinRoom(roomDetails.room.id, roomDetails.room.room_type !== 'public')}
-                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow-lg shadow-emerald-600/30 transition cursor-pointer"
-                      >
-                        <LogIn className="w-4 h-4" />
-                        <span>Join Group</span>
-                      </button>
+                      isCurrentRoomPending ? (
+                        <div className="flex items-center space-x-2">
+                          <span className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center space-x-1.5">
+                            <Clock className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                            <span>Request Pending Approval</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCancelRequest(roomDetails.room.id)}
+                            className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleJoinRoom(roomDetails.room.id)}
+                          className={`px-4 py-2 rounded-xl text-white font-bold text-xs flex items-center space-x-1.5 shadow-lg transition cursor-pointer ${
+                            isPrivateGroup
+                              ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/30'
+                              : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30'
+                          }`}
+                        >
+                          {isPrivateGroup ? <Lock className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
+                          <span>{isPrivateGroup ? 'Request to Join Group' : 'Join Group'}</span>
+                        </button>
+                      )
                     ) : isCurrentRoomAdmin ? (
                       <div className="flex items-center space-x-2">
                         <span className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center space-x-1">
@@ -558,14 +593,16 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                     )}
 
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => onOpenChatRoom && onOpenChatRoom(roomDetails.chatRoomId)}
-                        className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>Group Chat</span>
-                      </button>
+                      {isCurrentRoomMember && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenChatRoom && onOpenChatRoom(roomDetails.chatRoomId)}
+                          className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>Group Chat</span>
+                        </button>
+                      )}
 
                       <button
                         type="button"
@@ -580,6 +617,16 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                   </div>
                 </div>
 
+                {/* Private Group Guest Banner */}
+                {isPrivateGroup && !isCurrentRoomMember && !isCurrentRoomPending && (
+                  <div className="mt-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center space-x-3 text-xs text-amber-300">
+                    <ShieldAlert className="w-5 h-5 shrink-0 text-amber-400" />
+                    <div>
+                      <strong>Private Study Group:</strong> Members must be approved by the Group Admin before viewing group tasks, discussions, and doubt channels. Click "Request to Join Group" above.
+                    </div>
+                  </div>
+                )}
+
                 {/* Objectives Callout */}
                 {roomDetails.room.objectives && (
                   <div className="mt-4 p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs">
@@ -589,6 +636,59 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                 )}
               </div>
 
+              {/* Pending Join Requests Panel (Admin Only) */}
+              {isCurrentRoomAdmin && roomDetails.pendingRequests?.length > 0 && (
+                <div className="glass-panel border-amber-500/40 rounded-3xl p-5 sm:p-6 shadow-xl bg-amber-950/20">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-amber-300 flex items-center space-x-2">
+                      <div className="p-1 rounded-md bg-amber-500/20 text-amber-400">
+                        <Clock className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Pending Join Requests ({roomDetails.pendingRequests.length})</span>
+                    </h4>
+                    <span className="text-[11px] text-amber-400 font-semibold">Admin Approval Required</span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {roomDetails.pendingRequests.map(req => (
+                      <div key={req.user_id} className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+                        <div className="flex items-center space-x-3 min-w-0">
+                          <img
+                            src={req.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(req.full_name)}&background=4f46e5&color=fff`}
+                            alt={req.full_name}
+                            className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-700 shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-white truncate">{req.full_name}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">
+                              <span className="font-mono text-indigo-300">@{req.username}</span> &bull; {req.study_streak || 0}d streak
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleApproveRequest(req.user_id)}
+                            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center space-x-1 shadow-md shadow-emerald-600/30 transition cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Approve</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRejectRequest(req.user_id)}
+                            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 font-semibold text-xs border border-slate-700 transition cursor-pointer"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Members Section */}
               <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
                 <div className="flex items-center justify-between mb-4">
@@ -596,7 +696,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                     <div className="p-1 rounded-md bg-indigo-500/20 text-indigo-400">
                       <Users className="w-3.5 h-3.5" />
                     </div>
-                    <span>Group Members ({roomDetails.members?.length || 0})</span>
+                    <span>Active Group Members ({roomDetails.members?.length || 0})</span>
                   </h4>
 
                   {/* Add Member Button (Admin Only) */}
@@ -673,127 +773,131 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
               </div>
 
               {/* Shared Study Tasks & Schedule */}
-              <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h4 className="font-bold text-sm text-white flex items-center space-x-2">
-                      <div className="p-1 rounded-md bg-purple-500/20 text-purple-400">
-                        <CheckSquare className="w-3.5 h-3.5" />
-                      </div>
-                      <span>Group Task Schedule & Checkbox</span>
-                    </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Check off tasks when completed. Tasks with schedules are tracked here.
-                    </p>
+              {(isCurrentRoomMember || !isPrivateGroup) && (
+                <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="font-bold text-sm text-white flex items-center space-x-2">
+                        <div className="p-1 rounded-md bg-purple-500/20 text-purple-400">
+                          <CheckSquare className="w-3.5 h-3.5" />
+                        </div>
+                        <span>Group Task Schedule & Checkbox</span>
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Check off tasks when completed. Tasks with schedules are tracked here.
+                      </p>
+                    </div>
+
+                    {/* Add Task Button directly inside group */}
+                    {isCurrentRoomMember && (
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateTaskModal(true)}
+                        className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold transition flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Add Task</span>
+                      </button>
+                    )}
                   </div>
 
-                  {/* Add Task Button directly inside group */}
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateTaskModal(true)}
-                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold transition flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>+ Add Task</span>
-                  </button>
-                </div>
+                  <div className="space-y-2.5">
+                    {(roomDetails.tasks || []).map(t => {
+                      const isTaskCompleted = t.status === 'completed' || t.status === 'approved';
+                      const canDeleteTask = t.creator_id === user?.id || isCurrentRoomAdmin;
 
-                <div className="space-y-2.5">
-                  {(roomDetails.tasks || []).map(t => {
-                    const isTaskCompleted = t.status === 'completed' || t.status === 'approved';
-                    const canDeleteTask = t.creator_id === user?.id || isCurrentRoomAdmin;
-
-                    return (
-                      <div
-                        key={t.id}
-                        onClick={() => onOpenTask && onOpenTask(t.id)}
-                        className={`p-3.5 sm:p-4 rounded-2xl border transition flex items-center justify-between cursor-pointer group ${
-                          isTaskCompleted
-                            ? 'bg-slate-950/40 border-emerald-500/30 opacity-80'
-                            : 'bg-slate-950/70 hover:bg-slate-900 border-slate-800/80 hover:border-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3 min-w-0 pr-3">
-                          {/* Completion Checkbox */}
-                          <button
-                            type="button"
-                            onClick={(e) => handleToggleTask(t.id, e)}
-                            className={`p-1 rounded-lg border transition cursor-pointer shrink-0 ${
-                              isTaskCompleted
-                                ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-400'
-                                : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-indigo-400 hover:border-indigo-500'
-                            }`}
-                            title={isTaskCompleted ? "Mark as incomplete" : "Click checkbox to mark completed"}
-                          >
-                            {isTaskCompleted ? (
-                              <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
-                            ) : (
-                              <Square className="w-4 h-4" />
-                            )}
-                          </button>
-
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                                {t.topic || t.subject}
-                              </span>
-
-                              <span className={`text-xs font-bold transition truncate ${
-                                isTaskCompleted ? 'line-through text-slate-400' : 'text-white group-hover:text-indigo-200'
-                              }`}>
-                                {t.title}
-                              </span>
-
-                              {/* Task Schedule / Due Date */}
-                              {t.due_date && (
-                                <span className="text-[10px] text-amber-300/90 flex items-center space-x-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 font-medium">
-                                  <Calendar className="w-3 h-3 text-amber-400 shrink-0" />
-                                  <span>Schedule: {new Date(t.due_date).toLocaleDateString()}</span>
-                                </span>
-                              )}
-                            </div>
-
-                            <p className="text-xs text-slate-400 mt-1 line-clamp-1">{t.instructions}</p>
-                          </div>
-                        </div>
-
-                        {/* Status pill & Delete Button */}
-                        <div className="flex items-center space-x-2 shrink-0">
-                          <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold capitalize ${
-                            isTaskCompleted ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' :
-                            t.status === 'under_review' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' :
-                            t.status === 'in_progress' ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30' :
-                            'bg-slate-800 text-slate-400'
-                          }`}>
-                            {isTaskCompleted ? '✓ Completed' : t.status.replace('_', ' ')}
-                          </span>
-
-                          {/* Delete Task Button */}
-                          {canDeleteTask && (
+                      return (
+                        <div
+                          key={t.id}
+                          onClick={() => onOpenTask && onOpenTask(t.id)}
+                          className={`p-3.5 sm:p-4 rounded-2xl border transition flex items-center justify-between cursor-pointer group ${
+                            isTaskCompleted
+                              ? 'bg-slate-950/40 border-emerald-500/30 opacity-80'
+                              : 'bg-slate-950/70 hover:bg-slate-900 border-slate-800/80 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3 min-w-0 pr-3">
+                            {/* Completion Checkbox */}
                             <button
                               type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteTask(t.id, t.title);
-                              }}
-                              className="p-1.5 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 rounded-lg transition cursor-pointer"
-                              title="Delete task"
+                              onClick={(e) => handleToggleTask(t.id, e)}
+                              className={`p-1 rounded-lg border transition cursor-pointer shrink-0 ${
+                                isTaskCompleted
+                                  ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-400'
+                                  : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-indigo-400 hover:border-indigo-500'
+                              }`}
+                              title={isTaskCompleted ? "Mark as incomplete" : "Click checkbox to mark completed"}
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              {isTaskCompleted ? (
+                                <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                              ) : (
+                                <Square className="w-4 h-4" />
+                              )}
                             </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
 
-                  {(!roomDetails.tasks || roomDetails.tasks.length === 0) && (
-                    <div className="text-center py-8 text-xs text-slate-500 bg-slate-950/30 rounded-2xl border border-dashed border-slate-800">
-                      No tasks scheduled in this group yet. Click <strong>"+ Add Task"</strong> above to schedule one!
-                    </div>
-                  )}
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                                  {t.topic || t.subject}
+                                </span>
+
+                                <span className={`text-xs font-bold transition truncate ${
+                                  isTaskCompleted ? 'line-through text-slate-400' : 'text-white group-hover:text-indigo-200'
+                                }`}>
+                                  {t.title}
+                                </span>
+
+                                {/* Task Schedule / Due Date */}
+                                {t.due_date && (
+                                  <span className="text-[10px] text-amber-300/90 flex items-center space-x-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 font-medium">
+                                    <Calendar className="w-3 h-3 text-amber-400 shrink-0" />
+                                    <span>Schedule: {new Date(t.due_date).toLocaleDateString()}</span>
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-xs text-slate-400 mt-1 line-clamp-1">{t.instructions}</p>
+                            </div>
+                          </div>
+
+                          {/* Status pill & Delete Button */}
+                          <div className="flex items-center space-x-2 shrink-0">
+                            <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold capitalize ${
+                              isTaskCompleted ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' :
+                              t.status === 'under_review' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' :
+                              t.status === 'in_progress' ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30' :
+                              'bg-slate-800 text-slate-400'
+                            }`}>
+                              {isTaskCompleted ? '✓ Completed' : t.status.replace('_', ' ')}
+                            </span>
+
+                            {/* Delete Task Button */}
+                            {canDeleteTask && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteTask(t.id, t.title);
+                                }}
+                                className="p-1.5 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 rounded-lg transition cursor-pointer"
+                                title="Delete task"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {(!roomDetails.tasks || roomDetails.tasks.length === 0) && (
+                      <div className="text-center py-8 text-xs text-slate-500 bg-slate-950/30 rounded-2xl border border-dashed border-slate-800">
+                        No tasks scheduled in this group yet. Click <strong>"+ Add Task"</strong> above to schedule one!
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className="glass-panel rounded-3xl p-12 text-center text-slate-400 text-xs">
@@ -803,7 +907,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
         </div>
       </div>
 
-      {/* Modal: Create Room */}
+      {/* Modal: Create Room (Public vs Private with Admin Approval) */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl">
@@ -823,28 +927,56 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-slate-300 block mb-1 font-medium">Subject</label>
-                  <input
-                    type="text"
-                    required
-                    value={subject}
-                    onChange={e => setSubject(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-300 block mb-1 font-medium">Privacy Mode</label>
-                  <select
-                    value={roomType}
-                    onChange={e => setRoomType(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-hidden focus:border-indigo-500"
+              <div>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Subject</label>
+                <input
+                  type="text"
+                  required
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Public or Private Option with Admin Approval */}
+              <div>
+                <label className="text-xs text-slate-300 block mb-1.5 font-medium">Group Privacy & Access</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRoomType('public')}
+                    className={`p-3 rounded-2xl border text-left transition cursor-pointer ${
+                      roomType === 'public'
+                        ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-600/20'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
                   >
-                    <option value="public">Public (Open for anyone to join)</option>
-                    <option value="private">Private (Requires Join Code)</option>
-                    <option value="invite_only">Invite Only</option>
-                  </select>
+                    <div className="flex items-center space-x-1.5 mb-1">
+                      <Globe className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-bold text-white">Public Group</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Anyone can browse and join instantly without approval.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRoomType('private')}
+                    className={`p-3 rounded-2xl border text-left transition cursor-pointer ${
+                      roomType === 'private'
+                        ? 'bg-amber-500/20 border-amber-500 text-white shadow-md shadow-amber-500/20'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-1.5 mb-1">
+                      <Lock className="w-4 h-4 text-amber-400" />
+                      <span className="text-xs font-bold text-white">Private Group</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Users submit join requests; requires <strong>Admin approval</strong>.
+                    </p>
+                  </button>
                 </div>
               </div>
 
@@ -977,45 +1109,6 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                   className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-indigo-600/30 cursor-pointer"
                 >
                   {taskSubmitting ? 'Adding...' : 'Add Task to Group'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Join Code */}
-      {showJoinModal && joinTargetRoom && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1">Enter Group Join Code</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              "{joinTargetRoom.name}" is a private group. Please enter the invitation code to join.
-            </p>
-
-            <form onSubmit={submitJoinCode} className="space-y-4">
-              <input
-                type="text"
-                required
-                value={joinCode}
-                onChange={e => setJoinCode(e.target.value)}
-                placeholder="e.g. 4B8A29F1"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-center font-mono font-bold tracking-widest text-white uppercase focus:outline-hidden focus:border-indigo-500"
-              />
-
-              <div className="flex justify-end space-x-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowJoinModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer"
-                >
-                  Join Group
                 </button>
               </div>
             </form>
