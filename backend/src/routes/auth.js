@@ -7,6 +7,34 @@ const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
 const XPService = require('../services/xp_service');
 const StreakService = require('../services/streak_service');
 
+// Check if username is available
+router.get('/check-username', (req, res) => {
+  const username = (req.query.username || '').trim().toLowerCase();
+  if (!username || username.length < 3) {
+    return res.json({ available: false, message: 'Username must be at least 3 characters.' });
+  }
+
+  const existing = db.prepare('SELECT id FROM users WHERE LOWER(username) = ?').get(username);
+  if (existing) {
+    return res.json({ available: false, message: 'This username is already taken.' });
+  }
+  return res.json({ available: true, message: 'Username is available!' });
+});
+
+// Check if email is available
+router.get('/check-email', (req, res) => {
+  const email = (req.query.email || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    return res.json({ available: false, message: 'Enter a valid email address.' });
+  }
+
+  const existing = db.prepare('SELECT id FROM users WHERE LOWER(email) = ?').get(email);
+  if (existing) {
+    return res.json({ available: false, message: 'An account with this email already exists.' });
+  }
+  return res.json({ available: true, message: 'Email is available!' });
+});
+
 // Register
 router.post('/register', (req, res) => {
   const { username, email, password, full_name, bio, role, timezone } = req.body;
@@ -15,7 +43,10 @@ router.post('/register', (req, res) => {
     return res.status(400).json({ error: 'Username, email, password, and full name are required.' });
   }
 
-  const existing = db.prepare('SELECT id FROM users WHERE username = ? OR email = ?').get(username, email);
+  const cleanUsername = username.trim().toLowerCase();
+  const cleanEmail = email.trim().toLowerCase();
+
+  const existing = db.prepare('SELECT id FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?').get(cleanUsername, cleanEmail);
   if (existing) {
     return res.status(400).json({ error: 'Username or email already in use.' });
   }
@@ -27,7 +58,7 @@ router.post('/register', (req, res) => {
   const userRes = db.prepare(`
     INSERT INTO users (username, email, password_hash, full_name, bio, role, timezone)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(username, email, pwHash, full_name, bio || '', userRole, tz);
+  `).run(cleanUsername, cleanEmail, pwHash, full_name.trim(), bio || '', userRole, tz);
 
   const userId = Number(userRes.lastInsertRowid);
 
@@ -61,17 +92,19 @@ router.post('/login', (req, res) => {
     return res.status(400).json({ error: 'Identifier and password are required.' });
   }
 
-  let mappedUsername = identifier;
-  if (['mohit', 'mohit_learner'].includes(identifier.toLowerCase())) mappedUsername = 'alex_learner';
-  if (['abhijit', 'abhijit_study'].includes(identifier.toLowerCase())) mappedUsername = 'sam_study';
-  if (['abhishek', 'abhishek_mentor'].includes(identifier.toLowerCase())) mappedUsername = 'dr_stone';
+  const cleanId = identifier.trim().toLowerCase();
+  let mappedUsername = cleanId;
+  if (['mohit', 'mohit_learner'].includes(cleanId)) mappedUsername = 'alex_learner';
+  if (['abhijit', 'abhijit_study'].includes(cleanId)) mappedUsername = 'sam_study';
+  if (['abhishek', 'abhishek_mentor'].includes(cleanId)) mappedUsername = 'dr_stone';
 
   const user = db.prepare(`
-    SELECT * FROM users WHERE username = ? OR email = ? OR username = ?
-  `).get(identifier, identifier, mappedUsername);
+    SELECT * FROM users 
+    WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(username) = ?
+  `).get(cleanId, cleanId, mappedUsername);
 
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
-    return res.status(401).json({ error: 'Invalid credentials.' });
+    return res.status(401).json({ error: 'Invalid email/username or password.' });
   }
 
   const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });

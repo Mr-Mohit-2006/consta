@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import NotificationModal from './components/NotificationModal';
 import FriendsModal from './components/FriendsModal';
+import AuthView from './views/AuthView';
 import DashboardView from './views/DashboardView';
 import SoloStudyView from './views/SoloStudyView';
 import GroupStudyView from './views/GroupStudyView';
@@ -32,6 +33,11 @@ function AppContent() {
         </span>
       </div>
     );
+  }
+
+  // If user is not authenticated, show modern Registration & Login View
+  if (!user) {
+    return <AuthView onSuccess={() => setActiveTab('dashboard')} />;
   }
 
   function handleNavigate(tabId) {

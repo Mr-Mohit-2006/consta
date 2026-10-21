@@ -34,8 +34,7 @@ export function AuthProvider({ children }) {
     if (token) {
       loadMe();
     } else {
-      // Automatically log in as Alex Learner by default for immediate frictionless exploration
-      switchUser('alex_learner');
+      setLoading(false);
     }
   }, []);
 
