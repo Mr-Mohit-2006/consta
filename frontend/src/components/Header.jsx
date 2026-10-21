@@ -77,17 +77,17 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
           {/* Daily Streak Pill */}
           <div
             onClick={() => setActiveTab('streaks')}
-            className="flex items-center space-x-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-2.5 py-1.5 rounded-xl text-amber-400 cursor-pointer transition"
+            className="flex items-center space-x-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-2 sm:px-2.5 py-1.5 rounded-xl text-amber-400 cursor-pointer transition shrink-0"
             title="Study consistency streak"
           >
-            <Flame className="w-4 h-4 fill-amber-400 text-amber-400 animate-pulse" />
-            <span className="font-bold text-xs">{studyStreak}d Streak</span>
+            <Flame className="w-4 h-4 fill-amber-400 text-amber-400 animate-pulse shrink-0" />
+            <span className="font-bold text-xs">{studyStreak}d<span className="hidden sm:inline"> Streak</span></span>
           </div>
 
           {/* Study Buddies / Friends Button */}
           <button
             onClick={onOpenFriends}
-            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition flex items-center space-x-1"
+            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition flex items-center space-x-1 shrink-0"
             title="Study Buddies & Friend Activity"
           >
             <Users className="w-5 h-5 text-indigo-400" />
@@ -96,7 +96,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
           {/* Notifications Bell */}
           <button
             onClick={onOpenNotifications}
-            className="relative p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition"
+            className="relative p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition shrink-0"
             title="Notifications"
           >
             <Bell className="w-5 h-5" />
@@ -107,26 +107,26 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
             )}
           </button>
 
-          {/* User Switcher / Profile Dropdown */}
-          <div className="relative">
+          {/* User Profile Dropdown */}
+          <div className="relative shrink-0">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center space-x-2 bg-slate-800/80 hover:bg-slate-800 p-1.5 pr-2.5 rounded-xl border border-slate-700/60 transition"
+              className="flex items-center space-x-2 bg-slate-800/80 hover:bg-slate-800 p-1.5 sm:pr-2.5 rounded-xl border border-slate-700/60 transition"
             >
               <img
-                src={user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                src={user?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.full_name || 'User')}&background=4f46e5&color=fff`}
                 alt={user?.full_name}
                 className="w-7 h-7 rounded-lg object-cover ring-1 ring-indigo-500/50"
               />
-              <span className="text-xs font-medium text-slate-200 hidden sm:inline max-w-[90px] truncate">
-                {user?.full_name || 'Guest'}
+              <span className="text-xs font-medium text-slate-200 hidden md:inline max-w-[90px] truncate">
+                {user?.full_name?.split(' ')[0] || 'User'}
               </span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
             {userMenuOpen && (
               <div
-                className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl py-2 z-50 text-xs"
+                className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl py-2 z-50 text-xs"
                 onMouseLeave={() => setUserMenuOpen(false)}
               >
                 <div className="px-4 py-2.5 border-b border-slate-800">

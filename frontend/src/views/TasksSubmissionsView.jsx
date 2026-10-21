@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   CheckSquare, Plus, Clock, FileText, Image as ImageIcon, Link as LinkIcon,
   CheckCircle2, AlertCircle, RefreshCw, ChevronRight, Eye, Send, UploadCloud,
-  FileCheck, Shield, ExternalLink, Trophy, Play, Flame, Zap
+  FileCheck, Shield, ExternalLink, Trophy, Play, Flame, Zap, ChevronLeft
 } from 'lucide-react';
 
 export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOpenChallenge }) {
@@ -14,6 +14,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
   const [taskDetails, setTaskDetails] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [mobileView, setMobileView] = useState('details'); // 'list' | 'details' for mobile responsiveness
 
   // Challenge modal for this task
   const [showTaskChallengeModal, setShowTaskChallengeModal] = useState(false);
@@ -68,6 +69,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
   }
 
   async function loadTaskDetails(id) {
+    setMobileView('details');
     try {
       const details = await apiRequest(`/study-tasks/${id}`);
       setSelectedTask(details.task);
@@ -245,10 +247,32 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
         ))}
       </div>
 
+      {/* Mobile Screen Segmented Switcher */}
+      <div className="flex lg:hidden rounded-2xl bg-slate-900 p-1 border border-slate-800">
+        <button
+          onClick={() => setMobileView('list')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'list' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <CheckSquare className="w-3.5 h-3.5" />
+          <span>Task List ({filteredTasks.length})</span>
+        </button>
+        <button
+          onClick={() => setMobileView('details')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'details' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>Task Details & Submissions</span>
+        </button>
+      </div>
+
       {/* Two Column Layout: Task List vs Task Details & Submissions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Task List */}
-        <div className="space-y-2.5">
+        <div className={`space-y-2.5 ${mobileView === 'list' ? 'block' : 'hidden lg:block'}`}>
           {filteredTasks.map(t => {
             const isSelected = selectedTask?.id === t.id;
             return (
@@ -298,7 +322,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
         </div>
 
         {/* Task Details & Submissions View */}
-        <div className="lg:col-span-2">
+        <div className={`lg:col-span-2 ${mobileView === 'details' ? 'block' : 'hidden lg:block'}`}>
           {taskDetails && selectedTask ? (
             <div className="space-y-6">
               {/* Task Header & Instructions */}
@@ -306,6 +330,15 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenReview, onOp
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setMobileView('list')}
+                        className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-bold flex items-center space-x-1 border border-slate-700"
+                        title="Back to Task List"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Tasks</span>
+                      </button>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                         {selectedTask.subject} &bull; {selectedTask.topic}
                       </span>

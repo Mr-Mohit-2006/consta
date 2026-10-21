@@ -5,7 +5,7 @@ import {
   MessageSquare, Send, Paperclip, Pin, CheckCircle2, ThumbsUp,
   Search, CornerDownRight, Check, Sparkles, Users, Clock,
   Camera, Image as ImageIcon, X, ZoomIn, Download, HelpCircle,
-  AlertCircle
+  AlertCircle, ChevronLeft
 } from 'lucide-react';
 
 export default function ChatDiscussionView({ initialChatRoomId }) {
@@ -21,6 +21,7 @@ export default function ChatDiscussionView({ initialChatRoomId }) {
   const [isTypingUser, setIsTypingUser] = useState(null);
   const [presenceCount, setPresenceCount] = useState(1);
   const [isDoubt, setIsDoubt] = useState(false);
+  const [mobileView, setMobileView] = useState('chat'); // 'threads' | 'chat' for phone/tablet responsiveness
 
   // Photos state for instant upload
   const [selectedPhotos, setSelectedPhotos] = useState([]); // Array of { file, previewUrl, name, size }
@@ -120,12 +121,14 @@ export default function ChatDiscussionView({ initialChatRoomId }) {
     const details = await apiRequest(`/study-rooms/${room.id}`);
     setActiveChatRoomId(details.chatRoomId);
     setActiveRoomTitle(`Cohort: ${room.name}`);
+    setMobileView('chat');
   }
 
   async function selectTaskChat(task) {
     const details = await apiRequest(`/study-tasks/${task.id}`);
     setActiveChatRoomId(details.chatRoomId);
     setActiveRoomTitle(`Task Doubt Thread: ${task.title}`);
+    setMobileView('chat');
   }
 
   async function loadMessages(chatRoomId) {
@@ -281,9 +284,31 @@ export default function ChatDiscussionView({ initialChatRoomId }) {
         </div>
       </div>
 
+      {/* Mobile Screen Segmented Switcher (Tablet & Phone) */}
+      <div className="flex lg:hidden rounded-2xl bg-slate-900 p-1 border border-slate-800">
+        <button
+          onClick={() => setMobileView('threads')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'threads' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          <span>Channels & Doubt Threads ({rooms.length + tasks.length})</span>
+        </button>
+        <button
+          onClick={() => setMobileView('chat')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'chat' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          <span>Active Discussion</span>
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Column: Channels & Doubt Threads List */}
-        <div className="space-y-4">
+        <div className={`space-y-4 ${mobileView === 'threads' ? 'block' : 'hidden lg:block'}`}>
           {/* Cohorts */}
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-2">
@@ -332,20 +357,33 @@ export default function ChatDiscussionView({ initialChatRoomId }) {
         </div>
 
         {/* Right 3 Columns: Active Chat Thread */}
-        <div className="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl flex flex-col h-[670px] overflow-hidden">
+        <div className={`lg:col-span-3 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl flex-col h-[calc(100vh-210px)] min-h-[500px] lg:h-[670px] overflow-hidden ${
+          mobileView === 'chat' ? 'flex' : 'hidden lg:flex'
+        }`}>
           {/* Room Header */}
-          <div className="px-6 py-3.5 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-sm text-white truncate max-w-md">{activeRoomTitle}</h3>
-              <div className="flex items-center space-x-2 text-[11px] text-slate-400 mt-0.5">
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-semibold text-emerald-400">{presenceCount} online</span>
-                </span>
-                <span>&bull;</span>
-                <span className="text-slate-400">Real-Time Sync Active</span>
-                <span>&bull;</span>
-                <span className="text-amber-400 font-semibold">+15 XP for Accepted Solution</span>
+          <div className="px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
+            <div className="flex items-center space-x-3 min-w-0">
+              <button
+                type="button"
+                onClick={() => setMobileView('threads')}
+                className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-bold flex items-center space-x-1 border border-slate-700 shrink-0"
+                title="Switch channel or thread"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Threads</span>
+              </button>
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm text-white truncate max-w-xs sm:max-w-md">{activeRoomTitle}</h3>
+                <div className="flex items-center space-x-2 text-[11px] text-slate-400 mt-0.5">
+                  <span className="flex items-center space-x-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="font-semibold text-emerald-400">{presenceCount} online</span>
+                  </span>
+                  <span>&bull;</span>
+                  <span className="hidden sm:inline text-slate-400">Real-Time Sync Active</span>
+                  <span className="hidden sm:inline">&bull;</span>
+                  <span className="text-amber-400 font-semibold">+15 XP Solution</span>
+                </div>
               </div>
             </div>
           </div>

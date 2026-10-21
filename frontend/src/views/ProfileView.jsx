@@ -230,7 +230,7 @@ export default function ProfileView({ onOpenFriends }) {
       </div>
 
       {/* 4 Core Metrics Cards: Level, Streak, Friends, Followers */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Level & XP */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
           <div className="flex items-center justify-between mb-2">

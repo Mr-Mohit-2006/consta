@@ -3,7 +3,7 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   ShieldCheck, Sparkles, CheckCircle2, AlertTriangle, XCircle, FileText,
-  ExternalLink, Send, Award, HelpCircle, ChevronRight, Check
+  ExternalLink, Send, Award, HelpCircle, ChevronRight, Check, ChevronLeft
 } from 'lucide-react';
 
 export default function ReviewCenterView({ initialTaskId }) {
@@ -14,6 +14,7 @@ export default function ReviewCenterView({ initialTaskId }) {
   const [selectedSub, setSelectedSub] = useState(null);
   const [rubrics, setRubrics] = useState([]);
   const [activeRubric, setActiveRubric] = useState(null);
+  const [mobileView, setMobileView] = useState('review'); // 'queue' | 'review' for tablet/phone responsiveness
 
   // Scorecard state
   const [decision, setDecision] = useState('approved'); // 'approved' | 'revision_requested' | 'rejected'
@@ -70,6 +71,7 @@ export default function ReviewCenterView({ initialTaskId }) {
 
   function selectSubmission(sub) {
     setSelectedSub(sub);
+    setMobileView('review');
     setAiEvaluation(null);
     setDecision('approved');
     setWhatDoneWell('');
@@ -190,9 +192,31 @@ export default function ReviewCenterView({ initialTaskId }) {
         </select>
       </div>
 
+      {/* Mobile Screen Segmented Switcher */}
+      <div className="flex lg:hidden rounded-2xl bg-slate-900 p-1 border border-slate-800">
+        <button
+          onClick={() => setMobileView('queue')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'queue' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>Queue ({submissions.length})</span>
+        </button>
+        <button
+          onClick={() => setMobileView('review')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'review' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>Review Form & Scorecard</span>
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Col: Submission Queue */}
-        <div className="space-y-3">
+        <div className={`space-y-3 ${mobileView === 'queue' ? 'block' : 'hidden lg:block'}`}>
           <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
             Submissions Queue ({submissions.length})
           </div>
@@ -241,19 +265,30 @@ export default function ReviewCenterView({ initialTaskId }) {
         </div>
 
         {/* Right 2 Cols: Submission Content & Review Scorecard */}
-        <div className="lg:col-span-2">
+        <div className={`lg:col-span-2 ${mobileView === 'review' ? 'block' : 'hidden lg:block'}`}>
           {selectedSub ? (
             <div className="space-y-6">
               {/* Submission Work Preview Card */}
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <div>
-                    <h3 className="font-bold text-sm text-white">
-                      Submission by {selectedSub.full_name} (Version {selectedSub.current_version})
-                    </h3>
-                    <span className="text-[11px] text-slate-500">
-                      Submitted on {new Date(selectedSub.submitted_at).toLocaleString()}
-                    </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                  <div className="flex items-center space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setMobileView('queue')}
+                      className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-bold flex items-center space-x-1 border border-slate-700"
+                      title="Back to queue"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Queue</span>
+                    </button>
+                    <div>
+                      <h3 className="font-bold text-sm text-white">
+                        Submission by {selectedSub.full_name} (Version {selectedSub.current_version})
+                      </h3>
+                      <span className="text-[11px] text-slate-500">
+                        Submitted on {new Date(selectedSub.submitted_at).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">

@@ -3,7 +3,7 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   Trophy, Flame, Clock, Play, CheckCircle2, Plus, Users, User,
-  Sparkles, Award, ArrowRight, ShieldCheck, Square, Check
+  Sparkles, Award, ArrowRight, ShieldCheck, Square, Check, ChevronLeft
 } from 'lucide-react';
 
 export default function ChallengesView({ onOpenTask }) {
@@ -15,6 +15,7 @@ export default function ChallengesView({ onOpenTask }) {
   const [challengeDetails, setChallengeDetails] = useState(null);
   const [scopeFilter, setScopeFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [mobileView, setMobileView] = useState('details'); // 'list' | 'details' for mobile responsiveness
 
   // New challenge modal
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -78,6 +79,7 @@ export default function ChallengesView({ onOpenTask }) {
   }
 
   async function loadChallengeDetails(id) {
+    setMobileView('details');
     try {
       const details = await apiRequest(`/challenges/${id}`);
       setSelectedChallenge(details.challenge);
@@ -215,10 +217,32 @@ export default function ChallengesView({ onOpenTask }) {
         ))}
       </div>
 
+      {/* Mobile Screen Segmented Switcher */}
+      <div className="flex lg:hidden rounded-2xl bg-slate-900 p-1 border border-slate-800">
+        <button
+          onClick={() => setMobileView('list')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'list' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Trophy className="w-3.5 h-3.5" />
+          <span>Challenges ({filteredChallenges.length})</span>
+        </button>
+        <button
+          onClick={() => setMobileView('details')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'details' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Sprint Workspace</span>
+        </button>
+      </div>
+
       {/* Two Column Layout: Challenge List vs Details & Sprint Timer */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Challenge List */}
-        <div className="space-y-2.5">
+        <div className={`space-y-2.5 ${mobileView === 'list' ? 'block' : 'hidden lg:block'}`}>
           {filteredChallenges.map(c => {
             const isSelected = selectedChallenge?.id === c.id;
             return (
@@ -275,7 +299,7 @@ export default function ChallengesView({ onOpenTask }) {
         </div>
 
         {/* Right 2 Columns: Selected Challenge Workspace & Leaderboard */}
-        <div className="lg:col-span-2">
+        <div className={`lg:col-span-2 ${mobileView === 'details' ? 'block' : 'hidden lg:block'}`}>
           {selectedChallenge && challengeDetails ? (
             <div className="space-y-6">
               {/* Challenge Workspace Card */}
@@ -283,6 +307,15 @@ export default function ChallengesView({ onOpenTask }) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setMobileView('list')}
+                        className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-amber-400 text-xs font-bold flex items-center space-x-1 border border-slate-700"
+                        title="Back to Challenges List"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Challenges</span>
+                      </button>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         {selectedChallenge.challenge_scope} sprint
                       </span>

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Users, Plus, Lock, Globe, Key, Shield, CheckCircle, ArrowRight,
   MessageSquare, CheckSquare, Award, Clock, BarChart3, UserCheck,
-  Crown, Trash2, UserPlus, AlertCircle
+  Crown, Trash2, UserPlus, AlertCircle, ChevronLeft
 } from 'lucide-react';
 
 export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom }) {
@@ -13,6 +13,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [roomDetails, setRoomDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mobileView, setMobileView] = useState('details'); // 'list' | 'details' for mobile responsiveness
 
   // New room modal
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -59,6 +60,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
 
   async function loadRoomDetails(id) {
     setSelectedRoomId(id);
+    setMobileView('details');
     try {
       const details = await apiRequest(`/study-rooms/${id}`);
       setRoomDetails(details);
@@ -213,10 +215,32 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
         </button>
       </div>
 
+      {/* Mobile Screen Segmented Switcher */}
+      <div className="flex lg:hidden rounded-2xl bg-slate-900 p-1 border border-slate-800">
+        <button
+          onClick={() => setMobileView('list')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'list' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          <span>Available Cohorts ({rooms.length})</span>
+        </button>
+        <button
+          onClick={() => setMobileView('details')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+            mobileView === 'details' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <CheckSquare className="w-3.5 h-3.5" />
+          <span>Cohort Overview & Tasks</span>
+        </button>
+      </div>
+
       {/* Main Two-Column View */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Room List */}
-        <div className="space-y-3">
+        <div className={`space-y-3 ${mobileView === 'list' ? 'block' : 'hidden lg:block'}`}>
           <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
             Available Cohorts ({rooms.length})
           </div>
@@ -275,7 +299,7 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
         </div>
 
         {/* Right 2 Columns: Room Details, Members, Tasks, and Discussions */}
-        <div className="lg:col-span-2">
+        <div className={`lg:col-span-2 ${mobileView === 'details' ? 'block' : 'hidden lg:block'}`}>
           {roomDetails ? (
             <div className="space-y-6">
               {/* Room Header Card */}
@@ -283,6 +307,15 @@ export default function GroupStudyView({ onNavigate, onOpenTask, onOpenChatRoom 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setMobileView('list')}
+                        className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-bold flex items-center space-x-1 border border-slate-700"
+                        title="Back to Cohorts List"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Cohorts</span>
+                      </button>
                       <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                         {roomDetails.room.subject}
                       </span>

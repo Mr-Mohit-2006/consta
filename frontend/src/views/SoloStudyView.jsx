@@ -264,8 +264,8 @@ export default function SoloStudyView() {
               </div>
 
               {/* Digital Timer Display */}
-              <div className="my-8 text-center">
-                <div className="font-mono text-6xl sm:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white to-cyan-300 tracking-wider">
+              <div className="my-6 sm:my-8 text-center">
+                <div className="font-mono text-5xl sm:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white to-cyan-300 tracking-wider">
                   {timeFormatted}
                 </div>
                 <div className="text-xs text-slate-400 mt-2 flex items-center justify-center space-x-2">
@@ -275,10 +275,10 @@ export default function SoloStudyView() {
               </div>
 
               {/* Controls */}
-              <div className="flex items-center justify-center space-x-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md mx-auto">
                 <button
                   onClick={toggleTimer}
-                  className={`px-6 py-3 rounded-2xl font-semibold text-xs flex items-center space-x-2 shadow-lg transition ${
+                  className={`w-full sm:w-auto px-6 py-3 rounded-2xl font-semibold text-xs flex items-center justify-center space-x-2 shadow-lg transition cursor-pointer ${
                     timerRunning
                       ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-600/30'
                       : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
@@ -290,7 +290,7 @@ export default function SoloStudyView() {
 
                 <button
                   onClick={() => setShowCompleteModal(true)}
-                  className="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition"
+                  className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/30 transition cursor-pointer"
                 >
                   <Square className="w-4 h-4 fill-white" />
                   <span>Complete & Log Learning</span>

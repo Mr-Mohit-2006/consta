@@ -132,7 +132,7 @@ export default function StreaksView() {
         </div>
 
         {/* Heatmap Grid */}
-        <div className="grid grid-flow-col grid-rows-7 gap-1.5 overflow-x-auto py-2">
+        <div className="grid grid-flow-col grid-rows-7 gap-1.5 overflow-x-auto py-2 scrollbar-none touch-pan-x">
           {daysArray.map((day, idx) => {
             const count = day.count;
             const bgClass =
