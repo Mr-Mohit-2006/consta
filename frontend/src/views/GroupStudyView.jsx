@@ -132,18 +132,80 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     setLoading(true);
     try {
       const data = await apiRequest('/study-rooms');
-      setRooms(data);
-      const myRooms = data.filter(r => r.user_status === 'active' || r.user_role);
+      setRooms(data || []);
+      const myRooms = (data || []).filter(r => r.user_status === 'active' || r.user_role);
       if (myRooms.length > 0) {
         if (!selectedRoomId || !myRooms.some(r => r.id === selectedRoomId)) {
           loadRoomDetails(myRooms[0].id);
         }
+      } else if (data && data.length > 0) {
+        setGroupListFilter('explore');
+        loadRoomDetails(data[0].id);
       } else {
         setSelectedRoomId(null);
         setRoomDetails(null);
       }
     } catch (e) {
       // ignore
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreateStarterGroup(template) {
+    try {
+      setLoading(true);
+      const res = await apiRequest('/study-rooms', {
+        method: 'POST',
+        body: {
+          name: template.name,
+          subject: template.subject,
+          description: template.description,
+          objectives: template.objectives,
+          room_type: 'public'
+        }
+      });
+
+      const newRoomId = res.room?.id;
+      if (!newRoomId) throw new Error('Failed to create group');
+
+      // Add Admin task with topics checklist & duration timer
+      await apiRequest('/study-tasks', {
+        method: 'POST',
+        body: {
+          title: template.taskTitle,
+          topics_checklist: template.topics,
+          duration_days: 3,
+          priority: 'high',
+          instructions: 'Complete these core topics with your cohort before the countdown timer expires.',
+          room_id: Number(newRoomId),
+          is_group_task: true,
+          subject: template.subject
+        }
+      }).catch(() => null);
+
+      // Add Group challenge with timer
+      const todayStr = new Date().toISOString().split('T')[0];
+      await apiRequest('/challenges', {
+        method: 'POST',
+        body: {
+          room_id: Number(newRoomId),
+          title: template.chalTitle,
+          challenge_scope: 'group',
+          duration_type: 'weekly',
+          scheduled_date: todayStr,
+          time_limit_minutes: 45,
+          has_timer: true,
+          min_score: 4.0,
+          xp_reward: 250
+        }
+      }).catch(() => null);
+
+      await loadRooms();
+      await loadRoomDetails(newRoomId);
+      alert(`🎉 Group "${template.name}" created with Discord chat, topics checklist, and challenge!`);
+    } catch (err) {
+      alert(err.message || 'Failed to create starter group.');
     } finally {
       setLoading(false);
     }
@@ -2157,24 +2219,172 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
               )}
             </div>
           ) : (
-            <div className="glass-panel rounded-3xl p-10 sm:p-14 text-center text-slate-400 text-xs border border-dashed border-slate-800/80">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/10">
-                <Users className="w-7 h-7" />
+            <div className="space-y-6">
+              {/* Welcome to Study Groups Hero */}
+              <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-indigo-500/30 bg-gradient-to-br from-indigo-950/60 via-slate-900 to-slate-900 shadow-2xl">
+                <div className="max-w-xl">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 inline-flex items-center space-x-1 mb-3">
+                    <Sparkles className="w-3 h-3 text-indigo-400" />
+                    <span>Collaborative Learning Cohorts</span>
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                    Welcome to CONSTA Study Groups
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                    Study groups allow you to learn together in real-time with Discord-like live doubt chats, admin task checklists with countdown timers, and weekly cohort sprints.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-5 border-t border-slate-800/80">
+                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div className="flex items-center space-x-2 text-indigo-400 text-xs font-bold mb-1">
+                      <MessageSquare className="w-4 h-4" />
+                      <span>Discord Chat</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">Live doubt solving, handwritten notes photo uploads, and member presence.</p>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div className="flex items-center space-x-2 text-purple-400 text-xs font-bold mb-1">
+                      <CheckSquare className="w-4 h-4" />
+                      <span>Topic Checklists</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">Admin group tasks with interactive checkboxes for every topic & timer days.</p>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold mb-1">
+                      <Trophy className="w-4 h-4" />
+                      <span>Cohort Sprints</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">Scheduled challenges, countdown timers, and bonus XP rewards.</p>
+                  </div>
+                </div>
               </div>
-              <h4 className="text-base font-bold text-white mb-1.5">No Group Selected</h4>
-              <p className="text-slate-400 max-w-sm mx-auto mb-5 leading-relaxed text-xs">
-                {rooms.length === 0
-                  ? 'No study groups exist in the system yet. Click below to create the first group as Admin!'
-                  : 'Select a study group from the left to view shared tasks, open live chat discussions, and participate in challenges.'}
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs inline-flex items-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition cursor-pointer"
-              >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
-                <span>Create Study Group</span>
-              </button>
+
+              {/* 1-Click Starter Cohorts */}
+              <div className="glass-panel rounded-3xl p-6 sm:p-7 shadow-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h4 className="font-bold text-sm text-white flex items-center space-x-2">
+                      <Zap className="w-4 h-4 text-amber-400" />
+                      <span>Launch Instant Starter Group</span>
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Click any cohort below to instantly create a study group populated with Discord chat, checklist topics, and active challenge timer:
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {[
+                    {
+                      name: 'Computer Science & Engineering Cohort',
+                      subject: 'Computer Science',
+                      description: 'Public collaborative study group for Computer Science, Algorithms, and System Architecture.',
+                      objectives: 'Complete cohort topic checklist, solve doubts in Discord chat, and compete in weekly mastery sprints.',
+                      taskTitle: 'Data Structures & Algorithms Sprint',
+                      topics: [
+                        { id: 't1', title: 'Arrays, Hashing & Two-Pointer Patterns', completed: false },
+                        { id: 't2', title: 'Binary Trees, BST & Graph Traversals', completed: false },
+                        { id: 't3', title: 'Dynamic Programming & Memoization', completed: false }
+                      ],
+                      chalTitle: 'Weekly Mastery Sprint - Algorithms Challenge'
+                    },
+                    {
+                      name: 'Mathematics & Quantitative Problem Solving',
+                      subject: 'Mathematics',
+                      description: 'Advanced problem-solving group for Linear Algebra, Calculus, and Discrete Mathematics.',
+                      objectives: 'Weekly math problem sets, peer verification, and rigorous mathematical proofs.',
+                      taskTitle: 'Calculus & Linear Algebra Problem Set',
+                      topics: [
+                        { id: 'm1', title: 'Eigenvalues & Matrix Transformations', completed: false },
+                        { id: 'm2', title: 'Multivariable Derivatives & Integrals', completed: false },
+                        { id: 'm3', title: 'Differential Equations & Proof Verification', completed: false }
+                      ],
+                      chalTitle: 'Math Sprint - Solve 10 Proof Problems'
+                    },
+                    {
+                      name: 'Physics & Deep Tech Engineering',
+                      subject: 'Physics',
+                      description: 'Collaborative cohort for Classical Mechanics, Electromagnetism, and Quantum Concepts.',
+                      objectives: 'Break down physical concepts, solve textbook problems, and verify solutions.',
+                      taskTitle: 'Electromagnetism & Waves Mastery',
+                      topics: [
+                        { id: 'p1', title: 'Gauss Law & Electric Potential', completed: false },
+                        { id: 'p2', title: 'Magnetic Fields & Ampere Law', completed: false },
+                        { id: 'p3', title: 'Maxwell Equations & Wave Propagation', completed: false }
+                      ],
+                      chalTitle: 'Physics Challenge - 45m Timed Problem Solving'
+                    },
+                    {
+                      name: 'General Study & Daily Productivity Cohort',
+                      subject: 'General Study',
+                      description: 'Daily accountability group for focused study sessions, habit consistency, and streak building.',
+                      objectives: 'Daily check-ins, Pomodoro sprints, and consistent personal growth.',
+                      taskTitle: 'Daily Habit & Focus Sprint',
+                      topics: [
+                        { id: 'g1', title: '2 Hours Deep Focus Study Block', completed: false },
+                        { id: 'g2', title: 'Problem Logging & Notes Review', completed: false },
+                        { id: 'g3', title: 'Peer Discussion & Summary Post', completed: false }
+                      ],
+                      chalTitle: 'Consistency Sprint - 5 Days Streak Target'
+                    }
+                  ].map((tmpl, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900 transition flex flex-col justify-between group shadow-sm"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                            {tmpl.subject}
+                          </span>
+                          <span className="text-[10px] text-emerald-400 font-semibold flex items-center space-x-1">
+                            <Globe className="w-3 h-3" />
+                            <span>Instant Setup</span>
+                          </span>
+                        </div>
+                        <h5 className="font-bold text-sm text-white group-hover:text-indigo-200 transition">
+                          {tmpl.name}
+                        </h5>
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                          {tmpl.description}
+                        </p>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                        <span className="text-[11px] text-amber-300 font-mono font-bold flex items-center space-x-1">
+                          <Timer className="w-3 h-3 text-amber-400" />
+                          <span>3-Day Timer Task</span>
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCreateStarterGroup(tmpl)}
+                          className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3 stroke-[3]" />
+                          <span>Launch Group</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Or Custom Create Button */}
+                <div className="mt-5 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <p className="text-xs text-slate-400">Want to create your own custom study group with private approval or custom subject?</p>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center space-x-2 shrink-0 cursor-pointer self-start sm:self-auto"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create Custom Group</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

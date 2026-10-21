@@ -45,6 +45,85 @@ router.get('/', authenticateToken, (req, res) => {
   const userId = req.user.id;
   const { search, subject } = req.query;
 
+  // Auto-seed a default public cohort if total study rooms is 0
+  const totalRoomsCount = db.prepare('SELECT COUNT(*) as count FROM study_rooms').get()?.count || 0;
+  if (totalRoomsCount === 0) {
+    try {
+      const roomRes = db.prepare(`
+        INSERT INTO study_rooms (name, subject, description, objectives, room_type, join_code, owner_id)
+        VALUES (?, ?, ?, ?, 'public', 'CS101', ?)
+      `).run(
+        'Computer Science & Engineering Cohort',
+        'Computer Science',
+        'Public collaborative study group for Computer Science, Algorithms, and System Architecture.',
+        'Complete cohort topic checklist, solve doubts in Discord chat, and compete in weekly mastery sprints.',
+        userId
+      );
+
+      const roomId = Number(roomRes.lastInsertRowid);
+
+      db.prepare(`
+        INSERT INTO study_room_memberships (room_id, user_id, role, status)
+        VALUES (?, ?, 'owner', 'active')
+      `).run(roomId, userId);
+
+      const chatRoomRes = db.prepare(`
+        INSERT INTO chat_rooms (room_type, reference_id)
+        VALUES ('study_room', ?)
+      `).run(roomId);
+      const chatRoomId = Number(chatRoomRes.lastInsertRowid);
+
+      db.prepare(`
+        INSERT INTO chat_messages (chat_room_id, sender_id, content)
+        VALUES (?, ?, ?)
+      `).run(
+        chatRoomId,
+        userId,
+        '👋 Welcome to the Computer Science & Engineering Cohort! This is our real-time Discord-style chat. Feel free to discuss tasks, ask questions, or share handwritten notes.'
+      );
+
+      db.prepare(`
+        INSERT INTO study_tasks (
+          creator_id, room_id, title, subject, topic, priority, review_type,
+          instructions, is_group_task, duration_days, topics_checklist, status
+        ) VALUES (?, ?, ?, ?, ?, 'high', 'peer', ?, 1, 3, ?, 'pending')
+      `).run(
+        userId,
+        roomId,
+        'Data Structures & Algorithms Sprint',
+        'Computer Science',
+        'Core Algorithms',
+        'Complete the following topics checklist before the 3-day countdown timer expires. Check off each topic as you master it.',
+        JSON.stringify([
+          { id: 'topic_1', title: 'Arrays, Hashing & Two-Pointer Patterns', completed: false },
+          { id: 'topic_2', title: 'Binary Trees, BST & Graph Traversals', completed: false },
+          { id: 'topic_3', title: 'Dynamic Programming & Memoization', completed: false }
+        ])
+      );
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      db.prepare(`
+        INSERT INTO study_challenges (
+          room_id, creator_id, title, description, challenge_scope,
+          time_limit_minutes, min_score, target_criteria, xp_reward, status,
+          duration_type, has_timer, scheduled_date, start_date, end_date
+        ) VALUES (
+          ?, ?, ?, ?, 'group',
+          45, 4.0, 'Complete sprint task with score >= 4.0', 250, 'active',
+          'weekly', 1, ?, CURRENT_TIMESTAMP, datetime(CURRENT_TIMESTAMP, '+7 days')
+        )
+      `).run(
+        roomId,
+        userId,
+        'Weekly Mastery Sprint - Algorithms Challenge',
+        'Compete with cohort members in this timed 45-minute sprint to solve targeted algorithms.',
+        todayStr
+      );
+    } catch (e) {
+      console.error('Error auto-seeding initial study room:', e);
+    }
+  }
+
   let query = `
     SELECT r.*, u.full_name as owner_name,
            (SELECT COUNT(*) FROM study_room_memberships m WHERE m.room_id = r.id AND m.status = 'active') as member_count,
