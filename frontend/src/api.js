@@ -1,4 +1,12 @@
-const API_BASE = '/api';
+const BACKEND_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE = BACKEND_URL ? `${BACKEND_URL.replace(/\/$/, '')}/api` : '/api';
+
+export function getAssetUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
+  if (!BACKEND_URL) return path;
+  return `${BACKEND_URL.replace(/\/$/, '')}${path.startsWith('/') ? '' : '/'}${path}`;
+}
 
 export function getStoredToken() {
   return localStorage.getItem('consta_token');
@@ -53,8 +61,17 @@ export class ChatSocket {
 
   connect() {
     const token = getStoredToken();
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws?token=${token || ''}`;
+    let wsUrl = '';
+    if (import.meta.env.VITE_WS_URL) {
+      wsUrl = `${import.meta.env.VITE_WS_URL.replace(/\/$/, '')}/ws?token=${token || ''}`;
+    } else if (BACKEND_URL) {
+      const wsProto = BACKEND_URL.startsWith('https:') ? 'wss:' : 'ws:';
+      const host = BACKEND_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      wsUrl = `${wsProto}//${host}/ws?token=${token || ''}`;
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      wsUrl = `${protocol}//${window.location.host}/ws?token=${token || ''}`;
+    }
 
     this.ws = new WebSocket(wsUrl);
 
