@@ -1,0 +1,21 @@
+{
+  "name": "consta-platform",
+  "version": "2.0.0",
+  "description": "CONSTA - Collaborative Study and Personal Growth Platform",
+  "scripts": {
+    "start:backend": "node backend/src/server.js",
+    "start:frontend": "cd frontend && npm run dev",
+    "test": "cd backend && npm test",
+    "build": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "productivity",
+    "study-mode",
+    "collaborative-learning",
+    "gamification",
+    "streaks",
+    "peer-review"
+  ],
+  "author": "Google DeepMind Antigravity Pair Programmer",
+  "license": "ISC"
+}
