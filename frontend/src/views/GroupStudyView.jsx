@@ -1442,18 +1442,23 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                     {(roomDetails.tasks || []).map(t => {
                       const isTaskCompleted = t.status === 'completed' || t.status === 'approved';
                       const canDeleteTask = t.creator_id === user?.id || isCurrentRoomAdmin;
+                      const timerInfo = getTaskTimerInfo(t);
+                      const checklist = Array.isArray(t.topics_checklist) ? t.topics_checklist : [];
+                      const completedTopicsCount = checklist.filter(topic => topic.completed).length;
+                      const totalTopicsCount = checklist.length;
+                      const completionPct = totalTopicsCount > 0 ? Math.round((completedTopicsCount / totalTopicsCount) * 100) : 0;
 
                       return (
                         <div
                           key={t.id}
-                          onClick={() => onOpenTask && onOpenTask(t.id)}
-                          className={`p-3.5 sm:p-4 rounded-2xl border transition flex items-center justify-between cursor-pointer group ${
+                          className={`p-4 sm:p-5 rounded-2xl border transition-all ${
                             isTaskCompleted
-                              ? 'bg-slate-950/40 border-emerald-500/30 opacity-80'
-                              : 'bg-slate-950/70 hover:bg-slate-900 border-slate-800/80 hover:border-slate-700'
+                              ? 'bg-slate-950/40 border-emerald-500/30'
+                              : 'bg-slate-950/80 hover:bg-slate-900 border-slate-800 hover:border-slate-700 shadow-md'
                           }`}
                         >
-                          <div className="flex items-center space-x-3 min-w-0 pr-3">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div className="flex items-start space-x-3 min-w-0 pr-3 flex-1">
                             {/* Completion Checkbox */}
                             <button
                               type="button"
@@ -1474,55 +1479,127 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                                  {t.topic || t.subject}
-                                </span>
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                                    {t.subject || 'Cohort Sprint'}
+                                  </span>
 
-                                <span className={`text-xs font-bold transition truncate ${
-                                  isTaskCompleted ? 'line-through text-slate-400' : 'text-white group-hover:text-indigo-200'
+                                  {/* Priority Pill */}
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                                    t.priority === 'urgent' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' :
+                                    t.priority === 'high' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
+                                    'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'
+                                  }`}>
+                                    {t.priority || 'medium'}
+                                  </span>
+
+                                  {/* Duration Timer Pill */}
+                                  {timerInfo && (
+                                    <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold border flex items-center space-x-1.5 ${timerInfo.badgeClass}`}>
+                                      <Timer className="w-3 h-3 shrink-0" />
+                                      <span>{timerInfo.text}</span>
+                                      {timerInfo.totalDays > 0 && (
+                                        <span className="text-[9px] opacity-75 font-sans">({timerInfo.totalDays}d timer)</span>
+                                      )}
+                                    </span>
+                                  )}
+
+                                  {t.due_date && !timerInfo && (
+                                    <span className="text-[10px] text-amber-300/90 flex items-center space-x-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 font-medium">
+                                      <Calendar className="w-3 h-3 text-amber-400 shrink-0" />
+                                      <span>Schedule: {new Date(t.due_date).toLocaleDateString()}</span>
+                                    </span>
+                                  )}
+                                </div>
+
+                                <h4 className={`text-sm font-bold mt-1.5 transition ${
+                                  isTaskCompleted ? 'line-through text-slate-400' : 'text-white'
                                 }`}>
                                   {t.title}
-                                </span>
+                                </h4>
 
-                                {/* Task Schedule / Due Date */}
-                                {t.due_date && (
-                                  <span className="text-[10px] text-amber-300/90 flex items-center space-x-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 font-medium">
-                                    <Calendar className="w-3 h-3 text-amber-400 shrink-0" />
-                                    <span>Schedule: {new Date(t.due_date).toLocaleDateString()}</span>
-                                  </span>
+                                {t.instructions && (
+                                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">{t.instructions}</p>
                                 )}
                               </div>
+                            </div>
 
-                              <p className="text-xs text-slate-400 mt-1 line-clamp-1">{t.instructions}</p>
+                            {/* Status pill & Delete Button */}
+                            <div className="flex items-center space-x-2 shrink-0 self-end sm:self-auto">
+                              <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold capitalize ${
+                                isTaskCompleted ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' :
+                                t.status === 'under_review' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' :
+                                t.status === 'in_progress' ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30' :
+                                'bg-slate-800 text-slate-400'
+                              }`}>
+                                {isTaskCompleted ? '✓ Completed' : t.status.replace('_', ' ')}
+                              </span>
+
+                              {/* Delete Task Button */}
+                              {canDeleteTask && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteTask(t.id, t.title);
+                                  }}
+                                  className="p-1.5 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 rounded-lg transition cursor-pointer"
+                                  title="Delete task"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
                           </div>
 
-                          {/* Status pill & Delete Button */}
-                          <div className="flex items-center space-x-2 shrink-0">
-                            <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold capitalize ${
-                              isTaskCompleted ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' :
-                              t.status === 'under_review' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' :
-                              t.status === 'in_progress' ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30' :
-                              'bg-slate-800 text-slate-400'
-                            }`}>
-                              {isTaskCompleted ? '✓ Completed' : t.status.replace('_', ' ')}
-                            </span>
+                          {/* Topic Checklist with Interactive Checkboxes */}
+                          {totalTopicsCount > 0 && (
+                            <div className="mt-4 pt-3.5 border-t border-slate-800/80 space-y-2.5">
+                              {/* Checklist Header & Progress Bar */}
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-bold text-slate-300 flex items-center space-x-1.5">
+                                  <CheckSquare2 className="w-3.5 h-3.5 text-purple-400" />
+                                  <span>Topics Checklist ({completedTopicsCount}/{totalTopicsCount})</span>
+                                </span>
+                                <span className="text-[11px] font-mono font-bold text-indigo-300">{completionPct}% Done</span>
+                              </div>
 
-                            {/* Delete Task Button */}
-                            {canDeleteTask && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteTask(t.id, t.title);
-                                }}
-                                className="p-1.5 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 rounded-lg transition cursor-pointer"
-                                title="Delete task"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
+                              {/* Progress Track */}
+                              <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800">
+                                <div
+                                  className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 transition-all duration-300"
+                                  style={{ width: `${completionPct}%` }}
+                                />
+                              </div>
+
+                              {/* Topics List with Checkboxes */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                                {checklist.map((topic) => (
+                                  <div
+                                    key={topic.id}
+                                    onClick={(e) => handleToggleTopic(t.id, topic.id, e)}
+                                    className={`p-2.5 rounded-xl border flex items-center space-x-2.5 cursor-pointer transition select-none ${
+                                      topic.completed
+                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+                                        : 'bg-slate-900/70 hover:bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-300'
+                                    }`}
+                                  >
+                                    <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition ${
+                                      topic.completed
+                                        ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-black'
+                                        : 'border-slate-600 bg-slate-950 hover:border-indigo-400'
+                                    }`}>
+                                      {topic.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                                    </div>
+                                    <span className={`text-xs font-semibold truncate ${
+                                      topic.completed ? 'line-through text-slate-400' : 'text-slate-200'
+                                    }`}>
+                                      {topic.title}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
