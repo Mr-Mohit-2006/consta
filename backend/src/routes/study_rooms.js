@@ -10,8 +10,15 @@ router.post('/', authenticateToken, (req, res) => {
   const userId = req.user.id;
   const { name, subject, description, objectives, room_type } = req.body;
 
-  if (!name || !subject) {
+  const trimmedName = (name || '').trim();
+  if (!trimmedName || !subject) {
     return res.status(400).json({ error: 'Room name and subject are required.' });
+  }
+
+  // Ensure unique group name across the platform (case-insensitive)
+  const existingRoom = db.prepare('SELECT id, name FROM study_rooms WHERE LOWER(name) = LOWER(?)').get(trimmedName);
+  if (existingRoom) {
+    return res.status(400).json({ error: `A study group with the name "${trimmedName}" already exists. Please choose a unique group name.` });
   }
 
   const type = ['public', 'private', 'invite_only'].includes(room_type) ? room_type : 'public';
@@ -20,7 +27,7 @@ router.post('/', authenticateToken, (req, res) => {
   const roomRes = db.prepare(`
     INSERT INTO study_rooms (name, subject, description, objectives, room_type, join_code, owner_id)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(name, subject, description || '', objectives || '', type, joinCode, userId);
+  `).run(trimmedName, subject, description || '', objectives || '', type, joinCode, userId);
 
   const roomId = Number(roomRes.lastInsertRowid);
 

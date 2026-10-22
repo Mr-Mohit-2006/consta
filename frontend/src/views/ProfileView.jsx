@@ -4,11 +4,11 @@ import { apiRequest } from '../api';
 import {
   User, Lock, Shield, Eye, Flame, Award, Users, UserPlus,
   CheckCircle2, Globe, Settings, Key, AlertCircle, RefreshCw,
-  Calendar, Edit3, ShieldAlert, Check, Sparkles, Trash2, Plus, UserX, ArrowLeft
+  Calendar, Edit3, ShieldAlert, Check, Sparkles, Trash2, Plus, UserX, ArrowLeft, LogOut
 } from 'lucide-react';
 
 export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
-  const { user, streaks: contextStreaks, progression: contextProgression, refreshUserData } = useAuth();
+  const { user, streaks: contextStreaks, progression: contextProgression, refreshUserData, logout } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'friends' | 'settings'
@@ -184,8 +184,8 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
 
   return (
     <div className="space-y-6">
-      {/* Top Navigation Bar: Back Arrow */}
-      <div className="flex items-center justify-between">
+      {/* Top Navigation & Action Bar: Back Arrow & Direct Sign Out */}
+      <div className="flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}
@@ -194,6 +194,16 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
         >
           <ArrowLeft className="w-4 h-4 text-indigo-400" />
           <span className="text-xs font-bold">Back</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={logout}
+          className="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-500/50 text-xs font-bold transition flex items-center space-x-2 cursor-pointer shadow-sm"
+          title="Sign out of CONSTA"
+        >
+          <LogOut className="w-4 h-4 text-rose-400" />
+          <span>Sign Out</span>
         </button>
       </div>
 
@@ -685,6 +695,36 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
                 <span>{profileUpdateLoading ? 'Saving Changes...' : 'Save Profile Details'}</span>
               </button>
             </form>
+          </div>
+
+          {/* Card C: Account Session & Security */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:col-span-2">
+            <h3 className="text-base font-bold text-white mb-1 flex items-center space-x-2">
+              <Shield className="w-4 h-4 text-rose-400" />
+              <span>Active Session & Security</span>
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Manage your active login session or sign out securely from this device.
+            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
+              <div>
+                <div className="text-xs font-bold text-white flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span>Active Login Session</span>
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  Logged in as <span className="text-indigo-400 font-mono font-semibold">@{currentUser?.username}</span> (User ID #{currentUser?.id})
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={logout}
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-rose-600/25 transition cursor-pointer self-start sm:self-auto shrink-0"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out of CONSTA</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

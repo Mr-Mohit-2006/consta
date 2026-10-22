@@ -1112,6 +1112,69 @@ test('20. Join Group by Group Name (Requires Admin Approval Flow)', async () => 
   assert.equal(charlieRoomView.data.isMember, false);
 });
 
+test('21. Unique Group Name Enforcement Rejects Duplicate Names (Case-Insensitive)', async () => {
+  const testUser = `group_tester_${Date.now()}`;
+  const regRes = await request('/api/auth/register', {
+    method: 'POST',
+    body: {
+      username: testUser,
+      email: `${testUser}@example.com`,
+      password: 'Password123!',
+      full_name: 'Group Tester'
+    }
+  });
+  assert.equal(regRes.status, 201);
+  const token = regRes.data.token;
+
+  // 1. Create a group with a unique name
+  const res1 = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: {
+      name: 'Quantum Mechanics Lab',
+      subject: 'Physics',
+      room_type: 'public'
+    }
+  });
+  assert.equal(res1.status, 201);
+  assert.equal(res1.data.room.name, 'Quantum Mechanics Lab');
+
+  // 2. Attempt to create another group with the same name (case variation)
+  const res2 = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: {
+      name: 'quantum mechanics lab',
+      subject: 'Physics',
+      room_type: 'private'
+    }
+  });
+  assert.equal(res2.status, 400);
+  assert.ok(res2.data.error.includes('already exists'));
+
+  // 3. Second user joins this unique group by name
+  const joinerUser = `joiner_${Date.now()}`;
+  const joinerReg = await request('/api/auth/register', {
+    method: 'POST',
+    body: {
+      username: joinerUser,
+      email: `${joinerUser}@example.com`,
+      password: 'Password123!',
+      full_name: 'Group Joiner'
+    }
+  });
+  const joinerToken = joinerReg.data.token;
+
+  const joinRes = await request('/api/study-rooms/join-by-name', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${joinerToken}` },
+    body: { name: 'Quantum Mechanics Lab' }
+  });
+  assert.equal(joinRes.status, 200);
+  assert.equal(joinRes.data.room_id, res1.data.room.id);
+  assert.equal(joinRes.data.pendingApproval, true);
+});
+
 test.after(async () => {
   clearAllUserData();
   if (server && server.close) {

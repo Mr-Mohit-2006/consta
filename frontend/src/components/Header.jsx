@@ -31,7 +31,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
   const studyStreak = streaks?.study?.current_streak || 0;
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 transition-all max-w-full overflow-x-hidden">
+    <header className="sticky top-0 z-50 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 transition-all max-w-full">
       {/* Top Banner with Brand, Level, Streak, User Menu */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2">
         {/* Brand */}
@@ -129,39 +129,47 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
             </button>
 
             {userMenuOpen && (
-              <div
-                className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] glass-panel border border-slate-700/80 rounded-2xl shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150 overflow-hidden"
-                onMouseLeave={() => setUserMenuOpen(false)}
-              >
-                <div className="px-4 py-3 border-b border-slate-800">
-                  <div className="font-bold text-white text-sm truncate">{user?.full_name}</div>
-                  <div className="text-[11px] text-indigo-400 font-mono truncate">@{user?.username} · #{user?.id}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5 truncate">{user?.email}</div>
-                </div>
+              <>
+                {/* Backdrop to close menu when clicking outside */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setUserMenuOpen(false)}
+                />
+                <div
+                  className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150 ring-1 ring-white/10"
+                >
+                  <div className="px-4 py-3 border-b border-slate-800">
+                    <div className="font-bold text-white text-sm truncate">{user?.full_name}</div>
+                    <div className="text-[11px] text-indigo-400 font-mono truncate">@{user?.username} · #{user?.id}</div>
+                    <div className="text-[10px] text-slate-400 mt-0.5 truncate">{user?.email}</div>
+                  </div>
 
-                <div className="pt-1.5 pb-1">
-                  <button
-                    onClick={() => {
-                      setActiveTab('profile');
-                      setUserMenuOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-slate-800/80 text-slate-300 hover:text-white flex items-center space-x-2.5 transition"
-                  >
-                    <User className="w-4 h-4 text-indigo-400 shrink-0" />
-                    <span className="font-medium">My Profile & Settings</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setUserMenuOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-rose-500/10 text-rose-400 flex items-center space-x-2.5 transition"
-                  >
-                    <LogOut className="w-4 h-4 text-rose-400 shrink-0" />
-                    <span className="font-medium">Sign Out</span>
-                  </button>
+                  <div className="pt-1.5 pb-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab('profile');
+                        setUserMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-slate-800/80 text-slate-300 hover:text-white flex items-center space-x-2.5 transition cursor-pointer"
+                    >
+                      <User className="w-4 h-4 text-indigo-400 shrink-0" />
+                      <span className="font-medium">My Profile & Settings</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        setUserMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-rose-500/10 text-rose-400 flex items-center space-x-2.5 transition cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4 text-rose-400 shrink-0" />
+                      <span className="font-medium">Sign Out</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
 
