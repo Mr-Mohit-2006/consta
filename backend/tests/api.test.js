@@ -936,12 +936,16 @@ test('18. Admin Group Task with Topics Checklist, Duration Timer in Days, and To
 });
 
 test('19. Friend Request Approval Flow, Private Profile Access Control, and Add Group Member by Unique ID', async () => {
+  const suffix = Date.now();
+  const aliceUsername = `fa_alice_${suffix}`;
+  const bobUsername = `fb_bob_${suffix}`;
+
   // 1. Register Alice and Bob
   const aliceRes = await request('/api/auth/register', {
     method: 'POST',
     body: {
-      username: 'fa_alice',
-      email: 'fa_alice@example.com',
+      username: aliceUsername,
+      email: `${aliceUsername}@example.com`,
       password: 'Password123!',
       full_name: 'Alice FriendTest'
     }
@@ -953,8 +957,8 @@ test('19. Friend Request Approval Flow, Private Profile Access Control, and Add 
   const bobRes = await request('/api/auth/register', {
     method: 'POST',
     body: {
-      username: 'fb_bob',
-      email: 'fb_bob@example.com',
+      username: bobUsername,
+      email: `${bobUsername}@example.com`,
       password: 'Password123!',
       full_name: 'Bob FriendTest'
     }
@@ -973,7 +977,7 @@ test('19. Friend Request Approval Flow, Private Profile Access Control, and Add 
   assert.equal(privRes.data.is_public, false);
 
   // 3. Alice visits Bob profile -> should be restricted (isPrivate: true)
-  const view1 = await request('/api/profile/fb_bob', {
+  const view1 = await request(`/api/profile/${bobUsername}`, {
     headers: { Authorization: `Bearer ${aliceToken}` }
   });
   assert.equal(view1.status, 200);
@@ -1006,7 +1010,7 @@ test('19. Friend Request Approval Flow, Private Profile Access Control, and Add 
   assert.ok(incomingReq, 'Bob should see Alice in incoming friend requests');
 
   // 7. While pending, Bob profile remains private to Alice
-  const view2 = await request('/api/profile/fb_bob', {
+  const view2 = await request(`/api/profile/${bobUsername}`, {
     headers: { Authorization: `Bearer ${aliceToken}` }
   });
   assert.equal(view2.data.isPrivate, true);
@@ -1027,7 +1031,7 @@ test('19. Friend Request Approval Flow, Private Profile Access Control, and Add 
   assert.ok(acceptNotif, 'Alice should receive notification that request was accepted');
 
   // 10. Alice now accesses Bob private profile -> isPrivate is false!
-  const view3 = await request('/api/profile/fb_bob', {
+  const view3 = await request(`/api/profile/${bobUsername}`, {
     headers: { Authorization: `Bearer ${aliceToken}` }
   });
   assert.equal(view3.status, 200);
@@ -1062,7 +1066,7 @@ test('19. Friend Request Approval Flow, Private Profile Access Control, and Add 
   });
   assert.equal(removeRes.status, 200);
 
-  const view4 = await request('/api/profile/fb_bob', {
+  const view4 = await request(`/api/profile/${bobUsername}`, {
     headers: { Authorization: `Bearer ${aliceToken}` }
   });
   assert.equal(view4.data.isPrivate, true, 'Profile details should be hidden after friend removal');
