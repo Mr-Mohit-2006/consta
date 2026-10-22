@@ -2048,9 +2048,9 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 isCurrentRoomMember ? (
                 <div className="rounded-3xl overflow-hidden border border-[#3b3e45] bg-[#313338] shadow-2xl flex flex-col min-h-[560px]">
                   {/* Discord Top Channel Header */}
-                  <div className="bg-[#2b2d31] border-b border-[#232428] px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 shadow-xs">
+                  <div className="bg-slate-900 border-b border-slate-700 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 shadow-xs">
                     <div className="flex items-center space-x-2 sm:space-x-2.5 min-w-0 flex-1">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#5865F2]/20 text-[#5865F2] flex items-center justify-center font-bold shrink-0">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold shrink-0">
                         <Hash className="w-4 h-4 text-indigo-400 stroke-[2.5]" />
                       </div>
                       <div className="min-w-0">
@@ -2075,7 +2075,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                           setRoomDetails(null);
                           setMobileView('list');
                         }}
-                        className="px-2 sm:px-2.5 py-1.5 rounded-lg bg-[#383a40] hover:bg-[#404249] text-slate-200 text-xs font-bold flex items-center space-x-1 border border-[#4e5058]/50 transition cursor-pointer"
+                        className="px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center space-x-1 border border-slate-700 transition cursor-pointer"
                         title="Exit group view"
                       >
                         <ArrowLeft className="w-3.5 h-3.5 text-indigo-400" />
@@ -2092,8 +2092,8 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                         onClick={() => setChatMemberSidebarOpen(prev => !prev)}
                         className={`p-1.5 rounded-lg border transition cursor-pointer ${
                           chatMemberSidebarOpen
-                            ? 'bg-[#5865F2]/20 text-[#5865F2] border-[#5865F2]/30'
-                            : 'bg-[#383a40] text-slate-300 border-transparent hover:bg-[#404249]'
+                            ? 'bg-indigo-600/20 text-indigo-400 border-indigo-500/30'
+                            : 'bg-slate-800 text-slate-300 border-transparent hover:bg-slate-700'
                         }`}
                         title="Toggle Discord Members list"
                       >
@@ -2104,7 +2104,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                         type="button"
                         onClick={() => loadRoomChatMessages(roomDetails.chatRoomId)}
                         disabled={roomChatLoading}
-                        className="p-1.5 rounded-lg bg-[#383a40] hover:bg-[#404249] text-slate-300 transition cursor-pointer"
+                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
                         title="Refresh chat messages"
                       >
                         <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${roomChatLoading ? 'animate-spin' : ''}`} />
@@ -2115,12 +2115,12 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                   {/* Discord Main Chat Body (Messages + Member Sidebar) */}
                   <div className="flex flex-1 min-h-0 relative">
                     {/* Left/Center: Discord Message Feed */}
-                    <div className="flex-1 flex flex-col justify-between p-4 min-w-0 bg-[#313338]">
+                    <div className="flex-1 flex flex-col justify-between p-4 min-w-0 bg-slate-950">
                       {/* Messages Stream */}
-                      <div className="space-y-4 max-h-[460px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#232428]">
+                      <div className="space-y-4 max-h-[460px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-800">
                         {/* Discord Welcome Banner */}
-                        <div className="py-6 px-4 mb-4 rounded-2xl bg-[#2b2d31]/80 border border-[#3b3e45]/50 flex items-start space-x-3.5">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#5865F2] to-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-[#5865F2]/20">
+                        <div className="py-6 px-4 mb-4 rounded-2xl bg-slate-900 border border-slate-700 flex items-start space-x-3.5">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-600/20">
                             <Hash className="w-6 h-6 text-white stroke-[2.5]" />
                           </div>
                           <div>
@@ -2136,7 +2136,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                         {roomChatLoading && roomChatMessages.length === 0 ? (
                           <div className="py-12 text-center text-xs text-slate-400">Loading channel messages...</div>
                         ) : roomChatMessages.length === 0 ? (
-                          <div className="py-8 text-center text-xs text-slate-400 bg-[#2b2d31]/50 rounded-2xl border border-[#3b3e45]/40">
+                          <div className="py-8 text-center text-xs text-slate-400 bg-slate-900/60 rounded-2xl border border-slate-700">
                             No messages yet in this channel. Send the first message below!
                           </div>
                         ) : (
@@ -2150,34 +2150,34 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                             return (
                               <div
                                 key={msg.id || idx}
-                                className="flex items-start space-x-3.5 px-3 py-2 rounded-xl hover:bg-[#2e3035]/70 transition group"
+                                className="flex items-start space-x-3.5 px-3 py-2 rounded-xl hover:bg-slate-900/70 transition group"
                               >
                                 {/* Discord Avatar */}
                                 <img
-                                  src={msg.avatar_url ? getAssetUrl(msg.avatar_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.sender_name || msg.full_name || 'User')}&background=5865F2&color=fff`}
+                                  src={msg.avatar_url ? getAssetUrl(msg.avatar_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.sender_name || msg.full_name || 'User')}&background=A66A43&color=fff`}
                                   alt={msg.sender_name || 'User'}
-                                  className="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5 shadow-sm"
+                                  className="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5 shadow-sm ring-1 ring-slate-700"
                                 />
 
                                 {/* Message Content */}
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-baseline space-x-2">
                                     <span className={`font-bold text-sm hover:underline cursor-pointer ${
-                                      isOwner ? 'text-[#FEE75C]' : isMe ? 'text-[#5865F2]' : 'text-white'
+                                      isOwner ? 'text-amber-400' : isMe ? 'text-indigo-400' : 'text-white'
                                     }`}>
                                       {msg.sender_name || msg.full_name || 'Cohort Peer'}
                                     </span>
 
                                     {/* Discord Role Badge */}
                                     {isOwner && (
-                                      <span className="inline-flex items-center space-x-1 px-1.5 py-0.2 rounded-md bg-amber-500/20 text-[#FEE75C] border border-amber-500/30 text-[9px] font-extrabold uppercase tracking-wider">
+                                      <span className="inline-flex items-center space-x-1 px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] font-extrabold uppercase tracking-wider">
                                         <Crown className="w-2.5 h-2.5" />
                                         <span>Owner</span>
                                       </span>
                                     )}
 
                                     {!isOwner && msg.user_role === 'mentor' && (
-                                      <span className="inline-flex items-center space-x-1 px-1.5 py-0.2 rounded-md bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/30 text-[9px] font-extrabold uppercase tracking-wider">
+                                      <span className="inline-flex items-center space-x-1 px-1.5 py-0.2 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] font-extrabold uppercase tracking-wider">
                                         <span>Admin</span>
                                       </span>
                                     )}
@@ -2203,12 +2203,12 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                                           href={getAssetUrl(att.file_path)}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="block rounded-xl overflow-hidden border border-[#3b3e45] hover:opacity-95 transition max-w-xs"
+                                          className="block rounded-xl overflow-hidden border border-slate-700 hover:opacity-95 transition max-w-xs"
                                         >
                                           <img
                                             src={getAssetUrl(att.file_path)}
                                             alt={att.original_name || 'Attachment'}
-                                            className="max-h-56 rounded-xl object-contain bg-[#1e1f22]"
+                                            className="max-h-56 rounded-xl object-contain bg-slate-900"
                                           />
                                         </a>
                                       ))}
@@ -2224,7 +2224,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
                       {/* Discord Attachment Preview Tray */}
                       {chatPhotoPreview && (
-                        <div className="mb-2 p-2 rounded-xl bg-[#2b2d31] border border-[#3b3e45] inline-flex items-center space-x-2">
+                        <div className="mb-2 p-2 rounded-xl bg-slate-900 border border-slate-700 inline-flex items-center space-x-2">
                           <img src={chatPhotoPreview} alt="Preview" className="w-12 h-12 object-cover rounded-lg" />
                           <div className="text-xs text-slate-300 pr-2">
                             <span className="font-semibold block truncate max-w-[140px]">{selectedChatPhoto?.name}</span>
@@ -2247,10 +2247,10 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                       {/* Discord Input Bar */}
                       {isCurrentRoomMember ? (
                         <form onSubmit={handleSendRoomMessage} className="mt-3">
-                          <div className="bg-[#383a40] border border-[#404249] rounded-xl px-3 py-2 flex items-center space-x-2.5 focus-within:border-[#5865F2] transition">
+                          <div className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 flex items-center space-x-2.5 focus-within:border-indigo-500 transition">
                             {/* Attachment Plus button */}
                             <label
-                              className="p-1.5 rounded-full bg-[#4e5058] hover:bg-[#5865F2] text-slate-200 hover:text-white transition cursor-pointer shrink-0"
+                              className="p-1.5 rounded-full bg-slate-700 hover:bg-indigo-600 text-slate-200 hover:text-white transition cursor-pointer shrink-0"
                               title="Attach photo/screenshot"
                             >
                               <Plus className="w-3.5 h-3.5 stroke-[3]" />
@@ -2267,13 +2267,13 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                               value={newRoomMessage}
                               onChange={e => setNewRoomMessage(e.target.value)}
                               placeholder={`Message #${roomDetails.room.name}`}
-                              className="flex-1 bg-transparent text-xs text-white placeholder-[#949ba4] focus:outline-hidden"
+                              className="flex-1 bg-transparent text-xs text-white placeholder-slate-400 focus:outline-hidden"
                             />
 
                             <button
                               type="submit"
                               disabled={sendingRoomMessage || (!newRoomMessage.trim() && !selectedChatPhoto)}
-                              className="px-3.5 py-1.5 rounded-lg bg-[#5865F2] hover:bg-[#4752c4] disabled:opacity-40 text-white font-bold text-xs flex items-center space-x-1 transition cursor-pointer shrink-0 shadow-md shadow-[#5865F2]/20"
+                              className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold text-xs flex items-center space-x-1 transition cursor-pointer shrink-0 shadow-md shadow-indigo-600/20"
                             >
                               <Send className="w-3.5 h-3.5" />
                               <span className="hidden sm:inline">{sendingRoomMessage ? 'Sending...' : 'Send'}</span>
@@ -2281,7 +2281,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                           </div>
                         </form>
                       ) : (
-                        <div className="mt-3 text-center py-2.5 text-xs text-slate-400 bg-[#2b2d31] rounded-xl border border-[#3b3e45]">
+                        <div className="mt-3 text-center py-2.5 text-xs text-slate-400 bg-slate-900 rounded-xl border border-slate-700">
                           🔒 Join this study group to chat and collaborate with cohort members.
                         </div>
                       )}
@@ -2289,8 +2289,8 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
                     {/* Right: Discord Member Sidebar */}
                     {chatMemberSidebarOpen && (
-                      <div className="w-56 bg-[#2b2d31] border-l border-[#232428] p-3 hidden sm:block overflow-y-auto max-h-[520px] scrollbar-thin">
-                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#949ba4] px-2 mb-2">
+                      <div className="w-56 bg-slate-900 border-l border-slate-700 p-3 hidden sm:block overflow-y-auto max-h-[520px] scrollbar-thin">
+                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-2 mb-2">
                           MEMBERS — {roomDetails.members?.length || 0}
                         </div>
 
@@ -2302,26 +2302,26 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                             return (
                               <div
                                 key={m.user_id}
-                                className="flex items-center space-x-2.5 px-2 py-1.5 rounded-lg hover:bg-[#35373c] transition group cursor-pointer"
+                                className="flex items-center space-x-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-800 transition group cursor-pointer"
                                 title={`${m.full_name} (@${m.username})`}
                               >
                                 <div className="relative shrink-0">
                                   <img
-                                    src={m.avatar_url ? getAssetUrl(m.avatar_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}&background=5865F2&color=fff`}
+                                    src={m.avatar_url ? getAssetUrl(m.avatar_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}&background=A66A43&color=fff`}
                                     alt={m.full_name}
-                                    className="w-8 h-8 rounded-full object-cover"
+                                    className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-700"
                                   />
-                                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#2b2d31] absolute bottom-0 right-0" />
+                                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-900 absolute bottom-0 right-0" />
                                 </div>
 
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center space-x-1">
                                     <span className={`text-xs font-semibold truncate ${
-                                      isOwner ? 'text-[#FEE75C]' : isMod ? 'text-[#5865F2]' : 'text-slate-200'
+                                      isOwner ? 'text-amber-400' : isMod ? 'text-indigo-400' : 'text-slate-200'
                                     }`}>
                                       {m.full_name.split(' ')[0]}
                                     </span>
-                                    {isOwner && <Crown className="w-3 h-3 text-[#FEE75C] shrink-0" />}
+                                    {isOwner && <Crown className="w-3 h-3 text-amber-400 shrink-0" />}
                                   </div>
                                   <span className="text-[10px] text-slate-400 capitalize block truncate">
                                     {isOwner ? 'Admin' : m.role}
@@ -2336,11 +2336,11 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                   </div>
                 </div>
                 ) : (
-                  <div className="rounded-3xl overflow-hidden border border-indigo-500/30 bg-[#313338] shadow-2xl p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[380px]">
-                    <div className="w-16 h-16 rounded-3xl bg-[#5865F2]/20 text-[#5865F2] flex items-center justify-center mx-auto mb-4 border border-[#5865F2]/30 shadow-xl shadow-[#5865F2]/20">
+                  <div className="rounded-3xl overflow-hidden border border-indigo-500/30 bg-slate-900 shadow-2xl p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[380px]">
+                    <div className="w-16 h-16 rounded-3xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-4 border border-indigo-500/30 shadow-xl shadow-indigo-500/20">
                       <Lock className="w-8 h-8" />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#5865F2]/15 text-[#5865F2] border border-[#5865F2]/30 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 mb-2">
                       Group Members Only
                     </span>
                     <h4 className="text-xl font-black text-white mb-2">
@@ -2358,7 +2358,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                       <button
                         type="button"
                         onClick={() => handleJoinRoom(roomDetails.room.id)}
-                        className="px-6 py-2.5 rounded-xl bg-[#5865F2] hover:bg-indigo-600 text-white font-extrabold text-xs shadow-lg shadow-[#5865F2]/30 transition cursor-pointer flex items-center space-x-2"
+                        className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center space-x-2"
                       >
                         <LogIn className="w-4 h-4" />
                         <span>{isPrivateGroup ? 'Request Admin Approval to Join' : 'Join Group to Unlock Chat'}</span>
