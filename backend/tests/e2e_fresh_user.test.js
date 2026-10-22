@@ -209,8 +209,13 @@ test('6. Second user registers -> has independent isolated space, can join publi
   assert.strictEqual(roomsRes.status, 200);
   assert.ok(roomsRes.data.length >= 4);
 
-  // Bob can post in the cohort Discord chat
+  // Bob joins Mathematics cohort so he is a member
   const mathGroup = roomsRes.data.find(r => r.subject === 'Mathematics');
+  await request(`/api/study-rooms/${mathGroup.id}/join`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${user2Token}` }
+  });
+
   const mathDetail = await request(`/api/study-rooms/${mathGroup.id}`, {
     headers: { Authorization: `Bearer ${user2Token}` }
   });

@@ -30,9 +30,10 @@ router.post('/', authenticateToken, (req, res) => {
   }
 
   const validDuration = ['daily', 'weekly', 'monthly'].includes(duration_type) ? duration_type : 'daily';
-  const scope = ['self', 'group', 'friends'].includes(challenge_scope) ? challenge_scope : 'group';
+  const scope = challenge_scope === 'self' ? 'self' : 'group';
   const hasTimer = has_timer === undefined ? 1 : (has_timer ? 1 : 0);
   const schedDate = scheduled_date && scheduled_date.trim() ? scheduled_date.trim() : null;
+  const targetRoomId = (scope === 'group' && room_id) ? Number(room_id) : null;
 
   let timeLimit = Number(time_limit_minutes);
   let xpBonus = Number(xp_reward);
@@ -73,7 +74,7 @@ router.post('/', authenticateToken, (req, res) => {
       datetime(COALESCE(?, CURRENT_TIMESTAMP), '${daysModifier}')
     )
   `).run(
-    room_id || null,
+    targetRoomId,
     task_id || null,
     userId,
     title.trim(),
@@ -133,12 +134,14 @@ router.get('/', authenticateToken, (req, res) => {
 
   let query = `
     SELECT c.*, u.full_name as creator_name, t.title as task_title, t.subject as task_subject,
+           r.name as room_name, r.subject as room_subject,
            (SELECT COUNT(*) FROM study_challenge_participants p WHERE p.challenge_id = c.id) as participant_count,
            (SELECT status FROM study_challenge_participants p WHERE p.challenge_id = c.id AND p.user_id = ?) as my_status,
            (SELECT is_completed FROM study_challenge_participants p WHERE p.challenge_id = c.id AND p.user_id = ?) as my_completed
     FROM study_challenges c
     LEFT JOIN users u ON c.creator_id = u.id
     LEFT JOIN study_tasks t ON c.task_id = t.id
+    LEFT JOIN study_rooms r ON c.room_id = r.id
     WHERE 1=1
   `;
   const params = [userId, userId];
@@ -169,10 +172,12 @@ router.get('/:id', authenticateToken, (req, res) => {
 
   const challenge = db.prepare(`
     SELECT c.*, u.full_name as creator_name, u.avatar_url as creator_avatar,
-           t.title as task_title, t.instructions as task_instructions, t.subject as task_subject
+           t.title as task_title, t.instructions as task_instructions, t.subject as task_subject,
+           r.name as room_name, r.subject as room_subject
     FROM study_challenges c
     LEFT JOIN users u ON c.creator_id = u.id
     LEFT JOIN study_tasks t ON c.task_id = t.id
+    LEFT JOIN study_rooms r ON c.room_id = r.id
     WHERE c.id = ?
   `).get(challengeId);
 
@@ -180,9 +185,9 @@ router.get('/:id', authenticateToken, (req, res) => {
 
   // Participants leaderboard
   const participants = db.prepare(`
-    SELECT p.*, u.username, u.full_name, u.avatar_url
+    SELECT p.*, COALESCE(u.username, 'learner') as username, COALESCE(u.full_name, 'Learner') as full_name, u.avatar_url
     FROM study_challenge_participants p
-    JOIN users u ON p.user_id = u.id
+    LEFT JOIN users u ON p.user_id = u.id
     WHERE p.challenge_id = ?
     ORDER BY p.is_completed DESC, p.time_taken_seconds ASC, p.score_achieved DESC
   `).all(challengeId);
@@ -275,8 +280,14 @@ router.post('/:id/complete', authenticateToken, (req, res) => {
   const challenge = db.prepare('SELECT * FROM study_challenges WHERE id = ?').get(challengeId);
   if (!challenge) return res.status(404).json({ error: 'Challenge not found.' });
 
-  const participant = db.prepare('SELECT * FROM study_challenge_participants WHERE challenge_id = ? AND user_id = ?').get(challengeId, userId);
-  if (!participant) return res.status(400).json({ error: 'You have not joined this challenge.' });
+  let participant = db.prepare('SELECT * FROM study_challenge_participants WHERE challenge_id = ? AND user_id = ?').get(challengeId, userId);
+  if (!participant) {
+    db.prepare(`
+      INSERT OR IGNORE INTO study_challenge_participants (challenge_id, user_id, status, started_at)
+      VALUES (?, ?, 'in_progress', CURRENT_TIMESTAMP)
+    `).run(challengeId, userId);
+    participant = db.prepare('SELECT * FROM study_challenge_participants WHERE challenge_id = ? AND user_id = ?').get(challengeId, userId);
+  }
 
   let durationSec = Number(time_taken_seconds);
   if (!durationSec && participant.started_at) {

@@ -313,6 +313,9 @@ test('7. Doubt-Solving Chat & Solution Acceptance', async () => {
   const token = loginRes.data.token;
   const authHeader = { Authorization: `Bearer ${token}` };
 
+  // Join study room #1 so sam_study is an active member
+  await request('/api/study-rooms/1/join', { method: 'POST', headers: authHeader });
+
   // Post chat message in study room #1
   const chatRoom = db.prepare("SELECT id FROM chat_rooms WHERE reference_id = 1 AND room_type = 'study_room'").get();
   assert.ok(chatRoom);
@@ -335,6 +338,7 @@ test('7. Doubt-Solving Chat & Solution Acceptance', async () => {
     body: { identifier: 'dr_stone', password: 'password123' }
   });
   const mentorToken = mentorLogin.data.token;
+  await request('/api/study-rooms/1/join', { method: 'POST', headers: { Authorization: `Bearer ${mentorToken}` } });
 
   const replyRes = await request(`/api/chat/room/${chatRoom.id}/messages`, {
     method: 'POST',

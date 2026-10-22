@@ -26,10 +26,10 @@ function checkChatRoomAccess(chatRoomId, userId) {
   if (room.room_type === 'study_room') {
     const studyRoom = db.prepare('SELECT * FROM study_rooms WHERE id = ?').get(room.reference_id);
     if (!studyRoom) return null;
-    if (studyRoom.room_type === 'public') return room;
 
+    const isOwner = Number(studyRoom.owner_id) === Number(userId);
     const membership = db.prepare("SELECT * FROM study_room_memberships WHERE room_id = ? AND user_id = ? AND status = 'active'").get(studyRoom.id, userId);
-    return (membership || studyRoom.owner_id === userId) ? room : null;
+    return (membership || isOwner) ? room : null;
   } else if (room.room_type === 'task_discussion') {
     const task = db.prepare('SELECT * FROM study_tasks WHERE id = ?').get(room.reference_id);
     if (!task) return null;

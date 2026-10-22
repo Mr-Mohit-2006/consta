@@ -10,7 +10,6 @@ import {
 export default function ChallengesView({ initialChallengeId, onOpenTask, onNavigate, onBack }) {
   const { user, refreshUserData } = useAuth();
   const [challenges, setChallenges] = useState([]);
-  const [tasks, setTasks] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [challengeDetails, setChallengeDetails] = useState(null);
@@ -21,11 +20,10 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
 
   // New challenge modal
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState('');
   const [selectedRoomId, setSelectedRoomId] = useState('');
   const [chalTitle, setChalTitle] = useState('');
   const [chalDesc, setChalDesc] = useState('');
-  const [chalScope, setChalScope] = useState('self'); // 'self' | 'group' | 'friends'
+  const [chalScope, setChalScope] = useState('self'); // 'self' | 'group'
   const [chalDuration, setChalDuration] = useState('weekly'); // 'daily' | 'weekly' | 'monthly'
   const [chalScheduledDate, setChalScheduledDate] = useState(''); // Schedule for specific date
   const [timeLimit, setTimeLimit] = useState(10080); // 7 days in minutes
@@ -69,12 +67,6 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
     try {
       const chalList = await apiRequest('/challenges');
       setChallenges(chalList);
-
-      const taskList = await apiRequest('/study-tasks');
-      setTasks(taskList);
-      if (taskList.length > 0 && !selectedTaskId) {
-        setSelectedTaskId(taskList[0].id);
-      }
 
       const roomList = await apiRequest('/study-rooms');
       setRooms(roomList);
@@ -149,11 +141,11 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
 
     try {
       const finalTimeLimit = includeTimer ? Number(customTimerMinutes || timeLimit) : 0;
+      const targetRoom = chalScope === 'group' ? Number(selectedRoomId || (rooms[0] && rooms[0].id)) : null;
       const res = await apiRequest('/challenges', {
         method: 'POST',
         body: {
-          task_id: selectedTaskId ? Number(selectedTaskId) : null,
-          room_id: chalScope === 'group' && selectedRoomId ? Number(selectedRoomId) : null,
+          room_id: targetRoom,
           title: chalTitle.trim(),
           description: chalDesc.trim(),
           challenge_scope: chalScope,
@@ -171,8 +163,10 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
       setChalDesc('');
       setChalScheduledDate('');
       await loadData();
-      loadChallengeDetails(res.id);
-      alert('Challenge launched successfully! Notifications dispatched to participants.');
+      if (res?.id) {
+        await loadChallengeDetails(res.id);
+      }
+      alert('Challenge launched successfully!');
     } catch (err) {
       alert(err.message);
     }
@@ -332,8 +326,7 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
           {[
             { id: 'all', label: 'All Challenges' },
             { id: 'self', label: 'Self Sprints' },
-            { id: 'group', label: 'Cohort Challenges' },
-            { id: 'friends', label: 'Study Buddy Challenges' }
+            { id: 'group', label: 'Cohort Challenges' }
           ].map(item => (
             <button
               key={item.id}
@@ -514,6 +507,12 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
                         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center space-x-1">
                           <Calendar className="w-3 h-3 text-amber-400" />
                           <span>Scheduled: {new Date(selectedChallenge.scheduled_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </span>
+                      )}
+                      {selectedChallenge.room_name && (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 flex items-center space-x-1">
+                          <Users className="w-3 h-3 text-cyan-400" />
+                          <span>Group: {selectedChallenge.room_name}</span>
                         </span>
                       )}
                       {selectedChallenge.task_subject && (
@@ -716,13 +715,26 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
                         <span>Challenge Completed!</span>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => handleCompleteChallenge(selectedChallenge.id)}
-                        className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-extrabold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition cursor-pointer shrink-0"
-                      >
-                        <Check className="w-4 h-4 stroke-[3]" />
-                        <span>Finish & Complete Challenge (+{selectedChallenge.xp_reward} XP)</span>
-                      </button>
+                      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        {!timerRunning && !challengeDetails.myRecord?.started_at && (
+                          <button
+                            type="button"
+                            onClick={() => handleStartChallenge(selectedChallenge.id)}
+                            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center space-x-1.5 shadow-md shadow-amber-500/20 transition cursor-pointer"
+                          >
+                            <Play className="w-4 h-4 fill-slate-950" />
+                            <span>Start Challenge</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleCompleteChallenge(selectedChallenge.id)}
+                          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-extrabold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition cursor-pointer"
+                        >
+                          <Check className="w-4 h-4 stroke-[3]" />
+                          <span>Finish & Complete Challenge (+{selectedChallenge.xp_reward} XP)</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -857,60 +869,58 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
                 </div>
               </div>
 
-              {/* Task Selector */}
+              {/* Scope Selector: Only for Self or Group with Particular Group */}
               <div>
-                <label className="text-xs text-slate-300 block mb-1 font-medium">Select Task</label>
-                <select
-                  value={selectedTaskId}
-                  onChange={e => setSelectedTaskId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                >
-                  {tasks.map(t => (
-                    <option key={t.id} value={t.id}>
-                      [{t.subject}] {t.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Scope Selector */}
-              <div>
-                <label className="text-xs text-slate-300 block mb-1 font-medium">Who Can Participate?</label>
-                <div className="grid grid-cols-3 gap-2">
+                <label className="text-xs text-slate-300 block mb-1.5 font-medium">Challenge Mode</label>
+                <div className="grid grid-cols-2 gap-2.5">
                   {[
-                    { id: 'self', label: 'Self Sprint', desc: 'Just for you' },
-                    { id: 'group', label: 'Cohort', desc: 'Entire room' },
-                    { id: 'friends', label: 'Study Buddies', desc: 'Notify friends' }
-                  ].map(item => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setChalScope(item.id)}
-                      className={`p-2.5 rounded-xl border text-center transition cursor-pointer ${
-                        chalScope === item.id
-                          ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300 font-bold'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <div className="text-xs font-semibold">{item.label}</div>
-                      <div className="text-[10px] text-slate-400">{item.desc}</div>
-                    </button>
-                  ))}
+                    { id: 'self', label: 'Self Challenge', desc: 'Personal solo focus sprint (just for you)', icon: User },
+                    { id: 'group', label: 'Group Challenge', desc: 'Cohort sprint for a particular study group', icon: Users }
+                  ].map(item => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setChalScope(item.id)}
+                        className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                          chalScope === item.id
+                            ? 'bg-amber-500/20 border-amber-500/60 text-white shadow-md shadow-amber-500/10'
+                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2 mb-1">
+                          <Icon className={`w-4 h-4 ${chalScope === item.id ? 'text-amber-400' : 'text-slate-400'}`} />
+                          <div className="text-xs font-bold text-white">{item.label}</div>
+                        </div>
+                        <div className="text-[10px] text-slate-400 leading-tight">{item.desc}</div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
+              {/* Particular Group Selector when Group Mode is selected */}
               {chalScope === 'group' && (
                 <div>
-                  <label className="text-xs text-slate-300 block mb-1 font-medium">Assign to Study Room</label>
-                  <select
-                    value={selectedRoomId}
-                    onChange={e => setSelectedRoomId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  >
-                    {rooms.map(r => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
-                    ))}
-                  </select>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Select Particular Group</label>
+                  {rooms.length > 0 ? (
+                    <select
+                      value={selectedRoomId || (rooms[0] && rooms[0].id) || ''}
+                      onChange={e => setSelectedRoomId(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-hidden focus:border-amber-500"
+                    >
+                      {rooms.map(r => (
+                        <option key={r.id} value={r.id}>
+                          [{r.subject}] {r.name} ({r.member_count || 1} members)
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-amber-300">
+                      No study groups found. Please create a study group first or select "Self Challenge".
+                    </div>
+                  )}
                 </div>
               )}
 

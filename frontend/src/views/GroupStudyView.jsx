@@ -128,6 +128,30 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     }
   }, [roomDetails?.chatRoomId]);
 
+  // Real-time automatic chat background sync (every 2 seconds)
+  useEffect(() => {
+    if (!roomDetails?.chatRoomId || !isCurrentRoomMember) return;
+    const interval = setInterval(async () => {
+      try {
+        const msgs = await apiRequest(`/chat/room/${roomDetails.chatRoomId}/messages`);
+        if (Array.isArray(msgs)) {
+          setRoomChatMessages(prev => {
+            if (prev.length !== msgs.length) {
+              setTimeout(() => {
+                chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+              }, 50);
+              return msgs;
+            }
+            return prev;
+          });
+        }
+      } catch (e) {
+        // ignore
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [roomDetails?.chatRoomId, isCurrentRoomMember]);
+
   async function loadRooms() {
     setLoading(true);
     try {
@@ -1662,7 +1686,8 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
               )}
 
               {/* Discord-like Chat & Live Discussion Section */}
-              {(isCurrentRoomMember || !isPrivateGroup) && (activeGroupTab === 'all' || activeGroupTab === 'chat') && (
+              {(activeGroupTab === 'all' || activeGroupTab === 'chat') && (
+                isCurrentRoomMember ? (
                 <div className="rounded-3xl overflow-hidden border border-[#3b3e45] bg-[#313338] shadow-2xl flex flex-col min-h-[560px]">
                   {/* Discord Top Channel Header */}
                   <div className="bg-[#2b2d31] border-b border-[#232428] px-4 py-3 flex items-center justify-between shadow-xs">
@@ -1953,6 +1978,37 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                     )}
                   </div>
                 </div>
+                ) : (
+                  <div className="rounded-3xl overflow-hidden border border-indigo-500/30 bg-[#313338] shadow-2xl p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[380px]">
+                    <div className="w-16 h-16 rounded-3xl bg-[#5865F2]/20 text-[#5865F2] flex items-center justify-center mx-auto mb-4 border border-[#5865F2]/30 shadow-xl shadow-[#5865F2]/20">
+                      <Lock className="w-8 h-8" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#5865F2]/15 text-[#5865F2] border border-[#5865F2]/30 mb-2">
+                      Group Members Only
+                    </span>
+                    <h4 className="text-xl font-black text-white mb-2">
+                      Exclusive Discord Chat for Members
+                    </h4>
+                    <p className="text-xs text-slate-300 max-w-md mx-auto mb-6 leading-relaxed">
+                      Only enrolled members of <strong className="text-white font-bold">{roomDetails.room.name}</strong> can view and participate in this live chat. Join this study cohort to chat in real-time, solve doubts, and collaborate on tasks!
+                    </p>
+                    {isCurrentRoomPending ? (
+                      <span className="px-5 py-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center space-x-2">
+                        <Clock className="w-4 h-4 text-amber-400 animate-spin" />
+                        <span>Join Request Pending Admin Approval</span>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleJoinRoom(roomDetails.room.id)}
+                        className="px-6 py-2.5 rounded-xl bg-[#5865F2] hover:bg-indigo-600 text-white font-extrabold text-xs shadow-lg shadow-[#5865F2]/30 transition cursor-pointer flex items-center space-x-2"
+                      >
+                        <LogIn className="w-4 h-4" />
+                        <span>{isPrivateGroup ? 'Request Admin Approval to Join' : 'Join Group to Unlock Chat'}</span>
+                      </button>
+                    )}
+                  </div>
+                )
               )}
 
               {/* Group Challenges & Scheduled Competitions Section */}
