@@ -5,7 +5,7 @@ import {
   CheckSquare, Plus, Clock, FileText, Image as ImageIcon, Link as LinkIcon,
   CheckCircle2, AlertCircle, RefreshCw, ChevronRight, Eye, Send, UploadCloud,
   FileCheck, Shield, ExternalLink, Trophy, Play, Flame, Zap, ChevronLeft,
-  Trash2, Check, Square, Users, User, Calendar, ArrowLeft, X
+  Trash2, Check, Square, Users, User, Calendar, ArrowLeft, X, RotateCcw
 } from 'lucide-react';
 
 export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, onNavigate, onBack }) {
@@ -27,6 +27,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
 
   // Challenge modal for this task
   const [showTaskChallengeModal, setShowTaskChallengeModal] = useState(false);
+  const [taskChalSubmitting, setTaskChalSubmitting] = useState(false);
   const [taskChalTitle, setTaskChalTitle] = useState('');
   const [taskChalScope, setTaskChalScope] = useState('self'); // 'self' | 'group' | 'friends'
   const [taskChalTime, setTaskChalTime] = useState(25);
@@ -285,6 +286,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
     e.preventDefault();
     if (!selectedTask || !taskChalTitle.trim()) return;
 
+    setTaskChalSubmitting(true);
     try {
       const res = await apiRequest('/challenges', {
         method: 'POST',
@@ -303,13 +305,14 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
 
       setShowTaskChallengeModal(false);
       setTaskChalTitle('');
-      alert(`⚡ Challenge "${res.title}" created successfully! Notifications sent to your ${taskChalScope === 'group' ? 'cohort members' : 'friends'}.`);
 
       if (onOpenChallenge) {
         onOpenChallenge(res.id);
       }
     } catch (err) {
       alert(err.message);
+    } finally {
+      setTaskChalSubmitting(false);
     }
   }
 
@@ -1285,9 +1288,20 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 cursor-pointer transition"
+                  disabled={taskChalSubmitting}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 cursor-pointer transition flex items-center space-x-1.5"
                 >
-                  Create & Launch
+                  {taskChalSubmitting ? (
+                    <>
+                      <RotateCcw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Launching Sprint...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                      <span>Create & Launch</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

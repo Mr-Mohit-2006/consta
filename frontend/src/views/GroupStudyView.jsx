@@ -806,6 +806,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
       setGroupChalTitle('');
       setGroupChalDate('');
       setGroupChalTaskId('');
+      setActiveGroupTab('challenges');
       await loadRoomDetails(selectedRoomId);
       await loadRooms();
       alert(`🏆 Group Challenge "${res.title}" scheduled successfully for ${groupChalDate ? new Date(groupChalDate).toLocaleDateString() : 'today'}! Cohort members have been alerted.`);

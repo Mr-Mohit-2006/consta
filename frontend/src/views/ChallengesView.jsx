@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Trophy, Flame, Clock, Play, CheckCircle2, Plus, Users, User,
   Sparkles, Award, ArrowRight, ShieldCheck, Square, Check, ChevronLeft,
-  Calendar, Zap, CalendarDays, Pause, RotateCcw, Timer, Eye, EyeOff, Hourglass, Trash2, ArrowLeft, X
+  Calendar, Zap, CalendarDays, Pause, RotateCcw, Timer, Eye, EyeOff, Hourglass, Trash2, ArrowLeft, X, AlertCircle
 } from 'lucide-react';
 
 export default function ChallengesView({ initialChallengeId, onOpenTask, onNavigate, onBack }) {
@@ -31,6 +31,10 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
   const [customTimerMinutes, setCustomTimerMinutes] = useState(25);
   const [minScore, setMinScore] = useState(4.0);
   const [xpBonus, setXpBonus] = useState(250);
+  const [launchingChallenge, setLaunchingChallenge] = useState(false);
+  const [startingChallenge, setStartingChallenge] = useState(false);
+  const [completingChallenge, setCompletingChallenge] = useState(false);
+  const [challengeToast, setChallengeToast] = useState(null); // { type, text }
 
   // Active Sprint timer
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -38,6 +42,13 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
   const [timerMode, setTimerMode] = useState('stopwatch'); // 'stopwatch' | 'countdown'
   const [showWorkspaceTimer, setShowWorkspaceTimer] = useState(true);
   const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (challengeToast) {
+      const timer = setTimeout(() => setChallengeToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [challengeToast]);
 
   useEffect(() => {
     loadData();
@@ -111,7 +122,7 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
         setTimerSeconds(details.myRecord?.time_taken_seconds || 0);
       }
     } catch (err) {
-      alert(err.message);
+      setChallengeToast({ type: 'error', text: err.message });
     }
   }
 
@@ -139,6 +150,7 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
     e.preventDefault();
     if (!chalTitle.trim()) return;
 
+    setLaunchingChallenge(true);
     try {
       const finalTimeLimit = includeTimer ? Number(customTimerMinutes || timeLimit) : 0;
       const targetRoom = chalScope === 'group' ? Number(selectedRoomId || (rooms[0] && rooms[0].id)) : null;
@@ -165,10 +177,16 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
       await loadData();
       if (res?.id) {
         await loadChallengeDetails(res.id);
+        setMobileView('details');
       }
-      alert('Challenge launched successfully!');
+      setChallengeToast({
+        type: 'success',
+        text: `⚡ Challenge "${res.title || chalTitle.trim()}" launched successfully! Live workspace & focus timer are active.`
+      });
     } catch (err) {
-      alert(err.message);
+      setChallengeToast({ type: 'error', text: err.message });
+    } finally {
+      setLaunchingChallenge(false);
     }
   }
 
@@ -182,22 +200,31 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
         setSelectedChallenge(null);
         setChallengeDetails(null);
       }
-      alert('Challenge removed successfully.');
+      setChallengeToast({
+        type: 'info',
+        text: 'Challenge removed successfully.'
+      });
     } catch (err) {
-      alert(err.message);
+      setChallengeToast({ type: 'error', text: err.message });
     }
   }
 
   async function handleStartChallenge(challengeId) {
+    setStartingChallenge(true);
     try {
       await apiRequest(`/challenges/${challengeId}/start`, { method: 'POST' });
       setTimerSeconds(0);
       setTimerRunning(true);
       setShowWorkspaceTimer(true);
       await loadChallengeDetails(challengeId);
-      alert(`⚡ Challenge started! Push notifications sent to your friends to cheer you on.`);
+      setChallengeToast({
+        type: 'success',
+        text: '⚡ Sprint started! Focus timer is ticking.'
+      });
     } catch (err) {
-      alert(err.message);
+      setChallengeToast({ type: 'error', text: err.message });
+    } finally {
+      setStartingChallenge(false);
     }
   }
 
@@ -211,6 +238,7 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
   }
 
   async function handleCompleteChallenge(challengeId) {
+    setCompletingChallenge(true);
     try {
       const res = await apiRequest(`/challenges/${challengeId}/complete`, {
         method: 'POST',
@@ -226,12 +254,17 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
       await loadData();
 
       const timeMsg = timerSeconds > 0
-        ? `completed in ${Math.floor(timerSeconds / 60)}m ${timerSeconds % 60}s`
-        : `completed successfully`;
+        ? `in ${Math.floor(timerSeconds / 60)}m ${timerSeconds % 60}s`
+        : `successfully`;
 
-      alert(`🎉 Congratulations! Challenge ${timeMsg}! You earned +${res.xpReward} bonus XP! Friends have been notified.`);
+      setChallengeToast({
+        type: 'success',
+        text: `🎉 Congratulations! Challenge completed ${timeMsg}! +${res.xpReward} bonus XP earned!`
+      });
     } catch (err) {
-      alert(err.message);
+      setChallengeToast({ type: 'error', text: err.message });
+    } finally {
+      setCompletingChallenge(false);
     }
   }
 
@@ -280,7 +313,38 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Toast Notification */}
+      {challengeToast && (
+        <div className="fixed top-5 right-5 z-50 max-w-sm sm:max-w-md animate-in fade-in slide-in-from-top-3 duration-200">
+          <div className={`p-4 rounded-2xl shadow-2xl border flex items-start space-x-3 backdrop-blur-md ${
+            challengeToast.type === 'error'
+              ? 'bg-rose-950/90 border-rose-800 text-rose-200 shadow-rose-950/50'
+              : challengeToast.type === 'info'
+              ? 'bg-slate-900/95 border-slate-700 text-slate-200 shadow-black/50'
+              : 'bg-emerald-950/90 border-emerald-800 text-emerald-200 shadow-emerald-950/50'
+          }`}>
+            <div className={`p-1.5 rounded-lg shrink-0 ${
+              challengeToast.type === 'error' ? 'bg-rose-500/20 text-rose-400' :
+              challengeToast.type === 'info' ? 'bg-slate-700/50 text-slate-300' :
+              'bg-emerald-500/20 text-emerald-400'
+            }`}>
+              {challengeToast.type === 'error' ? <AlertCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+            </div>
+            <div className="flex-1 text-xs font-semibold leading-relaxed">
+              {challengeToast.text}
+            </div>
+            <button
+              type="button"
+              onClick={() => setChallengeToast(null)}
+              className="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
@@ -383,12 +447,18 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
         </button>
         <button
           onClick={() => setMobileView('details')}
-          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5 cursor-pointer relative ${
             mobileView === 'details' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
           }`}
         >
           <Clock className="w-3.5 h-3.5" />
           <span>Sprint Workspace</span>
+          {timerRunning && (
+            <span className="flex h-2 w-2 relative ml-1">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+          )}
         </button>
       </div>
 
@@ -719,20 +789,22 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
                         {!timerRunning && !challengeDetails.myRecord?.started_at && (
                           <button
                             type="button"
+                            disabled={startingChallenge}
                             onClick={() => handleStartChallenge(selectedChallenge.id)}
-                            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center space-x-1.5 shadow-md shadow-amber-500/20 transition cursor-pointer"
+                            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-amber-500/20 transition cursor-pointer"
                           >
                             <Play className="w-4 h-4 fill-slate-950" />
-                            <span>Start Challenge</span>
+                            <span>{startingChallenge ? 'Starting...' : 'Start Challenge'}</span>
                           </button>
                         )}
                         <button
                           type="button"
+                          disabled={completingChallenge}
                           onClick={() => handleCompleteChallenge(selectedChallenge.id)}
-                          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-extrabold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition cursor-pointer"
+                          className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-50 text-white font-extrabold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition cursor-pointer"
                         >
                           <Check className="w-4 h-4 stroke-[3]" />
-                          <span>Finish & Complete Challenge (+{selectedChallenge.xp_reward} XP)</span>
+                          <span>{completingChallenge ? 'Finishing...' : `Finish & Complete (+${selectedChallenge.xp_reward} XP)`}</span>
                         </button>
                       </div>
                     )}
@@ -1110,12 +1182,69 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold cursor-pointer shadow-md shadow-amber-500/20 transition"
+                  disabled={launchingChallenge || !chalTitle.trim()}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 text-slate-950 text-xs font-black cursor-pointer shadow-md shadow-amber-500/25 transition flex items-center space-x-1.5"
                 >
-                  Launch Challenge
+                  {launchingChallenge ? (
+                    <>
+                      <RotateCcw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Launching Sprint...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                      <span>Launch Challenge</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Active Sprint Bar (Responsive HUD) */}
+      {timerRunning && selectedChallenge && (
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-40 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <div className="bg-slate-900/95 backdrop-blur-md border border-amber-500/40 rounded-2xl p-3 sm:px-4 sm:py-3 shadow-2xl shadow-amber-500/10 flex items-center justify-between gap-3 text-white max-w-md">
+            <div className="flex items-center space-x-3 min-w-0">
+              <span className="relative flex h-3 w-3 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+              </span>
+              <div className="min-w-0">
+                <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1 truncate">
+                  <span>Sprint Running</span>
+                </div>
+                <div className="text-xs font-semibold text-slate-200 truncate">
+                  {selectedChallenge.title}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 shrink-0">
+              <div className="font-mono text-sm sm:text-base font-black px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-amber-300">
+                {String(swMins).padStart(2, '0')}:{String(swSecs).padStart(2, '0')}
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleTimer}
+                title="Pause / Resume"
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
+              >
+                {timerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileView('details');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition cursor-pointer hidden xs:inline-flex items-center space-x-1"
+              >
+                <span>Workspace</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
