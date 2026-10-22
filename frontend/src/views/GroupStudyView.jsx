@@ -1690,26 +1690,26 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 isCurrentRoomMember ? (
                 <div className="rounded-3xl overflow-hidden border border-[#3b3e45] bg-[#313338] shadow-2xl flex flex-col min-h-[560px]">
                   {/* Discord Top Channel Header */}
-                  <div className="bg-[#2b2d31] border-b border-[#232428] px-4 py-3 flex items-center justify-between shadow-xs">
-                    <div className="flex items-center space-x-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-[#5865F2]/20 text-[#5865F2] flex items-center justify-center font-bold">
+                  <div className="bg-[#2b2d31] border-b border-[#232428] px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 shadow-xs">
+                    <div className="flex items-center space-x-2 sm:space-x-2.5 min-w-0 flex-1">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#5865F2]/20 text-[#5865F2] flex items-center justify-center font-bold shrink-0">
                         <Hash className="w-4 h-4 text-indigo-400 stroke-[2.5]" />
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-extrabold text-sm text-white truncate">general-chat</span>
+                        <div className="flex items-center space-x-1.5 sm:space-x-2">
+                          <span className="font-extrabold text-xs sm:text-sm text-white truncate">general-chat</span>
                           <span className="hidden sm:inline-block text-slate-500">|</span>
                           <span className="hidden sm:inline-block text-xs text-slate-300 font-semibold truncate">
                             {roomDetails.room.name}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-400 truncate">
+                        <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">
                           {roomDetails.room.description || 'Welcome to this study cohort! Discuss tasks, ask doubts & collaborate.'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2 shrink-0">
+                    <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
                       <button
                         type="button"
                         onClick={() => {
@@ -1717,17 +1717,16 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                           setRoomDetails(null);
                           setMobileView('list');
                         }}
-                        className="px-2.5 py-1.5 rounded-lg bg-[#383a40] hover:bg-[#404249] text-slate-200 text-xs font-bold flex items-center space-x-1.5 border border-[#4e5058]/50 transition cursor-pointer"
+                        className="px-2 sm:px-2.5 py-1.5 rounded-lg bg-[#383a40] hover:bg-[#404249] text-slate-200 text-xs font-bold flex items-center space-x-1 border border-[#4e5058]/50 transition cursor-pointer"
                         title="Exit group view"
                       >
                         <ArrowLeft className="w-3.5 h-3.5 text-indigo-400" />
                         <span className="hidden sm:inline">Exit Group</span>
-                        <span className="sm:hidden">Exit</span>
                       </button>
 
-                      <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>{chatPresenceCount || roomDetails.members?.length || 1} online</span>
+                      <span className="inline-flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] sm:text-[11px] font-bold">
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>{chatPresenceCount || roomDetails.members?.length || 1} <span className="hidden xs:inline">online</span></span>
                       </span>
 
                       <button
@@ -1740,7 +1739,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                         }`}
                         title="Toggle Discord Members list"
                       >
-                        <Users className="w-4 h-4" />
+                        <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
 
                       <button
@@ -1750,7 +1749,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                         className="p-1.5 rounded-lg bg-[#383a40] hover:bg-[#404249] text-slate-300 transition cursor-pointer"
                         title="Refresh chat messages"
                       >
-                        <RefreshCw className={`w-4 h-4 ${roomChatLoading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${roomChatLoading ? 'animate-spin' : ''}`} />
                       </button>
                     </div>
                   </div>
@@ -2434,12 +2433,23 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
       {/* Modal: Create Room (Public vs Private with Admin Approval) */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-1">Create Study Group</h3>
-            <p className="text-xs text-slate-400 mb-4">Set up a collaborative study group as Group Admin.</p>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-0.5">Create Study Group</h3>
+                <p className="text-xs text-slate-400">Set up a collaborative study group as Group Admin.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleCreateRoom} className="space-y-4">
+            <form onSubmit={handleCreateRoom} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
               <div>
                 <label className="text-xs text-slate-300 block mb-1 font-medium">Group Name</label>
                 <input
@@ -2527,17 +2537,17 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-end space-x-2 mt-4 z-10">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold shadow-md shadow-indigo-600/30 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold shadow-md shadow-indigo-600/30 cursor-pointer transition"
                 >
                   Create Group
                 </button>
@@ -2549,17 +2559,23 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
       {/* Modal: Add Task in Group */}
       {showCreateTaskModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1 flex items-center space-x-2">
-              <Plus className="w-5 h-5 text-indigo-400" />
-              <span>Add Task to {roomDetails?.room?.name}</span>
-            </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Create an assignment or milestone for members of this study group.
-            </p>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between shrink-0">
+              <h3 className="text-lg font-bold text-white flex items-center space-x-2">
+                <Plus className="w-5 h-5 text-indigo-400" />
+                <span>Add Task to {roomDetails?.room?.name}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowCreateTaskModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleCreateTaskInGroup} className="space-y-4">
+            <form onSubmit={handleCreateTaskInGroup} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
               <div>
                 <label className="text-xs text-slate-300 block mb-1 font-medium">Task Title</label>
                 <input
@@ -2620,18 +2636,18 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-end space-x-2 mt-4 z-10">
                 <button
                   type="button"
                   onClick={() => setShowCreateTaskModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={taskSubmitting}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-indigo-600/30 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-indigo-600/30 cursor-pointer transition"
                 >
                   {taskSubmitting ? 'Adding...' : 'Add Task to Group'}
                 </button>
@@ -2643,8 +2659,8 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
       {/* Modal: Group Analytics */}
       {showAnalytics && groupAnalytics && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h3 className="text-base font-bold text-white flex items-center space-x-2">
                 <BarChart3 className="w-5 h-5 text-indigo-400" />
@@ -2653,9 +2669,9 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
               <button
                 type="button"
                 onClick={() => setShowAnalytics(false)}
-                className="text-slate-400 hover:text-white text-xs font-bold cursor-pointer"
+                className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -2696,12 +2712,21 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
       {/* Modal: Add / Invite Member (Admin Only) */}
       {showAddMemberModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-md p-6 shadow-2xl">
-            <h3 className="text-base font-bold text-white mb-1 flex items-center space-x-2">
-              <UserPlus className="w-4 h-4 text-indigo-400" />
-              <span>Invite Member to Group</span>
-            </h3>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+                <UserPlus className="w-4 h-4 text-indigo-400" />
+                <span>Invite Member to Group</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddMemberModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
             <p className="text-xs text-slate-400 mb-4">
               Add a user by their username or email to collaborate in this group.
             </p>
@@ -2999,9 +3024,9 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
       {/* Admin Group Task Modal with Main Title, Checkboxes for each topic & Timer */}
       {showAdminTaskModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-purple-500/30 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-slate-900 border border-purple-500/30 rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between shrink-0">
               <div className="flex items-center space-x-2">
                 <div className="p-1.5 rounded-xl bg-purple-500/20 text-purple-400">
                   <Crown className="w-4 h-4 text-amber-300" />
@@ -3013,13 +3038,13 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
               </div>
               <button
                 onClick={() => setShowAdminTaskModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateAdminGroupTask} className="space-y-4">
+            <form onSubmit={handleCreateAdminGroupTask} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
               {/* Main Title */}
               <div>
                 <label className="text-xs font-semibold text-slate-300 block mb-1">
@@ -3165,7 +3190,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex items-center justify-end space-x-2 mt-4 z-10">
                 <button
                   type="button"
                   onClick={() => setShowAdminTaskModal(false)}

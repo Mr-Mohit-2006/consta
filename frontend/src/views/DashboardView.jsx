@@ -233,13 +233,13 @@ export default function DashboardView({ onNavigate }) {
                   <div
                     key={t.id}
                     onClick={() => onNavigate('tasks')}
-                    className={`p-3.5 border rounded-2xl flex items-center justify-between cursor-pointer transition group ${
+                    className={`p-3.5 border rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 cursor-pointer transition group ${
                       isTaskCompleted
                         ? 'bg-slate-950/40 border-slate-800/60 opacity-80'
                         : 'bg-slate-900/60 hover:bg-slate-800/80 border-slate-800/80'
                     }`}
                   >
-                    <div className="flex items-center space-x-3 min-w-0 pr-4">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
                       {/* Checkbox button */}
                       <button
                         type="button"
@@ -258,16 +258,16 @@ export default function DashboardView({ onNavigate }) {
                         )}
                       </button>
 
-                      <div className="min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center space-x-2 flex-wrap sm:flex-nowrap gap-1">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider shrink-0 ${
                             t.priority === 'urgent' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
                             t.priority === 'high' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
                             'bg-slate-800 text-slate-300'
                           }`}>
                             {t.priority}
                           </span>
-                          <span className={`text-xs font-semibold transition truncate ${
+                          <span className={`text-xs font-semibold transition truncate block max-w-full ${
                             isTaskCompleted ? 'line-through text-slate-400' : 'text-slate-200 group-hover:text-white'
                           }`}>
                             {t.title}
@@ -279,7 +279,7 @@ export default function DashboardView({ onNavigate }) {
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
+                    <div className="text-left sm:text-right shrink-0 pl-7 sm:pl-0">
                       <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold capitalize ${
                         isTaskCompleted ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                         t.status === 'revision_requested' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :

@@ -196,7 +196,7 @@ export default function AuthView({ onSuccess }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center py-6 sm:py-10 px-3 sm:px-6 lg:px-8 relative overflow-x-hidden">
       {/* Background ambient lighting */}
       <div className="absolute top-10 left-1/4 w-[32rem] h-[32rem] bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-1/4 w-[28rem] h-[28rem] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />

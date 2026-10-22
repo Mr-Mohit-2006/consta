@@ -5,7 +5,7 @@ import {
   CheckSquare, Plus, Clock, FileText, Image as ImageIcon, Link as LinkIcon,
   CheckCircle2, AlertCircle, RefreshCw, ChevronRight, Eye, Send, UploadCloud,
   FileCheck, Shield, ExternalLink, Trophy, Play, Flame, Zap, ChevronLeft,
-  Trash2, Check, Square, Users, User, Calendar, ArrowLeft
+  Trash2, Check, Square, Users, User, Calendar, ArrowLeft, X
 } from 'lucide-react';
 
 export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, onNavigate, onBack }) {
@@ -892,12 +892,23 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
 
       {/* Modal: Create Study Task */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1">Create Study Task</h3>
-            <p className="text-xs text-slate-400 mb-4">Set clear instructions, expected outcomes, and review rubric.</p>
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-0.5">Create Study Task</h3>
+                <p className="text-xs text-slate-400">Set clear instructions, expected outcomes, and review rubric.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleCreateTask} className="space-y-3.5">
+            <form onSubmit={handleCreateTask} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3.5">
               <div>
                 <label className="text-xs text-slate-400 block mb-1">Title</label>
                 <input
@@ -984,17 +995,17 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-end space-x-2 mt-4 z-10">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/25 cursor-pointer transition"
                 >
                   Create Task
                 </button>
@@ -1087,17 +1098,28 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
       )}
       {/* Modal: Turn Task into Challenge */}
       {showTaskChallengeModal && selectedTask && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1 flex items-center space-x-2">
-              <Trophy className="w-5 h-5 text-amber-400" />
-              <span>Launch Challenge on "{selectedTask.title}"</span>
-            </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Set speedrun and score goals for yourself, your cohort, or your study buddies.
-            </p>
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-0.5 flex items-center space-x-2">
+                  <Trophy className="w-5 h-5 text-amber-400" />
+                  <span>Launch Challenge on "{selectedTask.title}"</span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Set speedrun and score goals for yourself, your cohort, or your study buddies.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTaskChallengeModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleCreateTaskChallenge} className="space-y-3.5">
+            <form onSubmit={handleCreateTaskChallenge} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3.5">
               <div>
                 <label className="text-xs text-slate-400 block mb-1">Challenge Scope</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -1253,17 +1275,17 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
                   : 'Starting this self challenge will notify your study buddies to cheer you on!'}
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-end space-x-2 mt-4 z-10">
                 <button
                   type="button"
                   onClick={() => setShowTaskChallengeModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs"
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 cursor-pointer transition"
                 >
                   Create & Launch
                 </button>

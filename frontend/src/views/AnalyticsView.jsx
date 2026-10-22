@@ -107,56 +107,56 @@ export default function AnalyticsView({ onNavigate, onBack }) {
       {activeTab === 'personal' ? (
         <div className="space-y-6">
           {/* Key Metric Blocks */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-              <span className="text-xs text-slate-400 flex items-center space-x-1.5">
-                <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Total Focus Time</span>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-5 shadow-xl">
+              <span className="text-[11px] sm:text-xs text-slate-400 flex items-center space-x-1.5">
+                <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span className="truncate">Total Focus Time</span>
               </span>
-              <div className="text-2xl font-bold text-white font-mono mt-2">
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono mt-1.5 sm:mt-2 truncate">
                 {overview.totalFocusMinutes || 0}m
               </div>
-              <div className="text-[11px] text-slate-500 mt-0.5">
+              <div className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 truncate">
                 Avg {overview.avgSessionMinutes || 0}m / session
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-              <span className="text-xs text-slate-400 flex items-center space-x-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Submission Approval Rate</span>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-5 shadow-xl">
+              <span className="text-[11px] sm:text-xs text-slate-400 flex items-center space-x-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="truncate">Approval Rate</span>
               </span>
-              <div className="text-2xl font-bold text-emerald-400 font-mono mt-2">
+              <div className="text-xl sm:text-2xl font-bold text-emerald-400 font-mono mt-1.5 sm:mt-2 truncate">
                 {overview.approvalRate || 0}%
               </div>
-              <div className="text-[11px] text-slate-500 mt-0.5">
+              <div className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 truncate">
                 {overview.tasksApproved || 0} of {overview.tasksSubmitted || 0} approved
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-              <span className="text-xs text-slate-400 flex items-center space-x-1.5">
-                <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
-                <span>Revision Iterations</span>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-5 shadow-xl">
+              <span className="text-[11px] sm:text-xs text-slate-400 flex items-center space-x-1.5">
+                <RefreshCw className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="truncate">Revision Iterations</span>
               </span>
-              <div className="text-2xl font-bold text-amber-400 font-mono mt-2">
+              <div className="text-xl sm:text-2xl font-bold text-amber-400 font-mono mt-1.5 sm:mt-2 truncate">
                 {overview.totalVersions || 0}
               </div>
-              <div className="text-[11px] text-slate-500 mt-0.5">
-                {overview.revisionsRequested || 0} revision requests resolved
+              <div className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 truncate">
+                {overview.revisionsRequested || 0} revisions resolved
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-              <span className="text-xs text-slate-400 flex items-center space-x-1.5">
-                <Award className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Avg Review Score</span>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-5 shadow-xl">
+              <span className="text-[11px] sm:text-xs text-slate-400 flex items-center space-x-1.5">
+                <Award className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span className="truncate">Avg Review Score</span>
               </span>
-              <div className="text-2xl font-bold text-cyan-400 font-mono mt-2">
+              <div className="text-xl sm:text-2xl font-bold text-cyan-400 font-mono mt-1.5 sm:mt-2 truncate">
                 {overview.avgReviewScore || 0} / 5.0
               </div>
-              <div className="text-[11px] text-slate-500 mt-0.5">
-                From {overview.reviewsReceived || 0} reviews received
+              <div className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 truncate">
+                From {overview.reviewsReceived || 0} reviews
               </div>
             </div>
           </div>

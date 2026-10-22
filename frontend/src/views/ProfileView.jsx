@@ -200,29 +200,29 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Avatar and Identity */}
-          <div className="flex items-center space-x-5">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-5 min-w-0">
+            <div className="relative shrink-0">
               <img
                 src={currentUser?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.full_name || 'User')}&background=4f46e5&color=fff&size=128`}
                 alt={currentUser?.full_name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-indigo-500/50 shadow-lg"
+                className="w-18 h-18 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-indigo-500/50 shadow-lg"
               />
               <span className="absolute -bottom-1.5 -right-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-indigo-600 text-white shadow-md">
                 User
               </span>
             </div>
 
-            <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight break-words">
                   {currentUser?.full_name}
                 </h1>
                 {isPublic ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
                     <Globe className="w-3 h-3 mr-1" /> Public Profile
                   </span>
                 ) : (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
                     <ShieldAlert className="w-3 h-3 mr-1" /> Friends Only (Private)
                   </span>
                 )}
@@ -234,7 +234,7 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
                   User ID: #{currentUser?.id}
                 </span>
               </div>
-              <div className="text-xs text-slate-400 mt-1 max-w-xl leading-relaxed">
+              <div className="text-xs text-slate-400 mt-1 max-w-xl leading-relaxed break-words">
                 {currentUser?.bio || 'Learning actively on CONSTA with solo sessions and group study.'}
               </div>
             </div>

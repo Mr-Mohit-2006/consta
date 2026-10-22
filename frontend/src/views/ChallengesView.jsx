@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Trophy, Flame, Clock, Play, CheckCircle2, Plus, Users, User,
   Sparkles, Award, ArrowRight, ShieldCheck, Square, Check, ChevronLeft,
-  Calendar, Zap, CalendarDays, Pause, RotateCcw, Timer, Eye, EyeOff, Hourglass, Trash2, ArrowLeft
+  Calendar, Zap, CalendarDays, Pause, RotateCcw, Timer, Eye, EyeOff, Hourglass, Trash2, ArrowLeft, X
 } from 'lucide-react';
 
 export default function ChallengesView({ initialChallengeId, onOpenTask, onNavigate, onBack }) {
@@ -835,14 +835,25 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
 
       {/* Modal: Launch Challenge */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-1">Launch Challenge on Task</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Set up a Daily, Weekly, or Monthly goal sprint on any study task.
-            </p>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-0.5">Launch Challenge on Task</h3>
+                <p className="text-xs text-slate-400">
+                  Set up a Daily, Weekly, or Monthly goal sprint on any study task.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleCreateChallenge} className="space-y-4">
+            <form onSubmit={handleCreateChallenge} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
               {/* Duration Selector */}
               <div>
                 <label className="text-xs text-slate-300 block mb-1.5 font-medium">Challenge Duration</label>
@@ -1089,17 +1100,17 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-end space-x-2 mt-4 z-10">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold cursor-pointer shadow-md shadow-amber-500/20 transition"
                 >
                   Launch Challenge
                 </button>

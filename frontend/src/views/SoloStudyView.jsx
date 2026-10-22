@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Play, Pause, Square, RotateCcw, Plus, Check, Clock, AlertTriangle,
   Sparkles, BookOpen, Layers, CheckCircle2, History, ChevronRight,
-  Bell, Flame, Award, ArrowLeft
+  Bell, Flame, Award, ArrowLeft, X
 } from 'lucide-react';
 
 export default function SoloStudyView({ onNavigate, onBack }) {
@@ -497,12 +497,23 @@ export default function SoloStudyView({ onNavigate, onBack }) {
 
       {/* Modal: Create Study Session */}
       {showNewModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1">Create Solo Study Session</h3>
-            <p className="text-xs text-slate-400 mb-4">Set your topic, goal, duration, and objective checklist.</p>
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-0.5">Create Solo Study Session</h3>
+                <p className="text-xs text-slate-400">Set your topic, goal, duration, and objective checklist.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowNewModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleStartSession} className="space-y-3.5">
+            <form onSubmit={handleStartSession} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-slate-400 block mb-1">Subject</label>
@@ -602,17 +613,17 @@ export default function SoloStudyView({ onNavigate, onBack }) {
                 </button>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-end space-x-2 mt-4 z-10">
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/25 cursor-pointer transition"
                 >
                   Start Focus Session
                 </button>
@@ -624,14 +635,25 @@ export default function SoloStudyView({ onNavigate, onBack }) {
 
       {/* Modal: Complete Session Summary & Problem Logger */}
       {showCompleteModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1">Complete Study Session</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Log your reflections, notes, and any problems encountered during learning.
-            </p>
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-0.5">Complete Study Session</h3>
+                <p className="text-xs text-slate-400">
+                  Log your reflections, notes, and any problems encountered during learning.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCompleteModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <div className="space-y-3">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
               <div>
                 <label className="text-xs text-slate-400 block mb-1">Session Reflections & Key Takeaways</label>
                 <textarea
@@ -639,7 +661,7 @@ export default function SoloStudyView({ onNavigate, onBack }) {
                   value={sessionNotes}
                   onChange={e => setSessionNotes(e.target.value)}
                   placeholder="What did you learn? Summarize the key concepts..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
                 />
               </div>
 
@@ -653,26 +675,26 @@ export default function SoloStudyView({ onNavigate, onBack }) {
                   value={problemsEncountered}
                   onChange={e => setProblemsEncountered(e.target.value)}
                   placeholder="Any difficult roadblocks or questions to follow up with peers?"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-amber-500"
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300">
+              <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300">
                 Objectives completed: <span className="font-bold text-emerald-400">{completedObjsCount}/{objectives.length}</span>. Completing learning objectives awards verified study XP!
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-end space-x-2 mt-4 z-10">
                 <button
                   type="button"
                   onClick={() => setShowCompleteModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition"
                 >
                   Back to Timer
                 </button>
                 <button
                   type="button"
                   onClick={handleFinishSession}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/25 cursor-pointer transition"
                 >
                   Save & Log Session
                 </button>

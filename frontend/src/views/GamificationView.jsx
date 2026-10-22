@@ -3,7 +3,7 @@ import { apiRequest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
   Award, ShieldAlert, History, Trophy, Plus, Check, ArrowUpRight,
-  ArrowDownRight, HelpCircle, FileText, ArrowLeft
+  ArrowDownRight, HelpCircle, FileText, ArrowLeft, X
 } from 'lucide-react';
 
 export default function GamificationView({ onNavigate, onBack }) {
@@ -244,9 +244,18 @@ export default function GamificationView({ onNavigate, onBack }) {
 
       {/* Modal: File XP Appeal */}
       {showAppealModal && selectedTx && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1">Dispute Penalty Appeal</h3>
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+              <h3 className="text-lg font-bold text-white">Dispute Penalty Appeal</h3>
+              <button
+                type="button"
+                onClick={() => setShowAppealModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
             <p className="text-xs text-slate-400 mb-4">
               All penalties must adhere to documented platform rules. If this deduction was an honest error or disputed moderation action, explain your case below.
             </p>
@@ -269,17 +278,17 @@ export default function GamificationView({ onNavigate, onBack }) {
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2">
+              <div className="flex justify-end space-x-2 pt-2 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowAppealModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 cursor-pointer transition"
                 >
                   Submit Appeal
                 </button>
