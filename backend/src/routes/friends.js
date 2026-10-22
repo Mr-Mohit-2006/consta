@@ -4,10 +4,16 @@ const { db } = require('../db/database');
 const { authenticateToken } = require('../middleware/auth');
 const FriendService = require('../services/friend_service');
 
-// Get all friends
+// Get all approved friends
 router.get('/', authenticateToken, (req, res) => {
   const friends = FriendService.getFriends(req.user.id);
   res.json(friends);
+});
+
+// Get pending friend requests (incoming & outgoing)
+router.get('/requests', authenticateToken, (req, res) => {
+  const requests = FriendService.getRequests(req.user.id);
+  res.json(requests);
 });
 
 // Search user by ID (or username/email) to add as friend
@@ -29,20 +35,45 @@ router.get('/search', authenticateToken, (req, res) => {
     return res.status(404).json({ error: `No user found with identifier "${query}".` });
   }
 
-  const isFriendRow = db.prepare(`
+  // Check relationship status
+  let friendStatus = 'none';
+  const isAccepted = db.prepare(`
     SELECT id FROM friendships
     WHERE ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?))
       AND status = 'accepted'
   `).get(userId, targetUser.id, targetUser.id, userId);
 
+  if (isAccepted) {
+    friendStatus = 'accepted';
+  } else {
+    const sentPending = db.prepare(`
+      SELECT id FROM friendships
+      WHERE user_id = ? AND friend_id = ? AND status = 'pending'
+    `).get(userId, targetUser.id);
+
+    if (sentPending) {
+      friendStatus = 'pending_sent';
+    } else {
+      const receivedPending = db.prepare(`
+        SELECT id FROM friendships
+        WHERE user_id = ? AND friend_id = ? AND status = 'pending'
+      `).get(targetUser.id, userId);
+
+      if (receivedPending) {
+        friendStatus = 'pending_received';
+      }
+    }
+  }
+
   res.json({
     user: targetUser,
     is_self: targetUser.id === userId,
-    is_friend: Boolean(isFriendRow)
+    is_friend: friendStatus === 'accepted',
+    friend_status: friendStatus
   });
 });
 
-// Add friend
+// Send friend request
 router.post('/', authenticateToken, (req, res) => {
   const { identifier } = req.body;
   if (!identifier) {
@@ -50,27 +81,61 @@ router.post('/', authenticateToken, (req, res) => {
   }
 
   try {
-    const id = FriendService.addFriend(req.user.id, identifier);
-    res.status(201).json({ success: true, message: 'Friend added successfully.', id });
+    const result = FriendService.addFriend(req.user.id, identifier);
+    res.status(201).json({ success: true, ...result });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Remove friend
+// Approve friend request by request ID or requester user ID
+router.post('/requests/:id/approve', authenticateToken, (req, res) => {
+  try {
+    const result = FriendService.approveRequest(req.user.id, req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post('/:friendId/approve', authenticateToken, (req, res) => {
+  try {
+    const result = FriendService.approveRequest(req.user.id, req.params.friendId);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Reject / decline friend request by request ID or requester user ID
+router.post('/requests/:id/reject', authenticateToken, (req, res) => {
+  try {
+    const result = FriendService.rejectRequest(req.user.id, req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post('/:friendId/reject', authenticateToken, (req, res) => {
+  try {
+    const result = FriendService.rejectRequest(req.user.id, req.params.friendId);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Remove friend or cancel request
 router.delete('/:friendId', authenticateToken, (req, res) => {
   const userId = req.user.id;
   const friendId = req.params.friendId;
 
-  db.prepare(`
-    DELETE FROM friendships
-    WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)
-  `).run(userId, friendId, friendId, userId);
-
-  res.json({ success: true, message: 'Study buddy removed.' });
+  const result = FriendService.removeFriend(userId, friendId);
+  res.json(result);
 });
 
-// Friends recent activity stream
+// Friends recent activity stream (approved friends only)
 router.get('/activity', authenticateToken, (req, res) => {
   const userId = req.user.id;
   const friends = FriendService.getFriends(userId);

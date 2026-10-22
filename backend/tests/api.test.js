@@ -935,6 +935,139 @@ test('18. Admin Group Task with Topics Checklist, Duration Timer in Days, and To
   assert.equal(foundTask.status, 'completed');
 });
 
+test('19. Friend Request Approval Flow, Private Profile Access Control, and Add Group Member by Unique ID', async () => {
+  // 1. Register Alice and Bob
+  const aliceRes = await request('/api/auth/register', {
+    method: 'POST',
+    body: {
+      username: 'fa_alice',
+      email: 'fa_alice@example.com',
+      password: 'Password123!',
+      full_name: 'Alice FriendTest'
+    }
+  });
+  assert.equal(aliceRes.status, 201);
+  const aliceToken = aliceRes.data.token;
+  const aliceId = aliceRes.data.user.id;
+
+  const bobRes = await request('/api/auth/register', {
+    method: 'POST',
+    body: {
+      username: 'fb_bob',
+      email: 'fb_bob@example.com',
+      password: 'Password123!',
+      full_name: 'Bob FriendTest'
+    }
+  });
+  assert.equal(bobRes.status, 201);
+  const bobToken = bobRes.data.token;
+  const bobId = bobRes.data.user.id;
+
+  // 2. Bob sets profile to Private mode
+  const privRes = await request('/api/profile/privacy', {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${bobToken}` },
+    body: { is_public: false }
+  });
+  assert.equal(privRes.status, 200);
+  assert.equal(privRes.data.is_public, false);
+
+  // 3. Alice visits Bob profile -> should be restricted (isPrivate: true)
+  const view1 = await request('/api/profile/fb_bob', {
+    headers: { Authorization: `Bearer ${aliceToken}` }
+  });
+  assert.equal(view1.status, 200);
+  assert.equal(view1.data.isPrivate, true);
+  assert.equal(view1.data.isFriend, false);
+
+  // 4. Alice sends friend request to Bob by Bob's unique ID
+  const sendReq = await request('/api/friends', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${aliceToken}` },
+    body: { identifier: bobId }
+  });
+  assert.equal(sendReq.status, 201);
+  assert.equal(sendReq.data.status, 'pending');
+
+  // 5. Bob receives friend request notification
+  const bobNotifs = await request('/api/notifications', {
+    headers: { Authorization: `Bearer ${bobToken}` }
+  });
+  assert.equal(bobNotifs.status, 200);
+  const frNotif = bobNotifs.data.find(n => n.type === 'friend_request');
+  assert.ok(frNotif, 'Bob should receive in-app notification for friend request approval');
+
+  // 6. Bob fetches pending requests
+  const bobReqs = await request('/api/friends/requests', {
+    headers: { Authorization: `Bearer ${bobToken}` }
+  });
+  assert.equal(bobReqs.status, 200);
+  const incomingReq = bobReqs.data.incoming.find(r => r.user_id === aliceId);
+  assert.ok(incomingReq, 'Bob should see Alice in incoming friend requests');
+
+  // 7. While pending, Bob profile remains private to Alice
+  const view2 = await request('/api/profile/fb_bob', {
+    headers: { Authorization: `Bearer ${aliceToken}` }
+  });
+  assert.equal(view2.data.isPrivate, true);
+
+  // 8. Bob approves Alice friend request
+  const approveRes = await request(`/api/friends/requests/${incomingReq.request_id}/approve`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${bobToken}` }
+  });
+  assert.equal(approveRes.status, 200);
+  assert.equal(approveRes.data.success, true);
+
+  // 9. Alice checks notifications -> receives friend_accepted notification
+  const aliceNotifs = await request('/api/notifications', {
+    headers: { Authorization: `Bearer ${aliceToken}` }
+  });
+  const acceptNotif = aliceNotifs.data.find(n => n.type === 'friend_accepted');
+  assert.ok(acceptNotif, 'Alice should receive notification that request was accepted');
+
+  // 10. Alice now accesses Bob private profile -> isPrivate is false!
+  const view3 = await request('/api/profile/fb_bob', {
+    headers: { Authorization: `Bearer ${aliceToken}` }
+  });
+  assert.equal(view3.status, 200);
+  assert.equal(view3.data.isPrivate, false, 'Approved friend should have access to user profile');
+  assert.equal(view3.data.isFriend, true);
+
+  // 11. Bob creates a study group and adds Alice using Alice's Unique ID
+  const roomRes = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${bobToken}` },
+    body: {
+      name: 'Algorithm Masters',
+      subject: 'Computer Science',
+      room_type: 'private'
+    }
+  });
+  assert.equal(roomRes.status, 201);
+  const roomId = roomRes.data.room.id;
+
+  const addMemberRes = await request(`/api/study-rooms/${roomId}/members`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${bobToken}` },
+    body: { identifier: aliceId, role: 'member' }
+  });
+  assert.equal(addMemberRes.status, 201);
+  assert.equal(addMemberRes.data.user.id, aliceId);
+
+  // 12. Alice removes Bob from friends -> Bob profile is private again
+  const removeRes = await request(`/api/friends/${bobId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${aliceToken}` }
+  });
+  assert.equal(removeRes.status, 200);
+
+  const view4 = await request('/api/profile/fb_bob', {
+    headers: { Authorization: `Bearer ${aliceToken}` }
+  });
+  assert.equal(view4.data.isPrivate, true, 'Profile details should be hidden after friend removal');
+});
+
 test.after(async () => {
   clearAllUserData();
   if (server && server.close) {

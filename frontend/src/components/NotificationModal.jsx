@@ -139,6 +139,11 @@ export default function NotificationModal({ isOpen, onClose, onNotificationClick
                       </span>
                     </div>
                     <p className="text-xs mt-1 text-slate-300 leading-relaxed">{n.message}</p>
+                    {n.type === 'friend_request' && (
+                      <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center space-x-2">
+                        <span className="text-[11px] font-semibold text-indigo-400">Click to view & approve in Friends Network &rarr;</span>
+                      </div>
+                    )}
                   </div>
                 ))
               )}

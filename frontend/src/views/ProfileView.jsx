@@ -13,7 +13,7 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'friends' | 'settings'
 
-  // Study Buddies Add State
+  // Friends Add State
   const [newBuddyIdentifier, setNewBuddyIdentifier] = useState('');
   const [addingBuddy, setAddingBuddy] = useState(false);
   const [buddyActionMsg, setBuddyActionMsg] = useState(null);
@@ -139,27 +139,30 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
     setAddingBuddy(true);
     setBuddyActionMsg(null);
     try {
-      await apiRequest('/friends', {
+      const res = await apiRequest('/friends', {
         method: 'POST',
         body: { identifier: newBuddyIdentifier.trim() }
       });
       setNewBuddyIdentifier('');
-      setBuddyActionMsg({ type: 'success', text: 'Study buddy connected successfully!' });
+      setBuddyActionMsg({
+        type: 'success',
+        text: res.message || 'Friend request sent successfully! Waiting for approval.'
+      });
       await loadProfile();
     } catch (err) {
-      setBuddyActionMsg({ type: 'error', text: err.message || 'Failed to add buddy.' });
+      setBuddyActionMsg({ type: 'error', text: err.message || 'Failed to send friend request.' });
     } finally {
       setAddingBuddy(false);
     }
   }
 
   async function handleRemoveBuddy(friendId, friendName) {
-    if (!window.confirm(`Are you sure you want to remove ${friendName || 'this buddy'} from your study buddies?`)) return;
+    if (!window.confirm(`Are you sure you want to remove ${friendName || 'this friend'} from your friends?`)) return;
     try {
       await apiRequest(`/friends/${friendId}`, { method: 'DELETE' });
       await loadProfile();
     } catch (err) {
-      alert(err.message || 'Failed to remove buddy.');
+      alert(err.message || 'Failed to remove friend.');
     }
   }
 
@@ -330,25 +333,25 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
           </div>
         </div>
 
-        {/* Card 3: Study Buddies Count */}
+        {/* Card 3: Friends Count */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Study Buddies</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Friends</span>
             <div className="w-8 h-8 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
               <Users className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-white">
-            {counts.buddies || counts.friends || 0}
+            {counts.friends || 0}
           </div>
           <div className="text-xs text-slate-400 mt-1 mb-3">
-            Confirmed friends & study partners
+            Approved friends & study partners
           </div>
           <button
             onClick={() => setActiveTab('friends')}
             className="w-full py-1.5 px-2 text-center rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 text-xs font-bold transition cursor-pointer"
           >
-            Manage Buddies ({counts.buddies || counts.friends || 0})
+            Manage Friends ({counts.friends || 0})
           </button>
         </div>
 
@@ -379,7 +382,7 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
       <div className="flex space-x-2 border-b border-slate-800 pb-2">
         {[
           { id: 'overview', label: 'Overview & Achievements', icon: Award },
-          { id: 'friends', label: `Study Buddies (${counts.buddies || counts.friends || 0})`, icon: Users },
+          { id: 'friends', label: `Friends (${counts.friends || 0})`, icon: Users },
           { id: 'settings', label: 'Settings & Reset Password', icon: Settings }
         ].map(tab => {
           const Icon = tab.icon;
@@ -434,17 +437,17 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
         </div>
       )}
 
-      {/* Tab 2: Study Buddies List & Add/Remove Manager */}
+      {/* Tab 2: Friends List & Add/Remove Manager */}
       {activeTab === 'friends' && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
               <h3 className="text-base font-bold text-white flex items-center space-x-2">
                 <Users className="w-5 h-5 text-indigo-400" />
-                <span>Confirmed Study Buddies ({friendsList.length})</span>
+                <span>Confirmed Friends ({friendsList.length})</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Buddies can view your private profile and study streaks, and receive alerts when you start a task or challenge sprint.
+                In Private mode, only approved friends are allowed to see your profile details, streaks, and progress.
               </p>
             </div>
 
@@ -455,23 +458,23 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
                 className="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-bold text-xs flex items-center space-x-1.5 transition cursor-pointer self-start sm:self-auto"
               >
                 <Users className="w-3.5 h-3.5" />
-                <span>Open Buddy Network</span>
+                <span>Open Friends Network</span>
               </button>
             )}
           </div>
 
-          {/* Quick Add Buddy Form */}
+          {/* Quick Add Friend Form */}
           <form onSubmit={handleAddBuddy} className="mb-6 p-4 rounded-2xl bg-slate-950/70 border border-indigo-500/30">
             <div className="text-xs font-bold text-white mb-2 flex items-center space-x-1.5">
               <UserPlus className="w-4 h-4 text-indigo-400" />
-              <span>Add New Study Buddy</span>
+              <span>Send Friend Request</span>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <input
                 type="text"
                 value={newBuddyIdentifier}
                 onChange={e => setNewBuddyIdentifier(e.target.value)}
-                placeholder="Enter User ID, username, or email to add as buddy..."
+                placeholder="Enter User ID, username, or email to send request..."
                 className="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
               />
               <button
@@ -480,7 +483,7 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-indigo-600/20 transition cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                <span>{addingBuddy ? 'Connecting...' : 'Add Study Buddy'}</span>
+                <span>{addingBuddy ? 'Sending...' : 'Send Friend Request'}</span>
               </button>
             </div>
             {buddyActionMsg && (
@@ -523,7 +526,7 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
                       type="button"
                       onClick={() => handleRemoveBuddy(friend.id, friend.full_name)}
                       className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 border border-slate-800 hover:border-rose-500/30 transition cursor-pointer"
-                      title="Remove buddy"
+                      title="Remove friend"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -534,8 +537,8 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
           ) : (
             <div className="text-center py-10 bg-slate-950 rounded-2xl border border-slate-800 text-slate-400 text-xs">
               <Users className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-              <p className="font-semibold text-slate-300">No study buddies connected yet.</p>
-              <p className="text-[11px] text-slate-500 mt-1">Use the search box above to connect with peers by User ID, username, or email!</p>
+              <p className="font-semibold text-slate-300">No friends connected yet.</p>
+              <p className="text-[11px] text-slate-500 mt-1">Use the search box above to send a friend request by User ID, username, or email!</p>
             </div>
           )}
         </div>

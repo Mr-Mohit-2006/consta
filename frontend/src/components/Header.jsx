@@ -88,11 +88,11 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
             <span className="font-extrabold text-[11px] sm:text-xs">{studyStreak}d<span className="hidden sm:inline"> Streak</span></span>
           </div>
 
-          {/* Study Buddies / Friends Button */}
+          {/* Friends Button */}
           <button
             onClick={onOpenFriends}
             className="p-1.5 sm:p-2 text-slate-300 hover:text-white bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 rounded-xl transition flex items-center space-x-1 shrink-0 cursor-pointer"
-            title="Study Buddies & Friend Activity"
+            title="Friends Network"
           >
             <Users className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-indigo-400" />
           </button>
@@ -225,7 +225,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-indigo-300 hover:bg-slate-800 font-semibold cursor-pointer"
             >
               <Users className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Buddies</span>
+              <span>Friends</span>
             </button>
             <button
               onClick={() => {

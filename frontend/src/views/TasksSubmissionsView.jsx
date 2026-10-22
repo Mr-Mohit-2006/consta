@@ -275,7 +275,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
       if (selectedTask?.id === taskId) {
         await loadTaskDetails(taskId);
       }
-      alert(`🚀 Task started! Push notifications sent to your study buddies so they know you are studying.`);
+      alert(`🚀 Task started! Push notifications sent to your friends so they know you are studying.`);
     } catch (err) {
       alert(err.message);
     }
@@ -303,7 +303,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
 
       setShowTaskChallengeModal(false);
       setTaskChalTitle('');
-      alert(`⚡ Challenge "${res.title}" created successfully! Notifications sent to your ${taskChalScope === 'group' ? 'cohort members' : 'study buddies'}.`);
+      alert(`⚡ Challenge "${res.title}" created successfully! Notifications sent to your ${taskChalScope === 'group' ? 'cohort members' : 'friends'}.`);
 
       if (onOpenChallenge) {
         onOpenChallenge(res.id);
@@ -670,7 +670,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
                       <button
                         onClick={() => handleStartTask(selectedTask.id)}
                         className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center space-x-1.5 shadow-lg shadow-emerald-600/20 transition cursor-pointer"
-                        title="Start task and push notification to study buddies"
+                        title="Start task and push notification to friends"
                       >
                         <Play className="w-3.5 h-3.5 fill-white" />
                         <span>Start (Alert Friends)</span>
@@ -1107,7 +1107,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
                   <span>Launch Challenge on "{selectedTask.title}"</span>
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Set speedrun and score goals for yourself, your cohort, or your study buddies.
+                  Set speedrun and score goals for yourself, your cohort, or your friends.
                 </p>
               </div>
               <button
@@ -1126,7 +1126,7 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
                   {[
                     { id: 'self', label: 'Self Sprint', desc: 'Focus timer' },
                     { id: 'group', label: 'Cohort Group', desc: 'Shared room' },
-                    { id: 'friends', label: 'Study Buddies', desc: 'Notify friends' }
+                    { id: 'friends', label: 'Friends', desc: 'Notify friends' }
                   ].map(item => (
                     <button
                       key={item.id}
@@ -1271,8 +1271,8 @@ export default function TasksSubmissionsView({ initialTaskId, onOpenChallenge, o
                 📢 {taskChalScope === 'group'
                   ? 'All members of the study room will receive an alert.'
                   : taskChalScope === 'friends'
-                  ? 'All your connected study buddies will receive an instant invite.'
-                  : 'Starting this self challenge will notify your study buddies to cheer you on!'}
+                  ? 'All your connected friends will receive an instant invite.'
+                  : 'Starting this self challenge will notify your friends to cheer you on!'}
               </div>
 
               <div className="sticky bottom-0 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-end space-x-2 mt-4 z-10">

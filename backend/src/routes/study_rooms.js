@@ -339,11 +339,14 @@ router.post('/:id/members', authenticateToken, (req, res) => {
     return res.status(403).json({ error: 'Only group admin or moderators can add members.' });
   }
 
-  const cleanId = identifier.trim().toLowerCase();
-  const targetUser = db.prepare('SELECT id, username, full_name FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?').get(cleanId, cleanId);
+  const cleanId = String(identifier).trim().toLowerCase();
+  const targetUser = db.prepare(`
+    SELECT id, username, full_name FROM users
+    WHERE id = ? OR LOWER(username) = ? OR LOWER(email) = ?
+  `).get(cleanId, cleanId, cleanId);
 
   if (!targetUser) {
-    return res.status(404).json({ error: 'No user found with that username or email.' });
+    return res.status(404).json({ error: 'No user found with that User ID, username, or email.' });
   }
 
   const targetRole = role === 'moderator' ? 'moderator' : 'member';

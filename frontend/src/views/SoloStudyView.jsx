@@ -397,7 +397,7 @@ export default function SoloStudyView({ onNavigate, onBack }) {
                 <h4 className="font-bold text-sm text-white">Study Alerts & Notifications</h4>
               </div>
               <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                Stay updated with real-time push notifications for your study streaks, break reminders, and buddy milestones.
+                Stay updated with real-time push notifications for your study streaks, break reminders, and friend milestones.
               </p>
 
               <div className="space-y-3 text-xs">
@@ -427,7 +427,7 @@ export default function SoloStudyView({ onNavigate, onBack }) {
 
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[11px] flex items-center space-x-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
-                  <span>Real-time buddy alerts active: Friends are notified when you start or complete sessions.</span>
+                  <span>Real-time friend alerts active: Friends are notified when you start or complete sessions.</span>
                 </div>
               </div>
             </div>

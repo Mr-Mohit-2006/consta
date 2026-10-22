@@ -87,6 +87,26 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
   const [memberRole, setMemberRole] = useState('member');
   const [memberActionLoading, setMemberActionLoading] = useState(false);
   const [memberActionError, setMemberActionError] = useState('');
+  const [userFriends, setUserFriends] = useState([]);
+  const [addMemberTab, setAddMemberTab] = useState('friend'); // 'friend' | 'id'
+
+  async function openAddMemberModal() {
+    setShowAddMemberModal(true);
+    setMemberActionError('');
+    setMemberIdentifier('');
+    try {
+      const list = await apiRequest('/friends');
+      setUserFriends(list || []);
+      if (!list || list.length === 0) {
+        setAddMemberTab('id');
+      } else {
+        setAddMemberTab('friend');
+        if (list[0]) setMemberIdentifier(String(list[0].id));
+      }
+    } catch (e) {
+      setAddMemberTab('id');
+    }
+  }
 
   useEffect(() => {
     loadRooms();
@@ -2189,10 +2209,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                     {isCurrentRoomAdmin && (
                       <button
                         type="button"
-                        onClick={() => {
-                          setShowAddMemberModal(true);
-                          setMemberActionError('');
-                        }}
+                        onClick={openAddMemberModal}
                         className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition cursor-pointer"
                       >
                         <UserPlus className="w-3.5 h-3.5" />
@@ -2727,9 +2744,45 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-slate-400 mb-4">
-              Add a user by their username or email to collaborate in this group.
+            <p className="text-xs text-slate-400 mb-3">
+              Add a peer to this study group either from your existing friends or by their Unique User ID.
             </p>
+
+            {/* Mode Selector Tabs: Existing Friend vs Unique ID */}
+            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-xl mb-4 border border-slate-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setAddMemberTab('friend');
+                  if (userFriends.length > 0 && !memberIdentifier) {
+                    setMemberIdentifier(String(userFriends[0].id));
+                  }
+                }}
+                className={`py-1.5 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center space-x-1.5 ${
+                  addMemberTab === 'friend'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Existing Friend ({userFriends.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAddMemberTab('id');
+                  setMemberIdentifier('');
+                }}
+                className={`py-1.5 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center space-x-1.5 ${
+                  addMemberTab === 'id'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Hash className="w-3.5 h-3.5" />
+                <span>Unique ID</span>
+              </button>
+            </div>
 
             {memberActionError && (
               <div className="p-3 rounded-xl mb-4 text-xs bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-start space-x-2">
@@ -2739,17 +2792,42 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             )}
 
             <form onSubmit={handleAddMember} className="space-y-4">
-              <div>
-                <label className="text-xs text-slate-300 block mb-1 font-medium">Username or Email</label>
-                <input
-                  type="text"
-                  required
-                  value={memberIdentifier}
-                  onChange={e => setMemberIdentifier(e.target.value)}
-                  placeholder="e.g. learner_username or learner@example.com"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
-                />
-              </div>
+              {addMemberTab === 'friend' ? (
+                <div>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Select an Approved Friend</label>
+                  {userFriends.length > 0 ? (
+                    <select
+                      value={memberIdentifier}
+                      onChange={e => setMemberIdentifier(e.target.value)}
+                      required
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-hidden focus:border-indigo-500"
+                    >
+                      <option value="">-- Choose an approved friend --</option>
+                      {userFriends.map(f => (
+                        <option key={f.id} value={f.id}>
+                          {f.full_name} (@{f.username} · ID #{f.id})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-400">
+                      No connected friends found. Switch to the <strong>"Unique ID"</strong> tab above to add a member using their User ID or username.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs text-slate-300 block mb-1 font-medium">Enter Unique ID, Username, or Email</label>
+                  <input
+                    type="text"
+                    required
+                    value={memberIdentifier}
+                    onChange={e => setMemberIdentifier(e.target.value)}
+                    placeholder="e.g. 1, 2, or username..."
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 font-mono"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="text-xs text-slate-300 block mb-1 font-medium">Assigned Role</label>
@@ -2773,7 +2851,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 </button>
                 <button
                   type="submit"
-                  disabled={memberActionLoading}
+                  disabled={memberActionLoading || !memberIdentifier.trim()}
                   className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 cursor-pointer"
                 >
                   {memberActionLoading ? 'Adding...' : 'Add to Group'}

@@ -178,7 +178,7 @@ router.get('/:username', optionalToken, (req, res) => {
       },
       isFriend,
       is_buddy: isFriend,
-      message: 'This profile is Private. Only confirmed study buddies can see full details, streaks, and progress.'
+      message: 'This profile is Private. Only approved friends are allowed to see full details, streaks, and progress.'
     });
   }
 

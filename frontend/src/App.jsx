@@ -75,12 +75,19 @@ function AppContent() {
 
   function handleNotificationClick(link) {
     setNotificationsOpen(false);
-    if (link.startsWith('/tasks/')) {
+    if (!link) return;
+    if (link === '/friends' || link.startsWith('/friends')) {
+      setFriendsOpen(true);
+    } else if (link.startsWith('/tasks/')) {
       const id = Number(link.split('/')[2]);
       if (id) handleOpenTask(id);
     } else if (link.startsWith('/chat/')) {
       const id = Number(link.split('/')[2]);
       if (id) handleOpenChatRoom(id);
+    } else if (link.startsWith('/profile')) {
+      setActiveTab('profile');
+    } else if (link.startsWith('/group')) {
+      setActiveTab('groups');
     }
   }
 
@@ -157,7 +164,7 @@ function AppContent() {
         onNotificationClick={handleNotificationClick}
       />
 
-      {/* Friends & Study Buddies Modal */}
+      {/* Friends Modal */}
       <FriendsModal
         isOpen={friendsOpen}
         onClose={() => setFriendsOpen(false)}
