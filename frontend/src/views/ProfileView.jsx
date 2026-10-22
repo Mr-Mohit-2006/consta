@@ -195,7 +195,7 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
   return (
     <div className="space-y-6">
       {/* Top Navigation & Action Bar: Back Arrow & Direct Sign Out */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 sticky top-14 z-20 bg-slate-950/90 py-1.5 backdrop-blur-md -mt-2">
         <button
           type="button"
           onClick={onBack || (() => onNavigate && onNavigate('dashboard'))}

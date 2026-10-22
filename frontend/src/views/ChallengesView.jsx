@@ -178,6 +178,7 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
       if (res?.id) {
         await loadChallengeDetails(res.id);
         setMobileView('details');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       setChallengeToast({
         type: 'success',
@@ -316,7 +317,7 @@ export default function ChallengesView({ initialChallengeId, onOpenTask, onNavig
     <div className="space-y-6 relative">
       {/* Toast Notification */}
       {challengeToast && (
-        <div className="fixed top-5 right-5 z-50 max-w-sm sm:max-w-md animate-in fade-in slide-in-from-top-3 duration-200">
+        <div className="fixed top-5 right-5 z-[90] max-w-sm sm:max-w-md animate-in fade-in slide-in-from-top-3 duration-200">
           <div className={`p-4 rounded-2xl shadow-2xl border flex items-start space-x-3 backdrop-blur-md ${
             challengeToast.type === 'error'
               ? 'bg-rose-950/90 border-rose-800 text-rose-200 shadow-rose-950/50'

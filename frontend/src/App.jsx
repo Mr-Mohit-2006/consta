@@ -85,9 +85,9 @@ function AppContent() {
       const id = Number(link.split('/')[2]);
       if (id) handleOpenChatRoom(id);
     } else if (link.startsWith('/profile')) {
-      setActiveTab('profile');
+      handleNavigate('profile');
     } else if (link.startsWith('/group')) {
-      setActiveTab('groups');
+      handleNavigate('group');
     }
   }
 

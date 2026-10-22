@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   BookOpen, Users, CheckSquare, MessageSquare, Flame, Award, BarChart3,
@@ -10,6 +10,32 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
   const { user, streaks, progression, unreadNotifications, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const userMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('pointerdown', handleClickOutside);
+    return () => document.removeEventListener('pointerdown', handleClickOutside);
+  }, [userMenuOpen]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function handleClickOutside(event) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener('pointerdown', handleClickOutside);
+    return () => document.removeEventListener('pointerdown', handleClickOutside);
+  }, [mobileMenuOpen]);
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Sparkles },
@@ -33,7 +59,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
   return (
     <header className="sticky top-0 z-50 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 transition-all max-w-full">
       {/* Top Banner with Brand, Level, Streak, User Menu */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2">
+      <div className="relative z-30 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2">
         {/* Brand */}
         <div
           className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0 min-w-0"
@@ -112,7 +138,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
           </button>
 
           {/* User Profile Dropdown */}
-          <div className="relative shrink-0">
+          <div ref={userMenuRef} className="relative shrink-0 z-50">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center space-x-1.5 sm:space-x-2 bg-slate-900/90 hover:bg-slate-800/90 p-1 sm:p-1.5 sm:pr-2.5 rounded-xl border border-slate-800 hover:border-slate-700 transition cursor-pointer"
@@ -129,47 +155,40 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
             </button>
 
             {userMenuOpen && (
-              <>
-                {/* Backdrop to close menu when clicking outside */}
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setUserMenuOpen(false)}
-                />
-                <div
-                  className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150 ring-1 ring-white/10"
-                >
-                  <div className="px-4 py-3 border-b border-slate-800">
-                    <div className="font-bold text-white text-sm truncate">{user?.full_name}</div>
-                    <div className="text-[11px] text-indigo-400 font-mono truncate">@{user?.username} · #{user?.id}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5 truncate">{user?.email}</div>
-                  </div>
-
-                  <div className="pt-1.5 pb-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab('profile');
-                        setUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-800/80 text-slate-300 hover:text-white flex items-center space-x-2.5 transition cursor-pointer"
-                    >
-                      <User className="w-4 h-4 text-indigo-400 shrink-0" />
-                      <span className="font-medium">My Profile & Settings</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        logout();
-                        setUserMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-rose-500/10 text-rose-400 flex items-center space-x-2.5 transition cursor-pointer"
-                    >
-                      <LogOut className="w-4 h-4 text-rose-400 shrink-0" />
-                      <span className="font-medium">Sign Out</span>
-                    </button>
-                  </div>
+              <div
+                className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] bg-slate-900 border border-slate-700/90 rounded-2xl shadow-2xl py-2 z-[100] text-xs animate-in fade-in zoom-in-95 duration-150 ring-1 ring-white/10"
+              >
+                <div className="px-4 py-3 border-b border-slate-800">
+                  <div className="font-bold text-white text-sm truncate">{user?.full_name}</div>
+                  <div className="text-[11px] text-indigo-400 font-mono truncate">@{user?.username} · #{user?.id}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5 truncate">{user?.email}</div>
                 </div>
-              </>
+
+                <div className="pt-1.5 pb-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('profile');
+                      setUserMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-slate-800/80 text-slate-300 hover:text-white flex items-center space-x-2.5 transition cursor-pointer"
+                  >
+                    <User className="w-4 h-4 text-indigo-400 shrink-0" />
+                    <span className="font-medium">My Profile & Settings</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      setUserMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-rose-500/10 text-rose-400 flex items-center space-x-2.5 transition cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4 text-rose-400 shrink-0" />
+                    <span className="font-medium">Sign Out</span>
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
@@ -193,7 +212,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
 
       {/* Mobile Drawer Navigation Menu (Phone & Tablet) */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-800/90 bg-slate-950/98 backdrop-blur-2xl px-4 py-3 shadow-2xl transition-all max-h-[82vh] overflow-y-auto">
+        <div ref={mobileMenuRef} className="md:hidden relative z-20 border-t border-slate-800/90 bg-slate-950/98 backdrop-blur-2xl px-4 py-3 shadow-2xl transition-all max-h-[82vh] overflow-y-auto">
           <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-2.5">
             <span>Navigation Sections</span>
             <span className="text-indigo-400 font-mono">User ID #{user?.id}</span>
@@ -259,7 +278,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
       )}
 
       {/* Navigation Tabs Bar for Desktop & Tablet */}
-      <div className="border-t border-slate-800/60 bg-slate-950/60 backdrop-blur-md">
+      <div className="relative z-10 border-t border-slate-800/60 bg-slate-950/60 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1.5 overflow-x-auto py-1.5 scrollbar-none touch-pan-x">
           {tabs.map(tab => {
             const Icon = tab.icon;
