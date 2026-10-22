@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { db } = require('../db/database');
+const userBackupService = require('../db/user_backup_service');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'consta_super_secret_jwt_key_2026_growth_platform';
+const JWT_SECRET = process.env.JWT_SECRET || 'consta_jwt_secret_persistent_key_2026_collaborative_platform_auth';
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -13,7 +14,17 @@ function authenticateToken(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = db.prepare('SELECT id, username, email, full_name, role, timezone, avatar_url FROM users WHERE id = ?').get(decoded.id);
+    let user = db.prepare('SELECT id, username, email, full_name, role, timezone, avatar_url FROM users WHERE id = ?').get(decoded.id);
+
+    if (!user) {
+      // Re-hydrate users from persistent backup in case of container restart/ephemeral reset
+      try {
+        userBackupService.restoreUsersToDb(db);
+        user = db.prepare('SELECT id, username, email, full_name, role, timezone, avatar_url FROM users WHERE id = ?').get(decoded.id);
+      } catch (e) {
+        console.warn('Backup restore notice during auth:', e.message);
+      }
+    }
 
     if (!user) {
       return res.status(401).json({ error: 'User not found or session expired.' });

@@ -1,4 +1,6 @@
+const path = require('path');
 process.env.NODE_ENV = 'test';
+process.env.DB_PATH = path.join(__dirname, 'test_api.sqlite');
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('http');

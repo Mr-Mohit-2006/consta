@@ -2,6 +2,7 @@ const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
+const userBackupService = require('./user_backup_service');
 
 const dbPath = process.env.DB_PATH || path.join(__dirname, '../../consta.sqlite');
 const db = new DatabaseSync(dbPath);
@@ -689,6 +690,73 @@ function seedData() {
     const insertAch = db.prepare('INSERT INTO learning_achievements (code, title, description, category, icon, criteria_type, criteria_threshold, xp_reward) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
     for (const a of achievements) {
       insertAch.run(a.code, a.title, a.desc, a.cat, a.icon, a.type, a.thresh, a.xp);
+    }
+  }
+
+  // Restore and maintain persistent users across container restarts & redeployments
+  userBackupService.restoreUsersToDb(db);
+
+  // Seed default sample group room and tasks if study_rooms is empty
+  const roomCount = db.prepare('SELECT COUNT(*) as count FROM study_rooms').get();
+  if (roomCount.count === 0) {
+    const owner = db.prepare('SELECT id FROM users WHERE username = ?').get('alex_learner');
+    const mentor = db.prepare('SELECT id FROM users WHERE username = ?').get('dr_stone');
+    const sam = db.prepare('SELECT id FROM users WHERE username = ?').get('sam_study');
+
+    if (owner && mentor && sam) {
+      const ownerId = owner.id;
+      const roomRes = db.prepare(`
+        INSERT INTO study_rooms (name, subject, description, objectives, room_type, join_code, owner_id)
+        VALUES (?, ?, ?, ?, 'public', 'ALGO-2026', ?)
+      `).run(
+        'Advanced Algorithms & Systems Cohort',
+        'Computer Science',
+        'Collaborative cohort for mastering dynamic programming, graph theory, and distributed consensus.',
+        'Solve 2 algorithmic challenges weekly, review peer solutions, and clarify system design doubts.',
+        ownerId
+      );
+      const roomId = Number(roomRes.lastInsertRowid);
+
+      db.prepare('INSERT OR IGNORE INTO study_room_memberships (room_id, user_id, role) VALUES (?, ?, ?)').run(roomId, owner.id, 'owner');
+      db.prepare('INSERT OR IGNORE INTO study_room_memberships (room_id, user_id, role) VALUES (?, ?, ?)').run(roomId, sam.id, 'member');
+      db.prepare('INSERT OR IGNORE INTO study_room_memberships (room_id, user_id, role) VALUES (?, ?, ?)').run(roomId, mentor.id, 'moderator');
+
+      const chatRoomRes = db.prepare('INSERT INTO chat_rooms (room_type, reference_id) VALUES (?, ?)').run('study_room', roomId);
+      const chatRoomId = Number(chatRoomRes.lastInsertRowid);
+
+      db.prepare(`
+        INSERT INTO chat_messages (chat_room_id, sender_id, content, is_pinned)
+        VALUES (?, ?, ?, 1)
+      `).run(
+        chatRoomId,
+        mentor.id,
+        'Welcome to the Advanced Algorithms Cohort! Please check the shared study tasks. Remember: peer reviews should be constructive, referencing specific rubric criteria.'
+      );
+
+      const taskRes = db.prepare(`
+        INSERT INTO study_tasks (
+          title, instructions, subject, topic, creator_id, room_id, due_date, priority,
+          expected_outcome, reference_materials, allowed_submission_types, review_type, rubric_id, status, is_group_task
+        ) VALUES (?, ?, ?, ?, ?, ?, datetime('now', '+3 days'), 'high', ?, ?, ?, 'peer', 1, 'in_progress', 1)
+      `).run(
+        'Dynamic Programming: Longest Increasing Subsequence with Binary Search',
+        'Implement the O(N log N) patience sorting algorithm for LIS. Include: 1) Formal explanation of the tails array invariant, 2) Complete clean code, 3) Step-by-step trace of example [10, 9, 2, 5, 3, 7, 101, 18].',
+        'Computer Science',
+        'Dynamic Programming',
+        mentor.id,
+        roomId,
+        'Thorough proof of time complexity and verifiable test output with handwritten or digital trace diagram.',
+        JSON.stringify([
+          { title: 'LIS Patience Sorting Guide', url: 'https://en.wikipedia.org/wiki/Longest_increasing_subsequence' },
+          { title: 'Binary Search Invariants', url: 'https://cp-algorithms.com' }
+        ]),
+        JSON.stringify(['text', 'image', 'multi_image', 'document', 'link'])
+      );
+      const taskId = Number(taskRes.lastInsertRowid);
+
+      db.prepare('INSERT INTO chat_rooms (room_type, reference_id) VALUES (?, ?)').run('task_discussion', taskId);
+      db.prepare('INSERT OR IGNORE INTO study_task_assignments (task_id, user_id) VALUES (?, ?)').run(taskId, owner.id);
+      db.prepare('INSERT OR IGNORE INTO study_task_assignments (task_id, user_id) VALUES (?, ?)').run(taskId, sam.id);
     }
   }
 

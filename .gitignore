@@ -3,5 +3,7 @@ dist/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
+*test*.sqlite*
+*test*.json
 .env
 .DS_Store

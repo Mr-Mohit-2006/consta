@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { db } = require('../db/database');
 const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
+const userBackupService = require('../db/user_backup_service');
 const XPService = require('../services/xp_service');
 const StreakService = require('../services/streak_service');
 
@@ -77,7 +78,33 @@ router.post('/register', (req, res) => {
   // Initial streak record
   StreakService.recordActivity(userId, 'overall', 'account_created', userId, tz);
 
-  const token = jwt.sign({ id: userId, username, role: userRole }, JWT_SECRET, { expiresIn: '7d' });
+  // Backup user for persistent multi-device & container restart recovery
+  try {
+    userBackupService.saveOrUpdateUser({
+      username: cleanUsername,
+      email: cleanEmail,
+      password_hash: pwHash,
+      full_name: full_name.trim(),
+      bio: bio || '',
+      avatar_url: '',
+      role: userRole,
+      timezone: tz,
+      profile: {
+        is_public: 1,
+        show_streak: 1,
+        show_xp: 1,
+        show_tasks: 1,
+        show_analytics: 1,
+        skills: [],
+        subjects: [],
+        portfolio_links: []
+      }
+    });
+  } catch (err) {
+    console.warn('Backup save notice:', err.message);
+  }
+
+  const token = jwt.sign({ id: userId, username, role: userRole }, JWT_SECRET, { expiresIn: '90d' });
 
   const user = db.prepare('SELECT id, username, email, full_name, bio, avatar_url, role, timezone, created_at FROM users WHERE id = ?').get(userId);
 
@@ -94,16 +121,29 @@ router.post('/login', (req, res) => {
 
   const cleanId = identifier.trim().toLowerCase();
 
-  const user = db.prepare(`
+  let user = db.prepare(`
     SELECT * FROM users 
     WHERE LOWER(username) = ? OR LOWER(email) = ?
   `).get(cleanId, cleanId);
+
+  // If user is missing from SQLite (e.g. cold container restart / rebuild), restore from persistent backup
+  if (!user) {
+    try {
+      userBackupService.restoreUsersToDb(db);
+      user = db.prepare(`
+        SELECT * FROM users 
+        WHERE LOWER(username) = ? OR LOWER(email) = ?
+      `).get(cleanId, cleanId);
+    } catch (err) {
+      console.warn('Restore check notice on login:', err.message);
+    }
+  }
 
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return res.status(401).json({ error: 'Invalid email/username or password.' });
   }
 
-  const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
 
   delete user.password_hash;
   res.json({ token, user });
@@ -172,6 +212,13 @@ router.post('/reset-password', (req, res) => {
 
   if (updateRes.changes === 0) {
     return res.status(404).json({ error: 'User account not found.' });
+  }
+
+  // Backup updated password hash
+  try {
+    userBackupService.updatePassword(cleanEmail, newHash);
+  } catch (err) {
+    console.warn('Backup password update notice:', err.message);
   }
 
   // Mark token as used
@@ -250,6 +297,24 @@ router.put('/profile', authenticateToken, (req, res) => {
     updatedProfile.skills = JSON.parse(updatedProfile.skills || '[]');
     updatedProfile.subjects = JSON.parse(updatedProfile.subjects || '[]');
     updatedProfile.portfolio_links = JSON.parse(updatedProfile.portfolio_links || '[]');
+  }
+
+  // Backup updated profile
+  try {
+    const pw = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(userId);
+    userBackupService.saveOrUpdateUser({
+      username: updatedUser.username,
+      email: updatedUser.email,
+      password_hash: pw ? pw.password_hash : '',
+      full_name: updatedUser.full_name,
+      bio: updatedUser.bio,
+      avatar_url: updatedUser.avatar_url,
+      role: updatedUser.role,
+      timezone: updatedUser.timezone,
+      profile: updatedProfile
+    });
+  } catch (err) {
+    console.warn('Backup profile save notice:', err.message);
   }
 
   res.json({ user: updatedUser, profile: updatedProfile });
