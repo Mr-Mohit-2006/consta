@@ -15,7 +15,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [roomDetails, setRoomDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mobileView, setMobileView] = useState('details'); // 'list' | 'details'
+  const [mobileView, setMobileView] = useState('list'); // 'list' | 'details'
   const [searchQuery, setSearchQuery] = useState('');
   const [groupListFilter, setGroupListFilter] = useState('my'); // 'my' | 'explore'
 
@@ -921,18 +921,22 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     }
   }
 
+  const queryClean = searchQuery.trim().toLowerCase();
   const filteredRooms = rooms.filter(r =>
-    (r.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (r.subject || '').toLowerCase().includes(searchQuery.toLowerCase())
+    (r.name || '').toLowerCase().includes(queryClean) ||
+    (r.subject || '').toLowerCase().includes(queryClean) ||
+    (r.description || '').toLowerCase().includes(queryClean)
   );
 
   const myRooms = filteredRooms.filter(r => r.user_status === 'active' || r.user_role);
   const publicRooms = filteredRooms.filter(r => r.user_status !== 'active' && !r.user_role);
 
-  // If the user selected 'my' but hasn't joined any groups yet, show all available filteredRooms so it is never empty!
-  const displayedRooms = groupListFilter === 'my'
-    ? (myRooms.length > 0 ? myRooms : filteredRooms)
-    : (publicRooms.length > 0 ? publicRooms : filteredRooms);
+  // When user is searching via search bar, search across ALL groups in the platform!
+  const displayedRooms = queryClean
+    ? filteredRooms
+    : (groupListFilter === 'my'
+        ? (myRooms.length > 0 ? myRooms : filteredRooms)
+        : (publicRooms.length > 0 ? publicRooms : filteredRooms));
 
   const isCurrentRoomAdmin = roomDetails?.room?.owner_id === user?.id;
   const isCurrentRoomMember = Boolean(roomDetails?.isMember);
@@ -1079,16 +1083,49 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             </button>
           </div>
 
-          {/* Quick Search */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search groups by name or subject..."
-              className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition"
-            />
+          {/* Search & Create Bar */}
+          <div className="space-y-2">
+            <div className="relative flex items-center">
+              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search groups by name or subject..."
+                className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Quick 1-Click "Create Group from Search" Pill if user typed something */}
+            {searchQuery.trim().length > 0 && (
+              <div className="flex items-center justify-between p-2 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-xs animate-in fade-in duration-150">
+                <span className="text-[11px] text-indigo-300 truncate mr-2">
+                  Searching: <strong className="text-white font-mono">"{searchQuery.trim()}"</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setName(searchQuery.trim());
+                    setShowCreateModal(true);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] flex items-center space-x-1 shrink-0 shadow-sm transition cursor-pointer"
+                  title={`Create a new study group named "${searchQuery.trim()}"`}
+                >
+                  <Plus className="w-3 h-3 stroke-[3]" />
+                  <span>Create "{searchQuery.trim().slice(0, 16)}{searchQuery.trim().length > 16 ? '...' : ''}"</span>
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2.5 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
@@ -1102,7 +1139,10 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
               return (
                 <div
                   key={r.id}
-                  onClick={() => loadRoomDetails(r.id)}
+                  onClick={() => {
+                    loadRoomDetails(r.id);
+                    setMobileView('details');
+                  }}
                   className={`p-4 rounded-2xl border transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-indigo-950/40 border-indigo-500/50 shadow-lg shadow-indigo-950/50'
@@ -1268,25 +1308,30 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 </div>
                 <div>
                   <h4 className="font-bold text-sm text-white">
-                    {searchQuery ? 'No groups matching search' : 'No Study Groups Yet'}
+                    {searchQuery ? `No study groups found matching "${searchQuery}"` : 'No Study Groups Yet'}
                   </h4>
                   <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">
                     {searchQuery
-                      ? 'Try adjusting your search terms or join an existing group by name.'
-                      : 'Choose to create a new study group or join an existing group by its name (requires Admin approval).'}
+                      ? `You can immediately create a study group named "${searchQuery}", or search across CONSTA network to join with Admin approval.`
+                      : 'Choose to create a new study group or select a starter cohort with topic checklists & Discord live doubt chat.'}
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
                   <button
                     type="button"
-                    onClick={() => setShowCreateModal(true)}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                    onClick={() => {
+                      if (searchQuery.trim()) setName(searchQuery.trim());
+                      setShowCreateModal(true);
+                    }}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center space-x-1.5"
                   >
-                    + Create Group
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{searchQuery.trim() ? `+ Create "${searchQuery.trim().slice(0, 18)}"` : '+ Create Study Group'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => {
+                      if (searchQuery.trim()) setJoinByNameQuery(searchQuery.trim());
                       setShowJoinByNameModal(true);
                       setJoinByNameError('');
                       setJoinByNameResults(null);
