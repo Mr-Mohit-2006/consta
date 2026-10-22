@@ -1344,6 +1344,68 @@ test('23. Real-time Friend Updates Push to Both Ends (Initiator & Target Users)'
   }
 });
 
+test('24. Account Persistence: Registered User Data Persists in Database and Can Be Accessed at Any Time', async () => {
+  const ts = Date.now();
+  const username = `persistent_user_${ts}`;
+  const email = `${username}@example.com`;
+  const password = 'StrongPassword123!';
+  const fullName = 'Persistent Learner';
+  const bio = 'Focused on lifelong computer science mastery';
+
+  // 1. User creates account
+  const regRes = await request('/api/auth/register', {
+    method: 'POST',
+    body: {
+      username,
+      email,
+      password,
+      full_name: fullName,
+      bio,
+      timezone: 'UTC'
+    }
+  });
+  assert.equal(regRes.status, 201);
+  assert.ok(regRes.data.token);
+  assert.equal(regRes.data.user.username, username);
+  const userId = regRes.data.user.id;
+
+  // 2. Verify record in database tables (users, user_profiles, streak_records)
+  const dbUser = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  assert.ok(dbUser, 'User must exist in SQLite database');
+  assert.equal(dbUser.username, username);
+  assert.equal(dbUser.email, email);
+
+  const dbProfile = db.prepare('SELECT * FROM user_profiles WHERE user_id = ?').get(userId);
+  assert.ok(dbProfile, 'User profile must exist in database');
+
+  // 3. User logs out (client discards old token) and logs in again anytime with username
+  const loginWithUsername = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: username, password }
+  });
+  assert.equal(loginWithUsername.status, 200);
+  assert.ok(loginWithUsername.data.token);
+  assert.equal(loginWithUsername.data.user.id, userId);
+
+  // 4. User logs in anytime using email
+  const loginWithEmail = await request('/api/auth/login', {
+    method: 'POST',
+    body: { identifier: email, password }
+  });
+  assert.equal(loginWithEmail.status, 200);
+  assert.ok(loginWithEmail.data.token);
+  assert.equal(loginWithEmail.data.user.id, userId);
+
+  // 5. User accesses their account data via /api/profile/me at any time
+  const profileRes = await request('/api/profile/me', {
+    headers: { Authorization: `Bearer ${loginWithEmail.data.token}` }
+  });
+  assert.equal(profileRes.status, 200);
+  assert.equal(profileRes.data.user.username, username);
+  assert.equal(profileRes.data.user.full_name, fullName);
+  assert.equal(profileRes.data.user.bio, bio);
+});
+
 test.after(async () => {
   clearAllUserData();
   if (server && server.close) {

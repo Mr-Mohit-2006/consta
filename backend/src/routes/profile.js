@@ -5,6 +5,7 @@ const { db } = require('../db/database');
 const { authenticateToken, optionalToken } = require('../middleware/auth');
 const XPService = require('../services/xp_service');
 const StreakService = require('../services/streak_service');
+const userBackupService = require('../db/user_backup_service');
 
 // Get current logged-in user profile with study buddies, streaks, and settings
 router.get('/me', authenticateToken, (req, res) => {
@@ -81,6 +82,17 @@ router.put('/privacy', authenticateToken, (req, res) => {
     ON CONFLICT(user_id) DO UPDATE SET is_public = ?
   `).run(userId, val, val);
 
+  try {
+    const user = db.prepare('SELECT username, email FROM users WHERE id = ?').get(userId);
+    if (user) {
+      userBackupService.saveOrUpdateUser({
+        username: user.username,
+        email: user.email,
+        profile: { is_public: val }
+      });
+    }
+  } catch (err) {}
+
   res.json({ success: true, is_public: Boolean(val) });
 });
 
@@ -100,6 +112,18 @@ router.put('/me', authenticateToken, (req, res) => {
   `).run(full_name?.trim() || null, bio !== undefined ? bio.trim() : null, avatar_url?.trim() || null, timezone || null, userId);
 
   const updatedUser = db.prepare('SELECT id, username, email, full_name, bio, avatar_url, role, timezone, created_at FROM users WHERE id = ?').get(userId);
+
+  try {
+    userBackupService.saveOrUpdateUser({
+      username: updatedUser.username,
+      email: updatedUser.email,
+      full_name: updatedUser.full_name,
+      bio: updatedUser.bio,
+      avatar_url: updatedUser.avatar_url,
+      timezone: updatedUser.timezone
+    });
+  } catch (err) {}
+
   res.json({ success: true, user: updatedUser });
 });
 
@@ -123,6 +147,10 @@ router.post('/reset-password', authenticateToken, (req, res) => {
 
   const newHash = bcrypt.hashSync(newPassword, 8);
   db.prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(newHash, userId);
+
+  try {
+    userBackupService.updatePassword(user.email, newHash);
+  } catch (err) {}
 
   res.json({ success: true, message: 'Password updated successfully!' });
 });
