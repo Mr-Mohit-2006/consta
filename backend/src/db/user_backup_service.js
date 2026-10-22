@@ -8,87 +8,21 @@ const BACKUP_FILE = process.env.USER_BACKUP_FILE || (
     : path.join(__dirname, 'persistent_users.json')
 );
 
-const DEFAULT_USERS = [
-  {
-    username: 'alex_learner',
-    email: 'alex@consta.edu',
-    password_hash: bcrypt.hashSync('password123', 8),
-    full_name: 'Alex Rivera',
-    bio: 'Computer Science and Mathematics student passionate about distributed systems and algorithmic problem solving.',
-    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    role: 'student',
-    timezone: 'UTC',
-    profile: {
-      is_public: 1,
-      show_streak: 1,
-      show_xp: 1,
-      show_tasks: 1,
-      show_analytics: 1,
-      skills: ['Algorithms', 'Data Structures', 'TypeScript', 'Database Design', 'System Architecture'],
-      subjects: ['Computer Science', 'Mathematics', 'Software Engineering'],
-      portfolio_links: [
-        { label: 'GitHub', url: 'https://github.com' },
-        { label: 'Portfolio', url: 'https://consta.dev' }
-      ]
-    }
-  },
-  {
-    username: 'sam_study',
-    email: 'sam@consta.edu',
-    password_hash: bcrypt.hashSync('password123', 8),
-    full_name: 'Sam Chen',
-    bio: 'Software engineer & AI enthusiast. Studying compilers and systems design collaboratively.',
-    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    role: 'student',
-    timezone: 'UTC',
-    profile: {
-      is_public: 1,
-      show_streak: 1,
-      show_xp: 1,
-      show_tasks: 1,
-      show_analytics: 1,
-      skills: ['Frontend', 'React', 'CSS', 'UI/UX Design'],
-      subjects: ['Web Development', 'Computer Science'],
-      portfolio_links: [{ label: 'GitHub', url: 'https://github.com' }]
-    }
-  },
-  {
-    username: 'dr_stone',
-    email: 'mentor@consta.edu',
-    password_hash: bcrypt.hashSync('password123', 8),
-    full_name: 'Dr. Evelyn Stone',
-    bio: 'Academic mentor and senior reviewer in Algorithms & Computational Systems.',
-    avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
-    role: 'mentor',
-    timezone: 'UTC',
-    profile: {
-      is_public: 1,
-      show_streak: 1,
-      show_xp: 1,
-      show_tasks: 1,
-      show_analytics: 1,
-      skills: ['Distributed Systems', 'Research', 'Mentorship'],
-      subjects: ['Computer Science', 'Software Engineering'],
-      portfolio_links: [{ label: 'Academic Profile', url: 'https://consta.edu' }]
-    }
-  }
-];
+const DEFAULT_USERS = [];
 
 function getAllBackupUsers() {
   try {
     if (fs.existsSync(BACKUP_FILE)) {
       const content = fs.readFileSync(BACKUP_FILE, 'utf8');
       const users = JSON.parse(content);
-      if (Array.isArray(users) && users.length > 0) {
+      if (Array.isArray(users)) {
         return users;
       }
     }
   } catch (err) {
     console.error('Error reading persistent_users.json:', err.message);
   }
-  // Initialize with default users if backup file does not exist or is empty
-  saveAllBackupUsers(DEFAULT_USERS);
-  return DEFAULT_USERS;
+  return [];
 }
 
 function saveAllBackupUsers(users) {

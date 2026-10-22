@@ -88,7 +88,7 @@ test('2. First user registers and gets isolated account with clean initial state
   user1Token = res.data.token;
   user1Id = res.data.user.id;
 
-  // Check Alice initial streaks and XP
+  // Check Alice initial streaks, XP, and friends
   const streakRes = await request('/api/streaks', {
     headers: { Authorization: `Bearer ${user1Token}` }
   });
@@ -100,24 +100,61 @@ test('2. First user registers and gets isolated account with clean initial state
   assert.strictEqual(xpRes.status, 200);
   assert.strictEqual(xpRes.data.level, 1);
   assert.strictEqual(xpRes.data.currentXp, 50); // Welcome XP
+
+  // Verify Alice has 0 friends initially
+  const friendsRes = await request('/api/friends', {
+    headers: { Authorization: `Bearer ${user1Token}` }
+  });
+  assert.strictEqual(friendsRes.status, 200);
+  assert.strictEqual(friendsRes.data.length, 0, 'Fresh user should start with 0 friends');
 });
 
-test('3. Alice opens Group Study -> receives auto-seeded starter cohorts with Discord chat & topic checklists', async () => {
+test('3. Alice opens Group Study -> receives 0 pre-existing cohorts, creates her own cohort & admin task', async () => {
   const res = await request('/api/study-rooms', {
     headers: { Authorization: `Bearer ${user1Token}` }
   });
 
   assert.strictEqual(res.status, 200);
   assert.ok(Array.isArray(res.data));
-  assert.ok(res.data.length >= 4, 'Should contain 4 starter cohorts');
+  assert.strictEqual(res.data.length, 0, 'Should start with 0 pre-existing groups/cohorts');
 
-  const csGroup = res.data.find(r => r.subject === 'Computer Science');
-  assert.ok(csGroup, 'CS cohort should exist');
-  assert.strictEqual(csGroup.user_status, 'active', 'Alice should be active in primary cohort');
-  assert.ok(csGroup.challenges.length > 0, 'Cohort should have active challenge with timer');
+  // Alice creates her own study cohort
+  const createRoomRes = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${user1Token}` },
+    body: {
+      name: 'Computer Science & Engineering Cohort',
+      subject: 'Computer Science',
+      description: 'Fresh CS cohort created by Alice',
+      is_private: false
+    }
+  });
+
+  assert.strictEqual(createRoomRes.status, 201);
+  const createdRoom = createRoomRes.data.room;
+  assert.strictEqual(createdRoom.name, 'Computer Science & Engineering Cohort');
+
+  // Alice creates an admin task with topic checklist and 3 days duration
+  const createTaskRes = await request('/api/study-tasks', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${user1Token}` },
+    body: {
+      room_id: createdRoom.id,
+      title: 'Core Systems & Algorithms',
+      description: 'Master trees, graphs, and dynamic programming',
+      duration_days: 3,
+      topics_checklist: [
+        { id: 1, title: 'Binary Search Trees & Balancing', completed: false },
+        { id: 2, title: 'Graph Traversals (BFS & DFS)', completed: false },
+        { id: 3, title: 'Dynamic Programming Memoization', completed: false }
+      ]
+    }
+  });
+
+  assert.strictEqual(createTaskRes.status, 201);
 
   // Fetch details of CS cohort
-  const detailRes = await request(`/api/study-rooms/${csGroup.id}`, {
+  const detailRes = await request(`/api/study-rooms/${createdRoom.id}`, {
     headers: { Authorization: `Bearer ${user1Token}` }
   });
 
@@ -131,15 +168,14 @@ test('3. Alice opens Group Study -> receives auto-seeded starter cohorts with Di
   assert.strictEqual(adminTask.topics_checklist.length, 3, 'Should have 3 starter topics');
   assert.strictEqual(adminTask.duration_days, 3, 'Should have 3 days duration timer');
 
-  // Verify Discord chat room exists and has starter message
+  // Verify chat room exists
   assert.ok(detailRes.data.chatRoomId, 'Room should have a linked chat room');
-  const chatRes = await request(`/api/chat/${detailRes.data.chatRoomId}/messages`, {
-    headers: { Authorization: `Bearer ${user1Token}` }
+  const sendMsgRes = await request(`/api/chat/${detailRes.data.chatRoomId}/messages`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${user1Token}` },
+    body: { content: 'Welcome to the Computer Science cohort!' }
   });
-
-  assert.strictEqual(chatRes.status, 200);
-  assert.ok(Array.isArray(chatRes.data));
-  assert.ok(chatRes.data.length > 0, 'Chat should have welcome message');
+  assert.strictEqual(sendMsgRes.status, 201);
 });
 
 test('4. Alice can toggle topics on Admin task', async () => {
@@ -196,7 +232,7 @@ test('6. Second user registers -> has independent isolated space, can join publi
   user2Token = res.data.token;
   user2Id = res.data.user.id;
 
-  // Bob has zero tasks of his own
+  // Bob has zero tasks and 0 friends of his own
   const bobTasks = await request('/api/study-tasks?created_by_me=true', {
     headers: { Authorization: `Bearer ${user2Token}` }
   });
@@ -204,26 +240,32 @@ test('6. Second user registers -> has independent isolated space, can join publi
   assert.strictEqual(bobTasks.status, 200);
   assert.strictEqual(bobTasks.data.length, 0, 'Bob should have 0 personal tasks');
 
-  // Bob can view and join cohorts
+  const bobFriends = await request('/api/friends', {
+    headers: { Authorization: `Bearer ${user2Token}` }
+  });
+  assert.strictEqual(bobFriends.status, 200);
+  assert.strictEqual(bobFriends.data.length, 0, 'Bob should have 0 friends initially');
+
+  // Bob can view Alice\'s public cohort
   const roomsRes = await request('/api/study-rooms', {
     headers: { Authorization: `Bearer ${user2Token}` }
   });
 
   assert.strictEqual(roomsRes.status, 200);
-  assert.ok(roomsRes.data.length >= 4);
+  assert.strictEqual(roomsRes.data.length, 1);
 
-  // Bob joins Mathematics cohort so he is a member
-  const mathGroup = roomsRes.data.find(r => r.subject === 'Mathematics');
-  await request(`/api/study-rooms/${mathGroup.id}/join`, {
+  // Bob joins Alice\'s Computer Science cohort
+  const csGroup = roomsRes.data.find(r => r.subject === 'Computer Science');
+  await request(`/api/study-rooms/${csGroup.id}/join`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${user2Token}` }
   });
 
-  const mathDetail = await request(`/api/study-rooms/${mathGroup.id}`, {
+  const csDetail = await request(`/api/study-rooms/${csGroup.id}`, {
     headers: { Authorization: `Bearer ${user2Token}` }
   });
 
-  const postMsgRes = await request(`/api/chat/${mathDetail.data.chatRoomId}/messages`, {
+  const postMsgRes = await request(`/api/chat/${csDetail.data.chatRoomId}/messages`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${user2Token}` },
     body: { content: 'Hello cohort! Bob here ready to solve proofs.' }
