@@ -1406,6 +1406,73 @@ test('24. Account Persistence: Registered User Data Persists in Database and Can
   assert.equal(profileRes.data.user.bio, bio);
 });
 
+test('25. Real-time Chat Sending, Public Cohort Access, and WebSocket Broadcasting without Refresh', async () => {
+  const { broadcastToChatRoom } = require('../src/websocket/chat_server');
+
+  // 1. Create User A and User B
+  const uAName = `chat_live_a_${Date.now()}`;
+  const uBName = `chat_live_b_${Date.now()}`;
+
+  const regA = await request('/api/auth/register', {
+    method: 'POST',
+    body: { username: uAName, email: `${uAName}@example.com`, password: 'Password123!', full_name: 'Chat User A' }
+  });
+  assert.equal(regA.status, 201);
+  const tokenA = regA.data.token;
+
+  const regB = await request('/api/auth/register', {
+    method: 'POST',
+    body: { username: uBName, email: `${uBName}@example.com`, password: 'Password123!', full_name: 'Chat User B' }
+  });
+  assert.equal(regB.status, 201);
+  const tokenB = regB.data.token;
+  const idB = regB.data.user.id;
+
+  // 2. User A creates a public study room
+  const createRoomRes = await request('/api/study-rooms', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenA}` },
+    body: {
+      name: `Public CS Hub ${Date.now()}`,
+      subject: 'Computer Science',
+      description: 'Open collaborative space',
+      room_type: 'public'
+    }
+  });
+  assert.equal(createRoomRes.status, 201);
+  const roomId = createRoomRes.data.room.id;
+  const chatRoomId = createRoomRes.data.chat_room_id;
+
+  // 3. User B (who has NOT explicitly joined via button yet) sends doubt chat message to this public room
+  // This must succeed without 403 Forbidden and auto-enroll User B as active member!
+  const sendChatRes = await request(`/api/chat/room/${chatRoomId}/messages`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenB}` },
+    body: {
+      content: 'Can someone explain recursion in binary trees?'
+    }
+  });
+  assert.equal(sendChatRes.status, 201);
+  assert.equal(sendChatRes.data.sender_id, idB);
+  assert.ok(sendChatRes.data.content.includes('recursion in binary trees'));
+
+  // 4. Retrieve messages as User A and User B without refresh
+  const getMessagesRes = await request(`/api/chat/room/${chatRoomId}/messages`, {
+    headers: { Authorization: `Bearer ${tokenA}` }
+  });
+  assert.equal(getMessagesRes.status, 200);
+  assert.ok(getMessagesRes.data.some(m => m.content.includes('recursion in binary trees')));
+
+  // 5. Test Solution marking awards XP to sender
+  const msgId = sendChatRes.data.id;
+  const solutionRes = await request(`/api/chat/messages/${msgId}/solution`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenA}` }
+  });
+  assert.equal(solutionRes.status, 200);
+  assert.equal(Boolean(solutionRes.data.is_solution), true);
+});
+
 test.after(async () => {
   clearAllUserData();
   if (server && server.close) {

@@ -230,9 +230,66 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
   }
 
   async function handleSendMessage(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!inputText.trim() && selectedPhotos.length === 0) return;
-    if (!activeChatRoomId) return;
+
+    let targetRoomId = activeChatRoomId;
+    if (!targetRoomId) {
+      if (rooms.length > 0) {
+        try {
+          const details = await apiRequest(`/study-rooms/${rooms[0].id}`);
+          targetRoomId = details.chatRoomId;
+          setActiveChatRoomId(targetRoomId);
+          setActiveGroup(rooms[0]);
+          setActiveRoomTitle(`Group: ${rooms[0].name}`);
+        } catch {}
+      } else if (friends.length > 0) {
+        try {
+          const res = await apiRequest(`/chat/direct/${friends[0].id}`, { method: 'POST' });
+          targetRoomId = res.chatRoomId;
+          setActiveChatRoomId(targetRoomId);
+          setActiveFriend(friends[0]);
+          setActiveRoomTitle(`Friend: ${friends[0].full_name}`);
+        } catch {}
+      } else {
+        // Seamlessly auto-create a default public community study room so send button always works
+        try {
+          const newRoomRes = await apiRequest('/study-rooms', {
+            method: 'POST',
+            body: {
+              name: 'General Doubt & Study Hub',
+              subject: 'General Study',
+              description: 'Public community cohort for doubts, discussions, and real-time collaboration.',
+              objectives: 'Share doubts, verify solutions, and study together.',
+              room_type: 'public'
+            }
+          });
+          targetRoomId = newRoomRes.chat_room_id;
+          setActiveChatRoomId(targetRoomId);
+          setActiveGroup(newRoomRes.room);
+          setActiveRoomTitle(`Group: ${newRoomRes.room.name}`);
+          setRooms([newRoomRes.room]);
+        } catch {
+          // If a room already exists with that name, fetch rooms and pick the first
+          try {
+            const list = await apiRequest('/study-rooms');
+            if (list && list.length > 0) {
+              const details = await apiRequest(`/study-rooms/${list[0].id}`);
+              targetRoomId = details.chatRoomId;
+              setActiveChatRoomId(targetRoomId);
+              setActiveGroup(list[0]);
+              setActiveRoomTitle(`Group: ${list[0].name}`);
+              setRooms(list);
+            }
+          } catch {}
+        }
+      }
+    }
+
+    if (!targetRoomId) {
+      alert('Please select or create a study group or friend to start chatting.');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -254,7 +311,7 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
       }
 
       // Asynchronous upload without page refresh
-      const newMsg = await apiRequest(`/chat/room/${activeChatRoomId}/messages`, {
+      const newMsg = await apiRequest(`/chat/room/${targetRoomId}/messages`, {
         method: 'POST',
         body: formData
       });
@@ -265,11 +322,21 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
         return [...prev, newMsg];
       });
 
+      // Real-time WebSocket broadcast to other active users
+      if (socketRef.current) {
+        socketRef.current.broadcastChatMessage(targetRoomId, newMsg);
+      }
+
       // Clear form states
       setInputText('');
       setSelectedPhotos([]);
       setReplyParent(null);
       setIsDoubt(false);
+
+      // Auto scroll to latest message smoothly
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
     } catch (err) {
       alert('Failed to send message: ' + err.message);
     } finally {
@@ -890,6 +957,12 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
               type="text"
               value={inputText}
               onChange={e => setInputText(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e);
+                }
+              }}
               placeholder={isDoubt ? "Describe your doubt or problem..." : "Ask a doubt, explain logic, or mention @user..."}
               className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 min-w-0"
             />
@@ -897,6 +970,7 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
             {/* Send Button */}
             <button
               type="submit"
+              onClick={handleSendMessage}
               disabled={submitting || (!inputText.trim() && selectedPhotos.length === 0)}
               className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition cursor-pointer shrink-0"
             >

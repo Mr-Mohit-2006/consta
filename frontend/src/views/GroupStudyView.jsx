@@ -2387,12 +2387,19 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                               type="text"
                               value={newRoomMessage}
                               onChange={e => setNewRoomMessage(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleSendRoomMessage(e);
+                                }
+                              }}
                               placeholder={`Message #${roomDetails.room.name}`}
                               className="flex-1 bg-transparent text-xs text-white placeholder-slate-400 focus:outline-hidden"
                             />
 
                             <button
                               type="submit"
+                              onClick={handleSendRoomMessage}
                               disabled={sendingRoomMessage || (!newRoomMessage.trim() && !selectedChatPhoto)}
                               className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold text-xs flex items-center space-x-1 transition cursor-pointer shrink-0 shadow-md shadow-indigo-600/20"
                             >

@@ -30,7 +30,22 @@ function checkChatRoomAccess(chatRoomId, userId) {
 
     const isOwner = Number(studyRoom.owner_id) === Number(userId);
     const membership = db.prepare("SELECT * FROM study_room_memberships WHERE room_id = ? AND user_id = ? AND status = 'active'").get(studyRoom.id, userId);
-    return (membership || isOwner) ? room : null;
+    if (membership || isOwner) return room;
+
+    // Public study rooms allow open doubt chat and seamlessly auto-enroll user as active member
+    if (studyRoom.room_type === 'public') {
+      try {
+        db.prepare(`
+          INSERT INTO study_room_memberships (room_id, user_id, role, status)
+          VALUES (?, ?, 'member', 'active')
+          ON CONFLICT(room_id, user_id) DO UPDATE SET status = 'active'
+        `).run(studyRoom.id, userId);
+      } catch (e) {
+        // ignore
+      }
+      return room;
+    }
+    return null;
   } else if (room.room_type === 'task_discussion') {
     const task = db.prepare('SELECT * FROM study_tasks WHERE id = ?').get(room.reference_id);
     if (!task) return null;

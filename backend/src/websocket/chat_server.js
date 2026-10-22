@@ -69,7 +69,18 @@ function setupWebSocket(server) {
             const chatRoomId = Number(message.chatRoomId);
             if (!chatRoomId) return;
 
-            // Security check
+            // Security check - authenticate from message token if not yet authenticated
+            if (!authenticatedUser && message.token) {
+              try {
+                const decoded = jwt.verify(message.token, JWT_SECRET);
+                const user = db.prepare('SELECT id, username, full_name FROM users WHERE id = ?').get(decoded.id);
+                if (user) {
+                  authenticatedUser = user;
+                  NotificationService.registerClient(user.id, ws);
+                }
+              } catch {}
+            }
+
             if (authenticatedUser) {
               const room = db.prepare('SELECT * FROM chat_rooms WHERE id = ?').get(chatRoomId);
               if (!room) return;

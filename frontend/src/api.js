@@ -60,6 +60,8 @@ export class ChatSocket {
     this.onMessage = onMessage;
     this.reconnectTimeout = null;
     this.disconnected = false;
+    this.currentRoomId = null;
+    this.queue = [];
     this.connect();
   }
 
@@ -82,7 +84,15 @@ export class ChatSocket {
 
     this.ws.onopen = () => {
       if (token) {
-        this.send({ type: 'AUTH', token });
+        this.sendImmediate({ type: 'AUTH', token });
+      }
+      if (this.currentRoomId) {
+        this.sendImmediate({ type: 'JOIN_ROOM', chatRoomId: this.currentRoomId, token });
+      }
+      // Flush any queued messages that were sent before connection opened
+      while (this.queue.length > 0) {
+        const item = this.queue.shift();
+        this.sendImmediate(item);
       }
     };
 
@@ -97,36 +107,59 @@ export class ChatSocket {
 
     this.ws.onclose = () => {
       if (!this.disconnected) {
-        this.reconnectTimeout = setTimeout(() => this.connect(), 3000);
+        this.reconnectTimeout = setTimeout(() => this.connect(), 2000);
       }
+    };
+
+    this.ws.onerror = () => {
+      // Handled by onclose reconnect
     };
   }
 
-  send(data) {
+  sendImmediate(data) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));
+      return true;
+    }
+    return false;
+  }
+
+  send(data) {
+    if (!this.sendImmediate(data)) {
+      this.queue.push(data);
     }
   }
 
   joinRoom(chatRoomId) {
-    this.send({ type: 'JOIN_ROOM', chatRoomId });
+    if (!chatRoomId) return;
+    this.currentRoomId = Number(chatRoomId);
+    const token = getStoredToken();
+    this.send({ type: 'JOIN_ROOM', chatRoomId: this.currentRoomId, token });
   }
 
   leaveRoom(chatRoomId) {
-    this.send({ type: 'LEAVE_ROOM', chatRoomId });
+    if (Number(this.currentRoomId) === Number(chatRoomId)) {
+      this.currentRoomId = null;
+    }
+    this.send({ type: 'LEAVE_ROOM', chatRoomId: Number(chatRoomId) });
   }
 
   sendTyping(chatRoomId, isTyping) {
-    this.send({ type: 'TYPING', chatRoomId, isTyping });
+    this.send({ type: 'TYPING', chatRoomId: Number(chatRoomId), isTyping });
   }
 
   broadcastChatMessage(chatRoomId, payload) {
-    this.send({ type: 'CHAT_MESSAGE', chatRoomId, payload });
+    this.send({ type: 'CHAT_MESSAGE', chatRoomId: Number(chatRoomId), payload });
   }
 
   disconnect() {
     this.disconnected = true;
+    this.queue = [];
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
-    if (this.ws) this.ws.close();
+    if (this.ws) {
+      try {
+        this.ws.close();
+      } catch {}
+    }
   }
 }
