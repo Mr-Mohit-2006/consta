@@ -1175,6 +1175,89 @@ test('21. Unique Group Name Enforcement Rejects Duplicate Names (Case-Insensitiv
   assert.equal(joinRes.data.pendingApproval, true);
 });
 
+test('22. Doubt Chat Supports Both Particular Group and Friends Options', async () => {
+  // 1. Register two friends
+  const u1Name = `chat_friend_a_${Date.now()}`;
+  const u2Name = `chat_friend_b_${Date.now()}`;
+
+  const regA = await request('/api/auth/register', {
+    method: 'POST',
+    body: { username: u1Name, email: `${u1Name}@example.com`, password: 'Password123!', full_name: 'Friend User A' }
+  });
+  assert.equal(regA.status, 201);
+  const tokenA = regA.data.token;
+  const idA = regA.data.user.id;
+
+  const regB = await request('/api/auth/register', {
+    method: 'POST',
+    body: { username: u2Name, email: `${u2Name}@example.com`, password: 'Password123!', full_name: 'Friend User B' }
+  });
+  assert.equal(regB.status, 201);
+  const tokenB = regB.data.token;
+  const idB = regB.data.user.id;
+
+  // 2. Connect as friends (send + approve)
+  const sendReq = await request('/api/friends', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenA}` },
+    body: { identifier: String(idB) }
+  });
+  assert.equal(sendReq.status, 201);
+
+  const approveReq = await request(`/api/friends/requests/${idA}/approve`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenB}` }
+  });
+  assert.equal(approveReq.status, 200);
+
+  // 3. User A queries chat friends
+  const friendsListRes = await request('/api/chat/friends', {
+    headers: { Authorization: `Bearer ${tokenA}` }
+  });
+  assert.equal(friendsListRes.status, 200);
+  assert.equal(friendsListRes.data.length, 1);
+  assert.equal(friendsListRes.data[0].id, idB);
+
+  // 4. User A opens direct doubt chat with Friend B
+  const directChatRes = await request(`/api/chat/direct/${idB}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenA}` }
+  });
+  assert.equal(directChatRes.status, 200);
+  const directRoomId = directChatRes.data.chatRoomId;
+  assert.ok(directRoomId);
+
+  // 5. User A sends doubt message in direct friend room
+  const sendMsgRes = await request(`/api/chat/room/${directRoomId}/messages`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenA}` },
+    body: { content: '[DOUBT] Can you explain how Dijkstra handles negative cycles?' }
+  });
+  assert.equal(sendMsgRes.status, 201);
+  assert.equal(sendMsgRes.data.content, '[DOUBT] Can you explain how Dijkstra handles negative cycles?');
+
+  // 6. Friend B can access direct chat messages
+  const bMsgsRes = await request(`/api/chat/room/${directRoomId}/messages`, {
+    headers: { Authorization: `Bearer ${tokenB}` }
+  });
+  assert.equal(bMsgsRes.status, 200);
+  assert.equal(bMsgsRes.data.length, 1);
+  assert.equal(bMsgsRes.data[0].sender_id, idA);
+
+  // 7. Non-friend User C cannot access this direct chat room (Access Denied)
+  const u3Name = `unauthorized_${Date.now()}`;
+  const regC = await request('/api/auth/register', {
+    method: 'POST',
+    body: { username: u3Name, email: `${u3Name}@example.com`, password: 'Password123!', full_name: 'Stranger' }
+  });
+  const tokenC = regC.data.token;
+
+  const strangerAccessRes = await request(`/api/chat/room/${directRoomId}/messages`, {
+    headers: { Authorization: `Bearer ${tokenC}` }
+  });
+  assert.equal(strangerAccessRes.status, 403);
+});
+
 test.after(async () => {
   clearAllUserData();
   if (server && server.close) {

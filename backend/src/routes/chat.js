@@ -6,6 +6,7 @@ const { db } = require('../db/database');
 const { authenticateToken } = require('../middleware/auth');
 const XPService = require('../services/xp_service');
 const NotificationService = require('../services/notification_service');
+const FriendService = require('../services/friend_service');
 const { broadcastToChatRoom } = require('../websocket/chat_server');
 
 const uploadDir = path.join(__dirname, '../../uploads');
@@ -43,10 +44,92 @@ function checkChatRoomAccess(chatRoomId, userId) {
       if (roomMem) return room;
     }
     return null;
+  } else if (room.room_type === 'direct') {
+    const friendship = db.prepare("SELECT * FROM friendships WHERE id = ? AND status = 'accepted'").get(room.reference_id);
+    if (!friendship) return null;
+    if (Number(friendship.user_id) === Number(userId) || Number(friendship.friend_id) === Number(userId)) {
+      return room;
+    }
+    return null;
   }
 
   return room;
 }
+
+// Get all friends with direct doubt chat status
+router.get('/friends', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const friends = FriendService.getFriends(userId);
+
+  const enrichedFriends = friends.map(friend => {
+    const friendship = db.prepare(`
+      SELECT id FROM friendships 
+      WHERE ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?))
+        AND status = 'accepted'
+    `).get(userId, friend.id, friend.id, userId);
+
+    let chatRoomId = null;
+    let lastMessage = null;
+
+    if (friendship) {
+      let room = db.prepare("SELECT id FROM chat_rooms WHERE room_type = 'direct' AND reference_id = ?").get(friendship.id);
+      if (!room) {
+        const createRes = db.prepare("INSERT INTO chat_rooms (room_type, reference_id) VALUES ('direct', ?)").run(friendship.id);
+        room = { id: Number(createRes.lastInsertRowid) };
+      }
+      chatRoomId = room.id;
+
+      lastMessage = db.prepare(`
+        SELECT content, created_at, sender_id
+        FROM chat_messages
+        WHERE chat_room_id = ?
+        ORDER BY created_at DESC LIMIT 1
+      `).get(chatRoomId);
+    }
+
+    return {
+      ...friend,
+      chatRoomId,
+      lastMessage
+    };
+  });
+
+  res.json(enrichedFriends);
+});
+
+// Get or create direct chat room with a friend
+router.post('/direct/:friendId', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const friendId = Number(req.params.friendId);
+
+  if (!friendId || userId === friendId) {
+    return res.status(400).json({ error: 'Cannot create a direct chat with yourself.' });
+  }
+
+  // Must be approved friends
+  const friendship = db.prepare(`
+    SELECT id FROM friendships 
+    WHERE ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?))
+      AND status = 'accepted'
+  `).get(userId, friendId, friendId, userId);
+
+  if (!friendship) {
+    return res.status(403).json({ error: 'You can only start direct doubt chat with approved friends.' });
+  }
+
+  let room = db.prepare("SELECT * FROM chat_rooms WHERE room_type = 'direct' AND reference_id = ?").get(friendship.id);
+  if (!room) {
+    const createRes = db.prepare("INSERT INTO chat_rooms (room_type, reference_id) VALUES ('direct', ?)").run(friendship.id);
+    room = db.prepare('SELECT * FROM chat_rooms WHERE id = ?').get(createRes.lastInsertRowid);
+  }
+
+  const friend = db.prepare('SELECT id, username, full_name, avatar_url, role FROM users WHERE id = ?').get(friendId);
+
+  res.json({
+    chatRoomId: room.id,
+    friend
+  });
+});
 
 // Get messages for a chat room
 router.get(['/room/:chatRoomId/messages', '/:chatRoomId/messages'], authenticateToken, (req, res) => {
@@ -167,6 +250,24 @@ router.post(['/room/:chatRoomId/messages', '/:chatRoomId/messages'], authenticat
         `${req.user.full_name}: "${sanitizedContent.slice(0, 80)}"`,
         `/chat/${chatRoomId}`
       );
+    }
+  }
+
+  // If direct friend chat, notify the friend
+  if (room.room_type === 'direct') {
+    const friendship = db.prepare('SELECT user_id, friend_id FROM friendships WHERE id = ?').get(room.reference_id);
+    if (friendship) {
+      const recipientId = Number(friendship.user_id) === Number(userId) ? friendship.friend_id : friendship.user_id;
+      const recipientUser = db.prepare('SELECT username FROM users WHERE id = ?').get(recipientId);
+      if (recipientUser && !parsedMentions.includes(recipientUser.username)) {
+        NotificationService.notify(
+          recipientId,
+          'chat',
+          `💬 Doubt Chat from ${req.user.full_name}`,
+          sanitizedContent ? sanitizedContent.slice(0, 100) : 'Sent a photo attachment',
+          `/chat`
+        );
+      }
     }
   }
 

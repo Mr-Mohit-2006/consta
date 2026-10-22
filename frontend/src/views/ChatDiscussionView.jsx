@@ -5,13 +5,17 @@ import {
   MessageSquare, Send, Paperclip, Pin, CheckCircle2, ThumbsUp,
   Search, CornerDownRight, Check, Sparkles, Users, Clock,
   Camera, Image as ImageIcon, X, ZoomIn, Download, HelpCircle,
-  AlertCircle, ChevronLeft, ArrowLeft
+  AlertCircle, ChevronLeft, ArrowLeft, UserCheck, UserPlus, User
 } from 'lucide-react';
 
 export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBack }) {
   const { user, refreshUserData } = useAuth();
+  const [chatMode, setChatMode] = useState('group'); // 'group' (Particular Group) | 'friends' (Friends)
   const [rooms, setRooms] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [activeGroup, setActiveGroup] = useState(null);
+  const [activeFriend, setActiveFriend] = useState(null);
   const [activeChatRoomId, setActiveChatRoomId] = useState(initialChatRoomId || null);
   const [activeRoomTitle, setActiveRoomTitle] = useState('');
   const [messages, setMessages] = useState([]);
@@ -100,15 +104,21 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
   async function loadChatNav() {
     try {
       const roomList = await apiRequest('/study-rooms');
-      setRooms(roomList);
+      setRooms(roomList || []);
 
       const taskList = await apiRequest('/study-tasks');
-      setTasks(taskList);
+      setTasks(taskList || []);
+
+      const friendList = await apiRequest('/chat/friends');
+      setFriends(friendList || []);
 
       if (!activeChatRoomId) {
-        if (roomList.length > 0) {
+        if (roomList && roomList.length > 0) {
           selectStudyRoomChat(roomList[0]);
-        } else if (taskList.length > 0) {
+        } else if (friendList && friendList.length > 0) {
+          setChatMode('friends');
+          selectFriendChat(friendList[0]);
+        } else if (taskList && taskList.length > 0) {
           selectTaskChat(taskList[0]);
         }
       }
@@ -118,13 +128,34 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
   }
 
   async function selectStudyRoomChat(room) {
-    const details = await apiRequest(`/study-rooms/${room.id}`);
-    setActiveChatRoomId(details.chatRoomId);
-    setActiveRoomTitle(`Cohort: ${room.name}`);
-    setMobileView('chat');
+    setActiveGroup(room);
+    setActiveFriend(null);
+    try {
+      const details = await apiRequest(`/study-rooms/${room.id}`);
+      setActiveChatRoomId(details.chatRoomId);
+      setActiveRoomTitle(`Group: ${room.name}`);
+      setMobileView('chat');
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  async function selectFriendChat(friend) {
+    setActiveFriend(friend);
+    setActiveGroup(null);
+    try {
+      const res = await apiRequest(`/chat/direct/${friend.id}`, { method: 'POST' });
+      setActiveChatRoomId(res.chatRoomId);
+      setActiveRoomTitle(`Friend: ${friend.full_name}`);
+      setMobileView('chat');
+    } catch (e) {
+      alert(e.message || 'Failed to start friend chat');
+    }
   }
 
   async function selectTaskChat(task) {
+    setActiveGroup(null);
+    setActiveFriend(null);
     const details = await apiRequest(`/study-tasks/${task.id}`);
     setActiveChatRoomId(details.chatRoomId);
     setActiveRoomTitle(`Task Doubt Thread: ${task.title}`);
@@ -270,10 +301,10 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
           <div>
             <h2 className="text-xl font-bold text-white flex items-center space-x-2">
               <MessageSquare className="w-5 h-5 text-indigo-400" />
-              <span>Real-Time Doubt Solving & Group Chat</span>
+              <span>Real-Time Doubt Solving Chat</span>
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Real-time chat discussions, upload handwritten photos for doubts, receive instant peer solutions, and verify answers without page reload.
+              Ask questions to your particular study group or discuss 1-on-1 with friends. Upload photos and earn +15 XP for verified solutions!
             </p>
           </div>
         </div>
@@ -295,6 +326,63 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
         </div>
       </div>
 
+      {/* Two Doubt Chat Mode Options: Option 1 (Particular Group) & Option 2 (Friends) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60 p-2 sm:p-2.5 rounded-2xl border border-slate-800">
+        <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={() => {
+              setChatMode('group');
+              if (rooms.length > 0) selectStudyRoomChat(rooms[0]);
+            }}
+            className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              chatMode === 'group'
+                ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-600/30 ring-1 ring-indigo-400/40'
+                : 'bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>Particular Group</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${chatMode === 'group' ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'}`}>
+              {rooms.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setChatMode('friends');
+              if (friends.length > 0) selectFriendChat(friends[0]);
+            }}
+            className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              chatMode === 'friends'
+                ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/30 ring-1 ring-emerald-400/40'
+                : 'bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>Friends</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${chatMode === 'friends' ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'}`}>
+              {friends.length}
+            </span>
+          </button>
+        </div>
+
+        <div className="text-xs text-slate-400 hidden sm:block">
+          {chatMode === 'group' ? (
+            <span className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+              <span>Doubt solving within your enrolled group cohorts</span>
+            </span>
+          ) : (
+            <span className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>Direct 1-on-1 doubt discussion with approved friends</span>
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Mobile Screen Segmented Switcher (Tablet & Phone) */}
       <div className="flex lg:hidden rounded-2xl bg-slate-900 p-1 border border-slate-800">
         <button
@@ -304,7 +392,7 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          <span>Channels & Doubt Threads ({rooms.length + tasks.length})</span>
+          <span>{chatMode === 'group' ? `Groups (${rooms.length})` : `Friends (${friends.length})`}</span>
         </button>
         <button
           onClick={() => setMobileView('chat')}
@@ -320,51 +408,142 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Column: Channels & Doubt Threads List */}
         <div className={`space-y-4 ${mobileView === 'threads' ? 'block' : 'hidden lg:block'}`}>
-          {/* Cohorts */}
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-2">
-              Cohort Rooms
-            </div>
-            <div className="space-y-1">
-              {rooms.map(r => (
-                <button
-                  key={r.id}
-                  onClick={() => selectStudyRoomChat(r)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2 cursor-pointer ${
-                    activeRoomTitle.includes(r.name)
-                      ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                  }`}
-                >
-                  <Users className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                  <span className="truncate">{r.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          {chatMode === 'group' ? (
+            /* Option 1: Particular Group Mode */
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between px-1 mb-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    Your Study Groups ({rooms.length})
+                  </span>
+                </div>
+                {rooms.length === 0 ? (
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-center space-y-2">
+                    <Users className="w-6 h-6 text-slate-500 mx-auto" />
+                    <p className="text-xs text-slate-400">No study groups joined yet.</p>
+                    {onNavigate && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('group')}
+                        className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition cursor-pointer"
+                      >
+                        Join / Create Group
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {rooms.map(r => {
+                      const isSelected = activeGroup?.id === r.id;
+                      return (
+                        <button
+                          key={r.id}
+                          onClick={() => selectStudyRoomChat(r)}
+                          className={`w-full text-left p-2.5 rounded-xl text-xs font-medium transition flex items-center space-x-2.5 cursor-pointer ${
+                            isSelected
+                              ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/40 shadow-xs'
+                              : 'text-slate-300 hover:text-white hover:bg-slate-900 border border-transparent'
+                          }`}
+                        >
+                          <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-indigo-400'}`}>
+                            <Users className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold truncate text-white">{r.name}</div>
+                            <div className="text-[10px] text-slate-400 truncate">
+                              {r.subject} &bull; {r.member_count || 1} members
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
-          {/* Task Threads */}
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-2">
-              Task Doubt Threads
+              {/* Task Threads */}
+              {tasks.length > 0 && (
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-2">
+                    Task Doubt Threads
+                  </div>
+                  <div className="space-y-1">
+                    {tasks.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => selectTaskChat(t)}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2 cursor-pointer ${
+                          activeRoomTitle.includes(t.title)
+                            ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                        }`}
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                        <span className="truncate">{t.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="space-y-1">
-              {tasks.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => selectTaskChat(t)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2 cursor-pointer ${
-                    activeRoomTitle.includes(t.title)
-                      ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                  }`}
-                >
-                  <MessageSquare className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                  <span className="truncate">{t.title}</span>
-                </button>
-              ))}
+          ) : (
+            /* Option 2: Friends Mode */
+            <div>
+              <div className="flex items-center justify-between px-1 mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Approved Friends ({friends.length})
+                </span>
+              </div>
+              {friends.length === 0 ? (
+                <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-center space-y-2">
+                  <UserCheck className="w-6 h-6 text-slate-500 mx-auto" />
+                  <p className="text-xs text-slate-400">No approved friends yet.</p>
+                  <p className="text-[11px] text-slate-500">Connect with friends using their unique user ID to solve doubts 1-on-1!</p>
+                  {onNavigate && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('profile')}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition cursor-pointer"
+                    >
+                      Connect Friends in Profile
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {friends.map(f => {
+                    const isSelected = activeFriend?.id === f.id;
+                    return (
+                      <button
+                        key={f.id}
+                        onClick={() => selectFriendChat(f)}
+                        className={`w-full text-left p-2.5 rounded-xl text-xs font-medium transition flex items-center space-x-2.5 cursor-pointer ${
+                          isSelected
+                            ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
+                            : 'text-slate-300 hover:text-white hover:bg-slate-900 border border-transparent'
+                        }`}
+                      >
+                        <div className="relative shrink-0">
+                          <img
+                            src={f.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(f.full_name || 'Friend')}&background=10b981&color=fff`}
+                            alt={f.full_name}
+                            className="w-8 h-8 rounded-xl object-cover ring-1 ring-emerald-500/40"
+                          />
+                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900"></span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold truncate text-white">{f.full_name}</div>
+                          <div className="text-[10px] text-slate-400 truncate">
+                            {f.lastMessage?.content ? f.lastMessage.content : `@${f.username}`}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right 3 Columns: Active Chat Thread */}
@@ -377,25 +556,59 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
               <button
                 type="button"
                 onClick={() => setMobileView('threads')}
-                className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-bold flex items-center space-x-1 border border-slate-700 shrink-0"
+                className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-bold flex items-center space-x-1 border border-slate-700 shrink-0 cursor-pointer"
                 title="Switch channel or thread"
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Threads</span>
+                <span className="hidden sm:inline">Channels</span>
               </button>
-              <div className="min-w-0">
-                <h3 className="font-bold text-sm text-white truncate max-w-xs sm:max-w-md">{activeRoomTitle}</h3>
-                <div className="flex items-center space-x-2 text-[11px] text-slate-400 mt-0.5">
-                  <span className="flex items-center space-x-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="font-semibold text-emerald-400">{presenceCount} online</span>
-                  </span>
-                  <span>&bull;</span>
-                  <span className="hidden sm:inline text-slate-400">Real-Time Sync Active</span>
-                  <span className="hidden sm:inline">&bull;</span>
-                  <span className="text-amber-400 font-semibold">+15 XP Solution</span>
+
+              {activeFriend ? (
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="relative shrink-0">
+                    <img
+                      src={activeFriend.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(activeFriend.full_name || 'Friend')}&background=10b981&color=fff`}
+                      alt={activeFriend.full_name}
+                      className="w-9 h-9 rounded-xl object-cover ring-2 ring-emerald-500/40"
+                    />
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-slate-900"></span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-bold text-sm text-white truncate max-w-xs sm:max-w-md">{activeFriend.full_name}</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 shrink-0">
+                        Friend Doubt Chat
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-[11px] text-slate-400 mt-0.5">
+                      <span className="text-emerald-400 font-mono">@{activeFriend.username}</span>
+                      <span>&bull;</span>
+                      <span className="text-slate-400">Direct 1-on-1 Discussion</span>
+                      <span>&bull;</span>
+                      <span className="text-amber-400 font-semibold">+15 XP Solution</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="min-w-0">
+                  <div className="flex items-center space-x-2">
+                    <h3 className="font-bold text-sm text-white truncate max-w-xs sm:max-w-md">{activeRoomTitle}</h3>
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 text-[10px] font-bold border border-indigo-500/30 shrink-0">
+                      Group Doubt Chat
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[11px] text-slate-400 mt-0.5">
+                    <span className="flex items-center space-x-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="font-semibold text-emerald-400">{presenceCount} online</span>
+                    </span>
+                    <span>&bull;</span>
+                    <span className="hidden sm:inline text-slate-400">Real-Time Sync Active</span>
+                    <span className="hidden sm:inline">&bull;</span>
+                    <span className="text-amber-400 font-semibold">+15 XP Solution</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
