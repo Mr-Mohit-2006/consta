@@ -377,6 +377,18 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
   async function handleCreateStarterGroup(template) {
     try {
       setLoading(true);
+
+      // If group already exists, immediately join and open it
+      const existing = (rooms || []).find(r => (r.name || '').toLowerCase() === template.name.toLowerCase());
+      if (existing) {
+        await handleJoinRoom(existing.id);
+        setSelectedRoomId(existing.id);
+        await loadRoomDetails(existing.id);
+        setMobileView('details');
+        alert(`🎉 Opened cohort "${existing.name}"!`);
+        return;
+      }
+
       const res = await apiRequest('/study-rooms', {
         method: 'POST',
         body: {
@@ -424,9 +436,25 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
       }).catch(() => null);
 
       await loadRooms();
+      setSelectedRoomId(newRoomId);
       await loadRoomDetails(newRoomId);
+      setMobileView('details');
       alert(`🎉 Group "${template.name}" created with Discord chat, topics checklist, and challenge!`);
     } catch (err) {
+      if (err.message && err.message.includes('already exists')) {
+        try {
+          const list = await apiRequest(`/study-rooms?search=${encodeURIComponent(template.name)}`);
+          const found = (list || []).find(r => (r.name || '').toLowerCase() === template.name.toLowerCase());
+          if (found) {
+            await handleJoinRoom(found.id);
+            setSelectedRoomId(found.id);
+            await loadRoomDetails(found.id);
+            setMobileView('details');
+            alert(`🎉 Joined existing cohort "${found.name}"!`);
+            return;
+          }
+        } catch {}
+      }
       alert(err.message || 'Failed to create starter group.');
     } finally {
       setLoading(false);
@@ -2949,6 +2977,106 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                     <p className="text-[11px] text-slate-400">Scheduled challenges, countdown timers, and bonus XP rewards.</p>
                   </div>
                 </div>
+              </div>
+
+              {/* Direct Quick Create Study Group Card */}
+              <div className="glass-panel rounded-3xl p-6 sm:p-7 shadow-xl border border-indigo-500/30 bg-slate-900/90 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-extrabold text-sm sm:text-base text-white flex items-center space-x-2">
+                      <div className="p-1.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+                        <Plus className="w-4 h-4 stroke-[3]" />
+                      </div>
+                      <span>Quick Create Study Group</span>
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Type a unique name and subject to instantly launch your own collaborative study cohort:
+                    </p>
+                  </div>
+                  <span className="text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                    Instant Setup
+                  </span>
+                </div>
+
+                <form onSubmit={handleCreateRoom} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-slate-300 block mb-1 font-semibold">Group Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={e => {
+                          setName(e.target.value);
+                          if (createRoomError) setCreateRoomError('');
+                        }}
+                        placeholder="e.g. Distributed Systems & AI"
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 shadow-inner"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-300 block mb-1 font-semibold">Subject</label>
+                      <input
+                        type="text"
+                        required
+                        value={subject}
+                        onChange={e => setSubject(e.target.value)}
+                        placeholder="e.g. Computer Science, Math, Physics"
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 shadow-inner"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setRoomType('public')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer ${
+                          roomType === 'public'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
+                            : 'bg-slate-950 text-slate-400 border border-slate-800'
+                        }`}
+                      >
+                        <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Public (Instant Join)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRoomType('private')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer ${
+                          roomType === 'private'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs'
+                            : 'bg-slate-950 text-slate-400 border border-slate-800'
+                        }`}
+                      >
+                        <Lock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Private (Admin Approval)</span>
+                      </button>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={createRoomSubmitting || !name.trim()}
+                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white font-extrabold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center space-x-1.5"
+                    >
+                      {createRoomSubmitting ? (
+                        <>
+                          <RotateCcw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Creating...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>🚀 Create & Open Group</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  {createRoomError && (
+                    <p className="text-xs text-rose-400 font-semibold pt-1">{createRoomError}</p>
+                  )}
+                </form>
               </div>
 
               {/* Search & Join Study Groups Section */}
