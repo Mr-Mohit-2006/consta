@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { apiRequest, setStoredToken, getStoredToken } from '../api';
+import { apiRequest, setStoredToken, getStoredToken, ChatSocket } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -94,6 +94,39 @@ export function AuthProvider({ children }) {
       if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     };
   }, []);
+
+  // Real-time notification and activity sync across the entire platform
+  useEffect(() => {
+    if (!user) return;
+
+    let socket = null;
+    try {
+      socket = new ChatSocket((data) => {
+        if (data.type === 'NOTIFICATION') {
+          setUnreadNotifications(prev => prev + 1);
+          loadMe(true);
+        }
+      });
+    } catch {
+      // ignore
+    }
+
+    // Background unread count poll every 4 seconds
+    const pollInterval = setInterval(() => {
+      apiRequest('/notifications/unread-count')
+        .then(res => {
+          if (res && res.unreadCount !== undefined) {
+            setUnreadNotifications(res.unreadCount);
+          }
+        })
+        .catch(() => {});
+    }, 4000);
+
+    return () => {
+      if (socket) socket.disconnect();
+      clearInterval(pollInterval);
+    };
+  }, [user?.id]);
 
   async function login(identifier, password) {
     const res = await apiRequest('/auth/login', {

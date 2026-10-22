@@ -59,10 +59,12 @@ export class ChatSocket {
     this.ws = null;
     this.onMessage = onMessage;
     this.reconnectTimeout = null;
+    this.disconnected = false;
     this.connect();
   }
 
   connect() {
+    if (this.disconnected) return;
     const token = getStoredToken();
     let wsUrl = '';
     if (import.meta.env.VITE_WS_URL) {
@@ -94,7 +96,9 @@ export class ChatSocket {
     };
 
     this.ws.onclose = () => {
-      this.reconnectTimeout = setTimeout(() => this.connect(), 3000);
+      if (!this.disconnected) {
+        this.reconnectTimeout = setTimeout(() => this.connect(), 3000);
+      }
     };
   }
 
@@ -121,6 +125,7 @@ export class ChatSocket {
   }
 
   disconnect() {
+    this.disconnected = true;
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     if (this.ws) this.ws.close();
   }

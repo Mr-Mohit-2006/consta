@@ -248,6 +248,20 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     return () => clearInterval(interval);
   }, [roomDetails?.chatRoomId, isCurrentRoomMember]);
 
+  // Real-time automatic room details background sync (every 3.5 seconds)
+  useEffect(() => {
+    if (!selectedRoomId) return;
+    const interval = setInterval(async () => {
+      try {
+        const details = await apiRequest(`/study-rooms/${selectedRoomId}`);
+        setRoomDetails(details);
+      } catch {
+        // silent
+      }
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [selectedRoomId]);
+
   async function loadRooms() {
     setLoading(true);
     try {

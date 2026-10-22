@@ -9,9 +9,20 @@ export default function NotificationModal({ isOpen, onClose, onNotificationClick
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      loadData();
-    }
+    if (!isOpen) return;
+    loadData();
+
+    // Silent background sync while modal is open (every 3 seconds)
+    const interval = setInterval(async () => {
+      try {
+        const notifs = await apiRequest('/notifications');
+        setNotifications(notifs);
+      } catch {
+        // silent
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [isOpen]);
 
   async function loadData() {

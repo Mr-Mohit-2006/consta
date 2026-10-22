@@ -114,11 +114,12 @@ class FriendService {
 
     if (pendingReceived) {
       db.prepare("UPDATE friendships SET status = 'accepted' WHERE id = ?").run(pendingReceived.id);
+
+      // Clean up any extra duplicates so only one friendship link exists
       db.prepare(`
-        INSERT INTO friendships (user_id, friend_id, status)
-        VALUES (?, ?, 'accepted')
-        ON CONFLICT(user_id, friend_id) DO UPDATE SET status = 'accepted'
-      `).run(userId, friend.id);
+        DELETE FROM friendships 
+        WHERE id != ? AND ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?))
+      `).run(pendingReceived.id, userId, friend.id, friend.id, userId);
 
       NotificationService.notify(
         friend.id,
@@ -174,15 +175,14 @@ class FriendService {
       throw new Error('Friend request not found or already processed.');
     }
 
-    // Mark request as accepted
+    // Mark request as accepted (ensures strictly ONE friendship record between the two friends)
     db.prepare("UPDATE friendships SET status = 'accepted' WHERE id = ?").run(reqRow.id);
 
-    // Ensure reciprocal friendship row is accepted
+    // Clean up any extra duplicates so only one friendship link exists
     db.prepare(`
-      INSERT INTO friendships (user_id, friend_id, status)
-      VALUES (?, ?, 'accepted')
-      ON CONFLICT(user_id, friend_id) DO UPDATE SET status = 'accepted'
-    `).run(userId, reqRow.user_id);
+      DELETE FROM friendships 
+      WHERE id != ? AND ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?))
+    `).run(reqRow.id, reqRow.user_id, reqRow.friend_id, reqRow.friend_id, reqRow.user_id);
 
     const currentUser = db.prepare('SELECT username, full_name FROM users WHERE id = ?').get(userId);
 

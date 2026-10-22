@@ -616,6 +616,14 @@ function runMigrations() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
       CREATE INDEX IF NOT EXISTS idx_resets_email ON password_resets(email);
+
+      -- Deduplicate any reciprocal friendships so strictly one connection exists per friend pair
+      DELETE FROM friendships
+      WHERE id NOT IN (
+        SELECT MIN(id)
+        FROM friendships
+        GROUP BY MIN(user_id, friend_id), MAX(user_id, friend_id)
+      );
     `);
   } catch (e) {
     console.error('Migration notice:', e.message);

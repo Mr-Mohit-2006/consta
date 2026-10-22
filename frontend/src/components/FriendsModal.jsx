@@ -22,11 +22,26 @@ export default function FriendsModal({ isOpen, onClose }) {
   const [copiedId, setCopiedId] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      loadFriendsData();
-      setSearchError('');
-      setSearchResult(null);
-    }
+    if (!isOpen) return;
+    loadFriendsData();
+    setSearchError('');
+    setSearchResult(null);
+
+    // Silent background sync while modal is open (every 2.5 seconds)
+    const interval = setInterval(async () => {
+      try {
+        const [fList, reqs] = await Promise.all([
+          apiRequest('/friends'),
+          apiRequest('/friends/requests')
+        ]);
+        setFriends(fList || []);
+        setRequests(reqs || { incoming: [], outgoing: [] });
+      } catch {
+        // silent
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
   }, [isOpen]);
 
   async function loadFriendsData() {
@@ -85,19 +100,44 @@ export default function FriendsModal({ isOpen, onClose }) {
   }
 
   async function handleApproveRequest(requestId, senderName) {
+    // Instant optimistic update
+    const approvedItem = requests.incoming.find(r => r.request_id === requestId || r.user_id === requestId);
+    if (approvedItem) {
+      setRequests(prev => ({
+        ...prev,
+        incoming: prev.incoming.filter(r => r.request_id !== requestId && r.user_id !== requestId)
+      }));
+      setFriends(prev => {
+        if (prev.some(f => f.id === approvedItem.user_id)) return prev;
+        return [...prev, {
+          id: approvedItem.user_id,
+          username: approvedItem.username,
+          full_name: approvedItem.full_name,
+          avatar_url: approvedItem.avatar_url,
+          study_streak: approvedItem.study_streak || 0
+        }];
+      });
+    }
+
     try {
       await apiRequest(`/friends/requests/${requestId}/approve`, { method: 'POST' });
       await loadFriendsData();
       if (searchResult) {
         setSearchResult(prev => ({ ...prev, friend_status: 'accepted', is_friend: true }));
       }
-      alert(`You and ${senderName || 'this user'} are now friends!`);
     } catch (err) {
       alert(err.message || 'Failed to approve friend request.');
+      await loadFriendsData();
     }
   }
 
   async function handleRejectRequest(requestId) {
+    // Instant optimistic update
+    setRequests(prev => ({
+      ...prev,
+      incoming: prev.incoming.filter(r => r.request_id !== requestId && r.user_id !== requestId)
+    }));
+
     try {
       await apiRequest(`/friends/requests/${requestId}/reject`, { method: 'POST' });
       await loadFriendsData();
@@ -106,11 +146,16 @@ export default function FriendsModal({ isOpen, onClose }) {
       }
     } catch (err) {
       alert(err.message || 'Failed to decline request.');
+      await loadFriendsData();
     }
   }
 
   async function handleRemoveFriend(friendId, friendName) {
     if (!window.confirm(`Are you sure you want to remove ${friendName || 'this friend'} from your friends?`)) return;
+
+    // Instant optimistic update
+    setFriends(prev => prev.filter(f => f.id !== friendId));
+
     try {
       await apiRequest(`/friends/${friendId}`, { method: 'DELETE' });
       await loadFriendsData();
@@ -119,6 +164,7 @@ export default function FriendsModal({ isOpen, onClose }) {
       }
     } catch (err) {
       alert(err.message || 'Failed to remove friend.');
+      await loadFriendsData();
     }
   }
 
