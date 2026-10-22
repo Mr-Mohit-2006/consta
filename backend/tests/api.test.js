@@ -1072,6 +1072,46 @@ test('19. Friend Request Approval Flow, Private Profile Access Control, and Add 
   assert.equal(view4.data.isPrivate, true, 'Profile details should be hidden after friend removal');
 });
 
+test('20. Join Group by Group Name (Requires Admin Approval Flow)', async () => {
+  const suffix = Date.now();
+  const charlieUsername = `fc_charlie_${suffix}`;
+
+  // 1. Register Charlie
+  const charlieRes = await request('/api/auth/register', {
+    method: 'POST',
+    body: {
+      username: charlieUsername,
+      email: `${charlieUsername}@example.com`,
+      password: 'Password123!',
+      full_name: 'Charlie JoinTest'
+    }
+  });
+  assert.equal(charlieRes.status, 201);
+  const charlieToken = charlieRes.data.token;
+  const charlieId = charlieRes.data.user.id;
+
+  // 2. Charlie submits join request by group name
+  const joinByNameRes = await request('/api/study-rooms/join-by-name', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${charlieToken}` },
+    body: { name: 'Algorithm Masters' }
+  });
+
+  assert.equal(joinByNameRes.status, 200);
+  assert.equal(joinByNameRes.data.pendingApproval, true);
+  assert.equal(joinByNameRes.data.status, 'pending');
+  const targetRoomId = joinByNameRes.data.room_id;
+  assert.ok(targetRoomId);
+
+  // 3. Group details for Charlie show pending status
+  const charlieRoomView = await request(`/api/study-rooms/${targetRoomId}`, {
+    headers: { Authorization: `Bearer ${charlieToken}` }
+  });
+  assert.equal(charlieRoomView.status, 200);
+  assert.equal(charlieRoomView.data.isPending, true);
+  assert.equal(charlieRoomView.data.isMember, false);
+});
+
 test.after(async () => {
   clearAllUserData();
   if (server && server.close) {

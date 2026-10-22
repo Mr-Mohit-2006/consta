@@ -186,6 +186,62 @@ router.get('/:id', authenticateToken, (req, res) => {
   });
 });
 
+// Join group by group name (requires Admin approval)
+router.post('/join-by-name', authenticateToken, (req, res) => {
+  const { name } = req.body;
+  const userId = req.user.id;
+  const NotificationService = require('../services/notification_service');
+
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Please enter a group name.' });
+  }
+
+  const cleanName = name.trim().toLowerCase();
+  const room = db.prepare('SELECT * FROM study_rooms WHERE LOWER(name) = ?').get(cleanName);
+  if (!room) {
+    return res.status(404).json({ error: `No study group found with the name "${name.trim()}".` });
+  }
+
+  const existingMembership = db.prepare('SELECT * FROM study_room_memberships WHERE room_id = ? AND user_id = ?').get(room.id, userId);
+
+  if (existingMembership && existingMembership.status === 'active') {
+    return res.json({ success: true, status: 'active', room_id: room.id, message: `You are already an active member of "${room.name}".` });
+  }
+
+  if (existingMembership && existingMembership.status === 'pending') {
+    return res.json({ success: true, status: 'pending', pendingApproval: true, room_id: room.id, message: `Your join request for "${room.name}" is already pending Admin approval.` });
+  }
+
+  // Submit join request with pending status
+  db.prepare(`
+    INSERT INTO study_room_memberships (room_id, user_id, role, status)
+    VALUES (?, ?, 'member', 'pending')
+    ON CONFLICT(room_id, user_id)
+    DO UPDATE SET status = 'pending'
+  `).run(room.id, userId);
+
+  try {
+    NotificationService.notify(
+      room.owner_id,
+      'group_request',
+      '⏳ New Group Join Request',
+      `${req.user.full_name} (@${req.user.username}) requested to join your group "${room.name}". Approval required.`,
+      '/group'
+    );
+  } catch (e) {
+    // ignore
+  }
+
+  res.json({
+    success: true,
+    pendingApproval: true,
+    status: 'pending',
+    room_id: room.id,
+    room_name: room.name,
+    message: `Join request for "${room.name}" submitted! Waiting for Group Admin approval.`
+  });
+});
+
 // Join room (Public: joins immediately; Private: submits join request for Admin approval)
 router.post('/:id/join', authenticateToken, (req, res) => {
   const roomId = req.params.id;

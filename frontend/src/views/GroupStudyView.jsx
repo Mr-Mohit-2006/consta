@@ -90,6 +90,80 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
   const [userFriends, setUserFriends] = useState([]);
   const [addMemberTab, setAddMemberTab] = useState('friend'); // 'friend' | 'id'
 
+  // Join by Group Name state (Requires Admin Approval)
+  const [showJoinByNameModal, setShowJoinByNameModal] = useState(false);
+  const [joinByNameQuery, setJoinByNameQuery] = useState('');
+  const [joinByNameLoading, setJoinByNameLoading] = useState(false);
+  const [joinByNameResults, setJoinByNameResults] = useState(null);
+  const [joinByNameError, setJoinByNameError] = useState('');
+
+  async function handleSearchGroupByName(e) {
+    if (e) e.preventDefault();
+    if (!joinByNameQuery.trim()) return;
+
+    setJoinByNameLoading(true);
+    setJoinByNameError('');
+    setJoinByNameResults(null);
+    try {
+      const data = await apiRequest(`/study-rooms?search=${encodeURIComponent(joinByNameQuery.trim())}`);
+      setJoinByNameResults(data || []);
+      if (!data || data.length === 0) {
+        setJoinByNameError(`No study group found matching "${joinByNameQuery.trim()}".`);
+      }
+    } catch (err) {
+      setJoinByNameError(err.message || 'Failed to search for groups.');
+    } finally {
+      setJoinByNameLoading(false);
+    }
+  }
+
+  async function handleJoinByNameDirect(groupId, groupName) {
+    setJoinByNameLoading(true);
+    try {
+      const res = await apiRequest(`/study-rooms/${groupId}/join`, {
+        method: 'POST'
+      });
+      alert(res.message || `Join request submitted for "${groupName}"! Waiting for Group Admin approval.`);
+      setShowJoinByNameModal(false);
+      setJoinByNameQuery('');
+      setJoinByNameResults(null);
+      await loadRooms();
+      if (res.status === 'active') {
+        loadRoomDetails(groupId);
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to submit join request.');
+    } finally {
+      setJoinByNameLoading(false);
+    }
+  }
+
+  async function handleQuickJoinByNameSubmit(e) {
+    if (e) e.preventDefault();
+    if (!joinByNameQuery.trim()) return;
+
+    setJoinByNameLoading(true);
+    setJoinByNameError('');
+    try {
+      const res = await apiRequest('/study-rooms/join-by-name', {
+        method: 'POST',
+        body: { name: joinByNameQuery.trim() }
+      });
+      alert(res.message || 'Join request submitted! Waiting for Group Admin approval.');
+      setShowJoinByNameModal(false);
+      setJoinByNameQuery('');
+      setJoinByNameResults(null);
+      await loadRooms();
+      if (res.status === 'active' && res.room_id) {
+        loadRoomDetails(res.room_id);
+      }
+    } catch (err) {
+      setJoinByNameError(err.message || 'Failed to join group.');
+    } finally {
+      setJoinByNameLoading(false);
+    }
+  }
+
   async function openAddMemberModal() {
     setShowAddMemberModal(true);
     setMemberActionError('');
@@ -860,16 +934,31 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
           </div>
         </div>
 
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition self-start cursor-pointer group"
-          title="Create New Study Group"
-        >
-          <div className="w-5 h-5 rounded-lg bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <UserPlus className="w-3.5 h-3.5 text-white" />
-          </div>
-          <span>Create Group</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition cursor-pointer group"
+            title="Create New Study Group"
+          >
+            <div className="w-5 h-5 rounded-lg bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <UserPlus className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span>Create Group</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setShowJoinByNameModal(true);
+              setJoinByNameError('');
+              setJoinByNameResults(null);
+            }}
+            className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 hover:text-white border border-indigo-500/40 hover:border-indigo-400 font-bold text-xs flex items-center space-x-2 shadow-sm transition cursor-pointer"
+            title="Join Group by Group Name (Requires Admin Approval)"
+          >
+            <Search className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Join Group by Name</span>
+          </button>
+        </div>
       </div>
 
       {/* Mobile Screen Segmented Switcher */}
@@ -906,15 +995,30 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Groups ({filteredRooms.length})
             </span>
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="p-1 px-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
-              title="Create New Study Group"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Create Group</span>
-            </button>
+            <div className="flex items-center space-x-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowJoinByNameModal(true);
+                  setJoinByNameError('');
+                  setJoinByNameResults(null);
+                }}
+                className="p-1 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1 transition cursor-pointer"
+                title="Join Group by Name (Admin Approval)"
+              >
+                <Search className="w-3 h-3 text-indigo-400" />
+                <span className="hidden sm:inline">Join by Name</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="p-1 px-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                title="Create New Study Group"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>+ Create</span>
+              </button>
+            </div>
           </div>
 
           {/* Segmented Filter Switcher */}
@@ -1126,21 +1230,41 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             })}
 
             {displayedRooms.length === 0 && (
-              <div className="text-center py-10 text-xs text-slate-400 glass-card rounded-2xl p-6 border border-dashed border-slate-800">
-                <Users className="w-8 h-8 text-indigo-400/60 mx-auto mb-2" />
-                <p className="font-semibold text-slate-300">
-                  {searchQuery ? 'No groups matching search' : 'No study groups created yet'}
-                </p>
-                <p className="text-[11px] text-slate-500 mt-1 mb-4">
-                  {searchQuery ? 'Try clearing your search query' : 'Create a group to start collaborating with Discord chat, topic checklists, and timers!'}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer"
-                >
-                  + Create Study Group
-                </button>
+              <div className="text-center py-8 text-xs text-slate-400 glass-card rounded-3xl p-6 border border-dashed border-slate-800 space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mx-auto">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-white">
+                    {searchQuery ? 'No groups matching search' : 'No Study Groups Yet'}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">
+                    {searchQuery
+                      ? 'Try adjusting your search terms or join an existing group by name.'
+                      : 'Choose to create a new study group or join an existing group by its name (requires Admin approval).'}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(true)}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                  >
+                    + Create Group
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowJoinByNameModal(true);
+                      setJoinByNameError('');
+                      setJoinByNameResults(null);
+                    }}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-slate-700 font-bold text-xs transition cursor-pointer flex items-center justify-center space-x-1.5"
+                  >
+                    <Search className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Join Group by Name</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -1359,6 +1483,143 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                         className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition cursor-pointer"
                       >
                         View Challenge
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Group Action Hub: Add Member, Group Chat, Assign Task, Launch Challenge */}
+                {isCurrentRoomMember && (
+                  <div className="mt-4 p-4 rounded-2xl bg-slate-950/70 border border-indigo-500/30 shadow-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Group Actions & Setup</span>
+                      </span>
+                      {isCurrentRoomAdmin && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                          Group Admin Controls
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {/* Action 1: Add Members */}
+                      {isCurrentRoomAdmin ? (
+                        <button
+                          type="button"
+                          onClick={openAddMemberModal}
+                          className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 text-left transition cursor-pointer group flex flex-col justify-between"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <UserPlus className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] font-mono text-indigo-300 font-bold">#{roomDetails.members?.length || 0}</span>
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-white">+ Add Member</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">Friends or Unique ID</div>
+                          </div>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setActiveGroupTab('members')}
+                          className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left transition cursor-pointer group flex flex-col justify-between"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <Users className="w-4 h-4 text-indigo-400" />
+                            <span className="text-[10px] font-mono text-indigo-300 font-bold">#{roomDetails.members?.length || 0}</span>
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-white">Members</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">View cohort</div>
+                          </div>
+                        </button>
+                      )}
+
+                      {/* Action 2: Group Chat */}
+                      <button
+                        type="button"
+                        onClick={() => setActiveGroupTab('chat')}
+                        className={`p-3 rounded-xl border text-left transition cursor-pointer group flex flex-col justify-between ${
+                          activeGroupTab === 'chat'
+                            ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md'
+                            : 'bg-slate-900 hover:bg-slate-800 border-slate-800 hover:border-indigo-500/50 text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <MessageSquare className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                          <span className="text-[10px] font-mono text-emerald-300 font-bold">{roomChatMessages.length} msgs</span>
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-white">Group Chat</div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">Live discussion</div>
+                        </div>
+                      </button>
+
+                      {/* Action 3: Assign Tasks */}
+                      {isCurrentRoomAdmin ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTaskTitle('');
+                            setTaskInstructions('');
+                            setTaskTopics(['']);
+                            setTaskDurationDays(3);
+                            setShowCreateTaskModal(true);
+                          }}
+                          className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 text-left transition cursor-pointer group flex flex-col justify-between"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <CheckSquare className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] font-mono text-purple-300 font-bold">#{roomDetails.tasks?.length || 0}</span>
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-white">+ Assign Task</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">Checklist & Timer</div>
+                          </div>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setActiveGroupTab('tasks')}
+                          className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left transition cursor-pointer group flex flex-col justify-between"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <CheckSquare className="w-4 h-4 text-purple-400" />
+                            <span className="text-[10px] font-mono text-purple-300 font-bold">#{roomDetails.tasks?.length || 0}</span>
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-white">Group Tasks</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">View assignments</div>
+                          </div>
+                        </button>
+                      )}
+
+                      {/* Action 4: Launch Challenge */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isCurrentRoomAdmin) {
+                            setShowCreateChallengeModal(true);
+                          } else {
+                            setActiveGroupTab('challenges');
+                          }
+                        }}
+                        className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-left transition cursor-pointer group flex flex-col justify-between"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <Trophy className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                          <span className="text-[10px] font-mono text-amber-300 font-bold">
+                            {roomDetails.challenges?.length || 0}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-white">
+                            {isCurrentRoomAdmin ? '+ Challenge' : 'Challenges'}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">Speedrun timers</div>
+                        </div>
                       </button>
                     </div>
                   </div>
@@ -3286,6 +3547,148 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Join Group by Group Name (Admin Approval Required) */}
+      {showJoinByNameModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="glass-panel border-slate-700 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+                <Search className="w-4 h-4 text-indigo-400" />
+                <span>Join Group by Name</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowJoinByNameModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 mb-4 text-xs text-amber-300 flex items-start space-x-2">
+              <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <span>
+                Enter the group name to search. Submitting a join request requires <strong>Group Admin approval</strong> before you can access the cohort.
+              </span>
+            </div>
+
+            <form onSubmit={handleSearchGroupByName} className="space-y-4">
+              <div>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Group Name</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    required
+                    value={joinByNameQuery}
+                    onChange={e => setJoinByNameQuery(e.target.value)}
+                    placeholder="e.g. Distributed Systems & Algorithms"
+                    className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={joinByNameLoading || !joinByNameQuery.trim()}
+                    className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 transition cursor-pointer shrink-0"
+                  >
+                    <Search className="w-3.5 h-3.5" />
+                    <span>{joinByNameLoading ? 'Searching...' : 'Find'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            {joinByNameError && (
+              <div className="p-3 rounded-xl mt-4 text-xs bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-start space-x-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{joinByNameError}</span>
+              </div>
+            )}
+
+            {/* Direct Join Option when group name is entered */}
+            {joinByNameQuery.trim() && !joinByNameResults && !joinByNameError && (
+              <div className="mt-4 p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+                <span>Know the exact name?</span>
+                <button
+                  type="button"
+                  onClick={handleQuickJoinByNameSubmit}
+                  disabled={joinByNameLoading}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition cursor-pointer"
+                >
+                  Send Join Request &rarr;
+                </button>
+              </div>
+            )}
+
+            {/* Matching Groups List */}
+            {joinByNameResults && joinByNameResults.length > 0 && (
+              <div className="mt-4 space-y-2.5">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Matching Groups ({joinByNameResults.length})
+                </div>
+                {joinByNameResults.map(grp => (
+                  <div
+                    key={grp.id}
+                    className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-bold text-xs text-white truncate">{grp.name}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">
+                          <span>{grp.subject}</span> &bull; <span>Admin: {grp.owner_name}</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-900 border border-slate-700 text-slate-300 shrink-0">
+                        {grp.member_count} member{grp.member_count === 1 ? '' : 's'}
+                      </span>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-800 flex justify-end">
+                      {grp.user_status === 'active' || grp.user_role ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowJoinByNameModal(false);
+                            setSelectedRoomId(grp.id);
+                            loadRoomDetails(grp.id);
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition cursor-pointer"
+                        >
+                          View Group &rarr;
+                        </button>
+                      ) : grp.user_status === 'pending' ? (
+                        <span className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center space-x-1.5">
+                          <Clock className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                          <span>Request Pending Approval</span>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleJoinByNameDirect(grp.id, grp.name)}
+                          disabled={joinByNameLoading}
+                          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Request to Join (Admin Approval)</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-end pt-4 mt-2 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowJoinByNameModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
