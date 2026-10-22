@@ -86,7 +86,7 @@ export default function DashboardView({ onNavigate }) {
             </button>
             <button
               onClick={() => onNavigate('tasks')}
-              className="px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-xs flex items-center space-x-2 transition cursor-pointer"
+              className="hidden sm:flex px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-xs items-center space-x-2 transition cursor-pointer"
             >
               <CheckSquare className="w-4 h-4 text-purple-400" />
               <span>Study Tasks</span>

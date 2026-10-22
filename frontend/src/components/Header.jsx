@@ -194,6 +194,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
+              const isTasksTab = tab.id === 'tasks';
               return (
                 <button
                   key={tab.id}
@@ -201,7 +202,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
                     setActiveTab(tab.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`flex items-center space-x-2 p-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer ${
+                  className={`${isTasksTab ? 'hidden sm:flex' : 'flex'} items-center space-x-2 p-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer ${
                     isActive
                       ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/30'
                       : 'bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-slate-800'
@@ -255,11 +256,12 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
           {tabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            const isTasksTab = tab.id === 'tasks';
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                className={`${isTasksTab ? 'hidden sm:flex' : 'flex'} items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
                   isActive
                     ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/25 ring-1 ring-indigo-400/30'
                     : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/80'
