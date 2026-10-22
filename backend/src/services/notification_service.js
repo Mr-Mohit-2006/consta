@@ -20,6 +20,27 @@ class NotificationService {
   }
 
   /**
+   * Directly push any real-time event to an authenticated user's active WebSocket connection(s).
+   */
+  static sendToUser(userId, data) {
+    if (!userId) return;
+    const targetId = Number(userId);
+    const userSockets = this.clients.get(targetId);
+    if (userSockets && userSockets.size > 0) {
+      const msgStr = typeof data === 'string' ? data : JSON.stringify(data);
+      for (const ws of userSockets) {
+        if (ws.readyState === 1) { // WebSocket.OPEN
+          try {
+            ws.send(msgStr);
+          } catch {
+            // ignore send error on abruptly closed socket
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Check if current time falls within user quiet hours.
    */
   static isQuietHours(pref) {

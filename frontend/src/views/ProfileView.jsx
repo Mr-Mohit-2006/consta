@@ -37,10 +37,18 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
 
   useEffect(() => {
     loadProfile();
+
+    function onFriendUpdate() {
+      loadProfile(true);
+    }
+    window.addEventListener('consta:friend-update', onFriendUpdate);
+    return () => {
+      window.removeEventListener('consta:friend-update', onFriendUpdate);
+    };
   }, []);
 
-  async function loadProfile() {
-    setLoading(true);
+  async function loadProfile(silent = false) {
+    if (!silent) setLoading(true);
     try {
       const data = await apiRequest('/profile/me');
       setProfileData(data);
@@ -52,7 +60,7 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
     } catch (err) {
       console.error('Failed to load profile:', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 
@@ -148,7 +156,8 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
         type: 'success',
         text: res.message || 'Friend request sent successfully! Waiting for approval.'
       });
-      await loadProfile();
+      await loadProfile(true);
+      window.dispatchEvent(new CustomEvent('consta:friend-update'));
     } catch (err) {
       setBuddyActionMsg({ type: 'error', text: err.message || 'Failed to send friend request.' });
     } finally {
@@ -160,7 +169,8 @@ export default function ProfileView({ onOpenFriends, onNavigate, onBack }) {
     if (!window.confirm(`Are you sure you want to remove ${friendName || 'this friend'} from your friends?`)) return;
     try {
       await apiRequest(`/friends/${friendId}`, { method: 'DELETE' });
-      await loadProfile();
+      await loadProfile(true);
+      window.dispatchEvent(new CustomEvent('consta:friend-update'));
     } catch (err) {
       alert(err.message || 'Failed to remove friend.');
     }

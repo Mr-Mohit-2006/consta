@@ -186,6 +186,16 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
 
   useEffect(() => {
     loadRooms();
+
+    function onFriendUpdate() {
+      apiRequest('/friends')
+        .then(list => setUserFriends(list || []))
+        .catch(() => {});
+    }
+    window.addEventListener('consta:friend-update', onFriendUpdate);
+    return () => {
+      window.removeEventListener('consta:friend-update', onFriendUpdate);
+    };
   }, [user]);
 
   // Real-time WebSocket connection for Discord-like Chat

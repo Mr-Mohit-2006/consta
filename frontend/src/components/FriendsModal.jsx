@@ -22,40 +22,42 @@ export default function FriendsModal({ isOpen, onClose }) {
   const [copiedId, setCopiedId] = useState(false);
 
   useEffect(() => {
+    function onFriendUpdate() {
+      loadFriendsData(true);
+    }
+    window.addEventListener('consta:friend-update', onFriendUpdate);
+    return () => {
+      window.removeEventListener('consta:friend-update', onFriendUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isOpen) return;
-    loadFriendsData();
+    loadFriendsData(false);
     setSearchError('');
     setSearchResult(null);
 
     // Silent background sync while modal is open (every 2.5 seconds)
-    const interval = setInterval(async () => {
-      try {
-        const [fList, reqs] = await Promise.all([
-          apiRequest('/friends'),
-          apiRequest('/friends/requests')
-        ]);
-        setFriends(fList || []);
-        setRequests(reqs || { incoming: [], outgoing: [] });
-      } catch {
-        // silent
-      }
+    const interval = setInterval(() => {
+      loadFriendsData(true);
     }, 2500);
 
     return () => clearInterval(interval);
   }, [isOpen]);
 
-  async function loadFriendsData() {
-    setLoading(true);
+  async function loadFriendsData(silent = false) {
+    if (!silent) setLoading(true);
     try {
-      const fList = await apiRequest('/friends');
+      const [fList, reqs] = await Promise.all([
+        apiRequest('/friends'),
+        apiRequest('/friends/requests')
+      ]);
       setFriends(fList || []);
-
-      const reqs = await apiRequest('/friends/requests');
       setRequests(reqs || { incoming: [], outgoing: [] });
     } catch (e) {
       // ignore
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 
@@ -84,6 +86,7 @@ export default function FriendsModal({ isOpen, onClose }) {
         body: { identifier: targetId }
       });
       await loadFriendsData();
+      window.dispatchEvent(new CustomEvent('consta:friend-update'));
       if (searchResult) {
         setSearchResult(prev => ({
           ...prev,
@@ -122,6 +125,7 @@ export default function FriendsModal({ isOpen, onClose }) {
     try {
       await apiRequest(`/friends/requests/${requestId}/approve`, { method: 'POST' });
       await loadFriendsData();
+      window.dispatchEvent(new CustomEvent('consta:friend-update'));
       if (searchResult) {
         setSearchResult(prev => ({ ...prev, friend_status: 'accepted', is_friend: true }));
       }
@@ -141,6 +145,7 @@ export default function FriendsModal({ isOpen, onClose }) {
     try {
       await apiRequest(`/friends/requests/${requestId}/reject`, { method: 'POST' });
       await loadFriendsData();
+      window.dispatchEvent(new CustomEvent('consta:friend-update'));
       if (searchResult) {
         setSearchResult(prev => ({ ...prev, friend_status: 'none', is_friend: false }));
       }
@@ -159,6 +164,7 @@ export default function FriendsModal({ isOpen, onClose }) {
     try {
       await apiRequest(`/friends/${friendId}`, { method: 'DELETE' });
       await loadFriendsData();
+      window.dispatchEvent(new CustomEvent('consta:friend-update'));
       if (searchResult && searchResult.user?.id === friendId) {
         setSearchResult(prev => ({ ...prev, friend_status: 'none', is_friend: false }));
       }

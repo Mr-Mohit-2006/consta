@@ -129,6 +129,17 @@ class FriendService {
         `/profile/${currentUser.username}`
       );
 
+      // Broadcast real-time update to BOTH ends instantly
+      const mutualAcceptedEvent = {
+        type: 'FRIEND_UPDATE',
+        action: 'accepted',
+        initiatorId: userId,
+        targetId: friend.id,
+        timestamp: new Date().toISOString()
+      };
+      NotificationService.sendToUser(userId, mutualAcceptedEvent);
+      NotificationService.sendToUser(friend.id, mutualAcceptedEvent);
+
       return { status: 'accepted', message: 'Mutual friend request approved! You are now friends.' };
     }
 
@@ -147,6 +158,17 @@ class FriendService {
       `${currentUser.full_name} (@${currentUser.username}) sent you a friend request. Approve or decline to connect.`,
       '/friends'
     );
+
+    // Broadcast real-time update to BOTH ends instantly
+    const requestCreatedEvent = {
+      type: 'FRIEND_UPDATE',
+      action: 'request_created',
+      senderId: userId,
+      recipientId: friend.id,
+      timestamp: new Date().toISOString()
+    };
+    NotificationService.sendToUser(userId, requestCreatedEvent);
+    NotificationService.sendToUser(friend.id, requestCreatedEvent);
 
     return {
       status: 'pending',
@@ -195,6 +217,17 @@ class FriendService {
       `/profile/${currentUser.username}`
     );
 
+    // Broadcast real-time update to BOTH ends instantly
+    const approvedEvent = {
+      type: 'FRIEND_UPDATE',
+      action: 'accepted',
+      approverId: userId,
+      requesterId: reqRow.user_id,
+      timestamp: new Date().toISOString()
+    };
+    NotificationService.sendToUser(userId, approvedEvent);
+    NotificationService.sendToUser(reqRow.user_id, approvedEvent);
+
     return { success: true, message: 'Friend request approved.' };
   }
 
@@ -216,6 +249,17 @@ class FriendService {
 
     if (reqRow) {
       db.prepare('DELETE FROM friendships WHERE id = ?').run(reqRow.id);
+
+      // Broadcast real-time update to BOTH ends instantly
+      const rejectedEvent = {
+        type: 'FRIEND_UPDATE',
+        action: 'rejected',
+        rejecterId: userId,
+        requesterId: reqRow.user_id,
+        timestamp: new Date().toISOString()
+      };
+      NotificationService.sendToUser(userId, rejectedEvent);
+      NotificationService.sendToUser(reqRow.user_id, rejectedEvent);
     }
 
     return { success: true, message: 'Friend request declined.' };
@@ -225,10 +269,22 @@ class FriendService {
    * Remove an accepted friend or cancel request.
    */
   static removeFriend(userId, friendId) {
+    const fId = Number(friendId);
     db.prepare(`
       DELETE FROM friendships
       WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)
-    `).run(userId, friendId, friendId, userId);
+    `).run(userId, fId, fId, userId);
+
+    // Broadcast real-time update to BOTH ends instantly
+    const removedEvent = {
+      type: 'FRIEND_UPDATE',
+      action: 'removed',
+      userId: userId,
+      friendId: fId,
+      timestamp: new Date().toISOString()
+    };
+    NotificationService.sendToUser(userId, removedEvent);
+    NotificationService.sendToUser(fId, removedEvent);
 
     return { success: true, message: 'Friend removed.' };
   }

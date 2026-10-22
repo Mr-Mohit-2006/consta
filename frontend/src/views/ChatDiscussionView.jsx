@@ -70,6 +70,8 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
         if (Number(data.chatRoomId) === Number(activeChatRoomId)) {
           setPresenceCount(data.activeCount || 1);
         }
+      } else if (data.type === 'FRIEND_UPDATE') {
+        refreshFriendsList();
       }
     });
 
@@ -100,6 +102,25 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  async function refreshFriendsList() {
+    try {
+      const friendList = await apiRequest('/chat/friends');
+      setFriends(friendList || []);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  useEffect(() => {
+    function onFriendUpdate() {
+      refreshFriendsList();
+    }
+    window.addEventListener('consta:friend-update', onFriendUpdate);
+    return () => {
+      window.removeEventListener('consta:friend-update', onFriendUpdate);
+    };
+  }, []);
 
   async function loadChatNav() {
     try {

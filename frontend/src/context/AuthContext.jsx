@@ -105,6 +105,12 @@ export function AuthProvider({ children }) {
         if (data.type === 'NOTIFICATION') {
           setUnreadNotifications(prev => prev + 1);
           loadMe(true);
+          if (data.payload?.type && data.payload.type.startsWith('friend_')) {
+            window.dispatchEvent(new CustomEvent('consta:friend-update', { detail: data.payload }));
+          }
+        } else if (data.type === 'FRIEND_UPDATE') {
+          window.dispatchEvent(new CustomEvent('consta:friend-update', { detail: data }));
+          loadMe(true);
         }
       });
     } catch {

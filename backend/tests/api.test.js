@@ -9,6 +9,7 @@ const { db, clearAllUserData } = require('../src/db/database');
 const XPService = require('../src/services/xp_service');
 const StreakService = require('../src/services/streak_service');
 const AIReviewService = require('../src/services/ai_review_service');
+const NotificationService = require('../src/services/notification_service');
 
 const PORT = 5099;
 let baseUrl = `http://localhost:${PORT}`;
@@ -1256,6 +1257,91 @@ test('22. Doubt Chat Supports Both Particular Group and Friends Options', async 
     headers: { Authorization: `Bearer ${tokenC}` }
   });
   assert.equal(strangerAccessRes.status, 403);
+});
+
+test('23. Real-time Friend Updates Push to Both Ends (Initiator & Target Users)', async () => {
+  // 1. Create two test users
+  const uXName = `sync_user_x_${Date.now()}`;
+  const uYName = `sync_user_y_${Date.now()}`;
+
+  const regX = await request('/api/auth/register', {
+    method: 'POST',
+    body: { username: uXName, email: `${uXName}@example.com`, password: 'Password123!', full_name: 'User X' }
+  });
+  const tokenX = regX.data.token;
+  const idX = regX.data.user.id;
+
+  const regY = await request('/api/auth/register', {
+    method: 'POST',
+    body: { username: uYName, email: `${uYName}@example.com`, password: 'Password123!', full_name: 'User Y' }
+  });
+  const tokenY = regY.data.token;
+  const idY = regY.data.user.id;
+
+  // 2. Register mock WebSocket clients for both User X and User Y
+  const messagesX = [];
+  const messagesY = [];
+  const wsX = {
+    readyState: 1,
+    send: (str) => messagesX.push(JSON.parse(str))
+  };
+  const wsY = {
+    readyState: 1,
+    send: (str) => messagesY.push(JSON.parse(str))
+  };
+
+  NotificationService.registerClient(idX, wsX);
+  NotificationService.registerClient(idY, wsY);
+
+  try {
+    // 3. User X sends friend request to User Y -> verify BOTH ends receive FRIEND_UPDATE
+    const sendRes = await request('/api/friends', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${tokenX}` },
+      body: { identifier: String(idY) }
+    });
+    assert.equal(sendRes.status, 201);
+
+    const xEventSent = messagesX.find(m => m.type === 'FRIEND_UPDATE' && m.action === 'request_created');
+    const yEventReceived = messagesY.find(m => m.type === 'FRIEND_UPDATE' && m.action === 'request_created');
+    assert.ok(xEventSent, 'User X (initiator) must receive real-time FRIEND_UPDATE on request creation');
+    assert.ok(yEventReceived, 'User Y (recipient) must receive real-time FRIEND_UPDATE on request creation');
+    assert.equal(xEventSent.senderId, idX);
+    assert.equal(yEventReceived.recipientId, idY);
+
+    // 4. User Y approves friend request -> verify BOTH ends receive FRIEND_UPDATE accepted
+    messagesX.length = 0;
+    messagesY.length = 0;
+
+    const approveRes = await request(`/api/friends/requests/${idX}/approve`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${tokenY}` }
+    });
+    assert.equal(approveRes.status, 200);
+
+    const xEventAccepted = messagesX.find(m => m.type === 'FRIEND_UPDATE' && m.action === 'accepted');
+    const yEventAccepted = messagesY.find(m => m.type === 'FRIEND_UPDATE' && m.action === 'accepted');
+    assert.ok(xEventAccepted, 'User X must receive instant real-time notification that request was accepted');
+    assert.ok(yEventAccepted, 'User Y must receive instant real-time notification that friendship is confirmed');
+
+    // 5. User X removes friend -> verify BOTH ends receive FRIEND_UPDATE removed
+    messagesX.length = 0;
+    messagesY.length = 0;
+
+    const removeRes = await request(`/api/friends/${idY}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${tokenX}` }
+    });
+    assert.equal(removeRes.status, 200);
+
+    const xEventRemoved = messagesX.find(m => m.type === 'FRIEND_UPDATE' && m.action === 'removed');
+    const yEventRemoved = messagesY.find(m => m.type === 'FRIEND_UPDATE' && m.action === 'removed');
+    assert.ok(xEventRemoved, 'User X must receive instant real-time FRIEND_UPDATE on removal');
+    assert.ok(yEventRemoved, 'User Y must receive instant real-time FRIEND_UPDATE when unfriended');
+  } finally {
+    NotificationService.unregisterClient(idX, wsX);
+    NotificationService.unregisterClient(idY, wsY);
+  }
 });
 
 test.after(async () => {
