@@ -65,13 +65,13 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
           className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0 min-w-0"
           onClick={() => setActiveTab('dashboard')}
         >
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200 shrink-0">
-            <GraduationCap className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-black border-2 border-white flex items-center justify-center shadow-lg shadow-black/80 group-hover:scale-105 transition-transform duration-200 shrink-0">
+            <GraduationCap className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center space-x-1.5 sm:space-x-2">
               <span className="font-black text-base sm:text-lg tracking-wider text-white">CONSTA</span>
-              <span className="hidden sm:inline-flex text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+              <span className="hidden sm:inline-flex text-[10px] uppercase font-extrabold tracking-widest px-2 py-0.5 rounded-full bg-white text-black border border-white">
                 Study Network
               </span>
             </div>

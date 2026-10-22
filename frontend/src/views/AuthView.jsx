@@ -212,12 +212,12 @@ export default function AuthView({ onSuccess }) {
           </div>
 
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-xl shadow-indigo-500/30">
-              <GraduationCap className="w-7 h-7 text-white" />
+            <div className="w-12 h-12 rounded-2xl bg-black border-2 border-white flex items-center justify-center shadow-2xl shadow-black/90">
+              <GraduationCap className="w-7 h-7 text-white stroke-[2.5]" />
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">CONSTA</h1>
-              <span className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Study & Growth Network</span>
+              <span className="text-xs uppercase tracking-widest text-slate-300 font-bold">Study & Growth Network</span>
             </div>
           </div>
 

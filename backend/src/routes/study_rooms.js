@@ -398,8 +398,10 @@ router.post('/:id/members', authenticateToken, (req, res) => {
   if (!room) return res.status(404).json({ error: 'Study room not found.' });
 
   const myMembership = db.prepare('SELECT role FROM study_room_memberships WHERE room_id = ? AND user_id = ?').get(roomId, userId);
-  if (!myMembership || (myMembership.role !== 'owner' && myMembership.role !== 'moderator')) {
-    return res.status(403).json({ error: 'Only group admin or moderators can add members.' });
+  const isOwnerOrMod = myMembership && (myMembership.role === 'owner' || myMembership.role === 'moderator');
+  const isPublicRoom = room.room_type === 'public';
+  if (!isOwnerOrMod && !isPublicRoom) {
+    return res.status(403).json({ error: 'Only group admin or moderators can add members in a private group.' });
   }
 
   const cleanId = String(identifier).trim().toLowerCase();

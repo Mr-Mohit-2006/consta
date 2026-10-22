@@ -9,6 +9,61 @@ import {
   Hash, Image, Paperclip, X, CheckSquare2, Sparkles, RotateCcw
 } from 'lucide-react';
 
+export const STARTER_COHORTS = [
+  {
+    name: 'Computer Science & Engineering Cohort',
+    subject: 'Computer Science',
+    description: 'Public collaborative study group for Computer Science, Algorithms, and System Architecture.',
+    objectives: 'Complete cohort topic checklist, solve doubts in Discord chat, and compete in weekly mastery sprints.',
+    taskTitle: 'Data Structures & Algorithms Sprint',
+    topics: [
+      { id: 't1', title: 'Arrays, Hashing & Two-Pointer Patterns', completed: false },
+      { id: 't2', title: 'Binary Trees, BST & Graph Traversals', completed: false },
+      { id: 't3', title: 'Dynamic Programming & Memoization', completed: false }
+    ],
+    chalTitle: 'Weekly Mastery Sprint - Algorithms Challenge'
+  },
+  {
+    name: 'Mathematics & Quantitative Problem Solving',
+    subject: 'Mathematics',
+    description: 'Advanced problem-solving group for Linear Algebra, Calculus, and Discrete Mathematics.',
+    objectives: 'Weekly math problem sets, peer verification, and rigorous mathematical proofs.',
+    taskTitle: 'Calculus & Linear Algebra Problem Set',
+    topics: [
+      { id: 'm1', title: 'Eigenvalues & Matrix Transformations', completed: false },
+      { id: 'm2', title: 'Multivariable Derivatives & Integrals', completed: false },
+      { id: 'm3', title: 'Differential Equations & Proof Verification', completed: false }
+    ],
+    chalTitle: 'Math Sprint - Solve 10 Proof Problems'
+  },
+  {
+    name: 'Physics & Deep Tech Engineering',
+    subject: 'Physics',
+    description: 'Collaborative cohort for Classical Mechanics, Electromagnetism, and Quantum Concepts.',
+    objectives: 'Break down physical concepts, solve textbook problems, and verify solutions.',
+    taskTitle: 'Electromagnetism & Waves Mastery',
+    topics: [
+      { id: 'p1', title: 'Gauss Law & Electric Potential', completed: false },
+      { id: 'p2', title: 'Magnetic Fields & Ampere Law', completed: false },
+      { id: 'p3', title: 'Maxwell Equations & Wave Propagation', completed: false }
+    ],
+    chalTitle: 'Physics Challenge - 45m Timed Problem Solving'
+  },
+  {
+    name: 'General Study & Daily Productivity Cohort',
+    subject: 'General Study',
+    description: 'Daily accountability group for focused study sessions, habit consistency, and streak building.',
+    objectives: 'Daily check-ins, Pomodoro sprints, and consistent personal growth.',
+    taskTitle: 'Daily Habit & Focus Sprint',
+    topics: [
+      { id: 'g1', title: '2 Hours Deep Focus Study Block', completed: false },
+      { id: 'g2', title: 'Problem Logging & Notes Review', completed: false },
+      { id: 'g3', title: 'Peer Discussion & Summary Post', completed: false }
+    ],
+    chalTitle: 'Consistency Sprint - 5 Days Streak Target'
+  }
+];
+
 export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenChatRoom, onOpenChallenge }) {
   const { user } = useAuth();
   const [rooms, setRooms] = useState([]);
@@ -1302,46 +1357,92 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             })}
 
             {displayedRooms.length === 0 && (
-              <div className="text-center py-8 text-xs text-slate-400 glass-card rounded-3xl p-6 border border-dashed border-slate-800 space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mx-auto">
-                  <Users className="w-6 h-6" />
+              <div className="space-y-4">
+                <div className="text-center py-6 text-xs text-slate-400 glass-card rounded-3xl p-5 border border-dashed border-slate-800 space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mx-auto">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-white">
+                      {searchQuery ? `No study groups found matching "${searchQuery}"` : 'No Study Groups Yet'}
+                    </h4>
+                    <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">
+                      {searchQuery
+                        ? `You can immediately create a study group named "${searchQuery}", or search across CONSTA network to join with Admin approval.`
+                        : 'Choose to create a new study group or select a starter cohort below with topic checklists & Discord live doubt chat.'}
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (searchQuery.trim()) setName(searchQuery.trim());
+                        setShowCreateModal(true);
+                      }}
+                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center space-x-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{searchQuery.trim() ? `+ Create "${searchQuery.trim().slice(0, 18)}"` : '+ Create Study Group'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (searchQuery.trim()) setJoinByNameQuery(searchQuery.trim());
+                        setShowJoinByNameModal(true);
+                        setJoinByNameError('');
+                        setJoinByNameResults(null);
+                      }}
+                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-slate-700 font-bold text-xs transition cursor-pointer flex items-center justify-center space-x-1.5"
+                    >
+                      <Search className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Join by Unique Name</span>
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-sm text-white">
-                    {searchQuery ? `No study groups found matching "${searchQuery}"` : 'No Study Groups Yet'}
-                  </h4>
-                  <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">
-                    {searchQuery
-                      ? `You can immediately create a study group named "${searchQuery}", or search across CONSTA network to join with Admin approval.`
-                      : 'Choose to create a new study group or select a starter cohort with topic checklists & Discord live doubt chat.'}
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (searchQuery.trim()) setName(searchQuery.trim());
-                      setShowCreateModal(true);
-                    }}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center space-x-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>{searchQuery.trim() ? `+ Create "${searchQuery.trim().slice(0, 18)}"` : '+ Create Study Group'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (searchQuery.trim()) setJoinByNameQuery(searchQuery.trim());
-                      setShowJoinByNameModal(true);
-                      setJoinByNameError('');
-                      setJoinByNameResults(null);
-                    }}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-slate-700 font-bold text-xs transition cursor-pointer flex items-center justify-center space-x-1.5"
-                  >
-                    <Search className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>Join by Unique Name</span>
-                  </button>
-                </div>
+
+                {/* 1-Click Starter Cohorts List */}
+                {!searchQuery && (
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
+                        <Zap className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Instant Starter Groups</span>
+                      </span>
+                      <span className="text-[10px] text-slate-500">1-Click Launch</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {STARTER_COHORTS.map((tmpl, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900 transition flex items-center justify-between group shadow-sm"
+                        >
+                          <div className="min-w-0 pr-3">
+                            <div className="flex items-center space-x-2 mb-0.5">
+                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                                {tmpl.subject}
+                              </span>
+                            </div>
+                            <h5 className="font-bold text-xs text-white truncate group-hover:text-indigo-200 transition">
+                              {tmpl.name}
+                            </h5>
+                            <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                              {tmpl.description}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCreateStarterGroup(tmpl)}
+                            className="shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] flex items-center space-x-1 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+                          >
+                            <Plus className="w-3 h-3 stroke-[3]" />
+                            <span>Launch</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1427,6 +1528,15 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                       )
                     ) : isCurrentRoomAdmin ? (
                       <div className="flex items-center space-x-2">
+                        <button
+                          type="button"
+                          onClick={openAddMemberModal}
+                          className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 cursor-pointer"
+                          title="Add Member from Friends or Unique ID"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                          <span>+ Add Member</span>
+                        </button>
                         <span className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center space-x-1">
                           <Crown className="w-3.5 h-3.5 text-amber-400" />
                           <span>Admin</span>
@@ -1456,6 +1566,17 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                       </div>
                     ) : (
                       <div className="flex items-center space-x-2">
+                        {(!isPrivateGroup || isCurrentRoomAdmin) && (
+                          <button
+                            type="button"
+                            onClick={openAddMemberModal}
+                            className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 cursor-pointer"
+                            title="Add or Invite Member to Group"
+                          >
+                            <UserPlus className="w-3.5 h-3.5" />
+                            <span>+ Add Member</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => {
@@ -2543,15 +2664,15 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                       <span>Active Group Members ({roomDetails.members?.length || 0})</span>
                     </h4>
 
-                    {/* Add Member Button (Admin Only) */}
-                    {isCurrentRoomAdmin && (
+                    {/* Add Member Button */}
+                    {(isCurrentRoomAdmin || !isPrivateGroup) && (
                       <button
                         type="button"
                         onClick={openAddMemberModal}
-                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition cursor-pointer"
+                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer"
                       >
                         <UserPlus className="w-3.5 h-3.5" />
-                        <span>+ Invite Member</span>
+                        <span>+ Add Member</span>
                       </button>
                     )}
                   </div>
@@ -2673,60 +2794,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {[
-                    {
-                      name: 'Computer Science & Engineering Cohort',
-                      subject: 'Computer Science',
-                      description: 'Public collaborative study group for Computer Science, Algorithms, and System Architecture.',
-                      objectives: 'Complete cohort topic checklist, solve doubts in Discord chat, and compete in weekly mastery sprints.',
-                      taskTitle: 'Data Structures & Algorithms Sprint',
-                      topics: [
-                        { id: 't1', title: 'Arrays, Hashing & Two-Pointer Patterns', completed: false },
-                        { id: 't2', title: 'Binary Trees, BST & Graph Traversals', completed: false },
-                        { id: 't3', title: 'Dynamic Programming & Memoization', completed: false }
-                      ],
-                      chalTitle: 'Weekly Mastery Sprint - Algorithms Challenge'
-                    },
-                    {
-                      name: 'Mathematics & Quantitative Problem Solving',
-                      subject: 'Mathematics',
-                      description: 'Advanced problem-solving group for Linear Algebra, Calculus, and Discrete Mathematics.',
-                      objectives: 'Weekly math problem sets, peer verification, and rigorous mathematical proofs.',
-                      taskTitle: 'Calculus & Linear Algebra Problem Set',
-                      topics: [
-                        { id: 'm1', title: 'Eigenvalues & Matrix Transformations', completed: false },
-                        { id: 'm2', title: 'Multivariable Derivatives & Integrals', completed: false },
-                        { id: 'm3', title: 'Differential Equations & Proof Verification', completed: false }
-                      ],
-                      chalTitle: 'Math Sprint - Solve 10 Proof Problems'
-                    },
-                    {
-                      name: 'Physics & Deep Tech Engineering',
-                      subject: 'Physics',
-                      description: 'Collaborative cohort for Classical Mechanics, Electromagnetism, and Quantum Concepts.',
-                      objectives: 'Break down physical concepts, solve textbook problems, and verify solutions.',
-                      taskTitle: 'Electromagnetism & Waves Mastery',
-                      topics: [
-                        { id: 'p1', title: 'Gauss Law & Electric Potential', completed: false },
-                        { id: 'p2', title: 'Magnetic Fields & Ampere Law', completed: false },
-                        { id: 'p3', title: 'Maxwell Equations & Wave Propagation', completed: false }
-                      ],
-                      chalTitle: 'Physics Challenge - 45m Timed Problem Solving'
-                    },
-                    {
-                      name: 'General Study & Daily Productivity Cohort',
-                      subject: 'General Study',
-                      description: 'Daily accountability group for focused study sessions, habit consistency, and streak building.',
-                      objectives: 'Daily check-ins, Pomodoro sprints, and consistent personal growth.',
-                      taskTitle: 'Daily Habit & Focus Sprint',
-                      topics: [
-                        { id: 'g1', title: '2 Hours Deep Focus Study Block', completed: false },
-                        { id: 'g2', title: 'Problem Logging & Notes Review', completed: false },
-                        { id: 'g3', title: 'Peer Discussion & Summary Post', completed: false }
-                      ],
-                      chalTitle: 'Consistency Sprint - 5 Days Streak Target'
-                    }
-                  ].map((tmpl, idx) => (
+                  {STARTER_COHORTS.map((tmpl, idx) => (
                     <div
                       key={idx}
                       className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900 transition flex flex-col justify-between group shadow-sm"
