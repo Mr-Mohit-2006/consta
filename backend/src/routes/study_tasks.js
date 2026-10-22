@@ -157,11 +157,11 @@ router.get('/', authenticateToken, (req, res) => {
   const { room_id, status, assigned_to_me, created_by_me, subject } = req.query;
 
   let query = `
-    SELECT t.*, u.full_name as creator_name, r.name as room_name,
+    SELECT t.*, COALESCE(u.full_name, 'Study Lead') as creator_name, r.name as room_name,
            (SELECT status FROM study_task_assignments a WHERE a.task_id = t.id AND a.user_id = ?) as user_assignment_status,
            (SELECT s.status FROM study_submissions s WHERE s.task_id = t.id AND s.user_id = ?) as user_submission_status
     FROM study_tasks t
-    JOIN users u ON t.creator_id = u.id
+    LEFT JOIN users u ON t.creator_id = u.id
     LEFT JOIN study_rooms r ON t.room_id = r.id
     WHERE 1=1
   `;
@@ -208,10 +208,10 @@ router.get('/:id', authenticateToken, (req, res) => {
   const userId = req.user.id;
 
   const task = db.prepare(`
-    SELECT t.*, u.full_name as creator_name, u.avatar_url as creator_avatar,
+    SELECT t.*, COALESCE(u.full_name, 'Study Lead') as creator_name, u.avatar_url as creator_avatar,
            r.name as room_name
     FROM study_tasks t
-    JOIN users u ON t.creator_id = u.id
+    LEFT JOIN users u ON t.creator_id = u.id
     LEFT JOIN study_rooms r ON t.room_id = r.id
     WHERE t.id = ?
   `).get(taskId);
@@ -405,7 +405,8 @@ router.put('/:id/toggle', authenticateToken, handleToggleTask);
 function handleToggleTopic(req, res) {
   const taskId = req.params.id;
   const userId = req.user.id;
-  const { topicId, topicIndex } = req.body;
+  const topicId = req.params.topicId || req.body.topicId || req.body.topic_id;
+  const { topicIndex } = req.body;
 
   if (!taskId || taskId === 'undefined' || isNaN(Number(taskId))) {
     return res.status(400).json({ error: 'Valid task ID is required.' });
@@ -474,8 +475,8 @@ function handleToggleTopic(req, res) {
   });
 }
 
-router.patch('/:id/toggle-topic', authenticateToken, handleToggleTopic);
-router.post('/:id/toggle-topic', authenticateToken, handleToggleTopic);
+router.patch(['/:id/toggle-topic', '/:id/topics/:topicId/toggle'], authenticateToken, handleToggleTopic);
+router.post(['/:id/toggle-topic', '/:id/topics/:topicId/toggle'], authenticateToken, handleToggleTopic);
 
 // Delete task (Creator or Group Admin only)
 router.delete('/:id', authenticateToken, (req, res) => {

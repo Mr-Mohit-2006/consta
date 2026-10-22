@@ -49,7 +49,7 @@ function checkChatRoomAccess(chatRoomId, userId) {
 }
 
 // Get messages for a chat room
-router.get('/room/:chatRoomId/messages', authenticateToken, (req, res) => {
+router.get(['/room/:chatRoomId/messages', '/:chatRoomId/messages'], authenticateToken, (req, res) => {
   const chatRoomId = req.params.chatRoomId;
   const userId = req.user.id;
   const { search, limit = 50, before_id } = req.query;
@@ -97,7 +97,7 @@ router.get('/room/:chatRoomId/messages', authenticateToken, (req, res) => {
 });
 
 // Post message to chat room
-router.post('/room/:chatRoomId/messages', authenticateToken, upload.array('attachments', 4), (req, res) => {
+router.post(['/room/:chatRoomId/messages', '/:chatRoomId/messages'], authenticateToken, upload.array('attachments', 4), (req, res) => {
   const chatRoomId = req.params.chatRoomId;
   const userId = req.user.id;
   const { content, parent_id, mentions } = req.body;

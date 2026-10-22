@@ -150,7 +150,7 @@ router.get('/', authenticateToken, (req, res) => {
           INSERT INTO study_tasks (
             creator_id, room_id, title, subject, topic, priority, review_type,
             instructions, is_group_task, duration_days, topics_checklist, status
-          ) VALUES (?, ?, ?, ?, ?, 'high', 'peer', ?, 1, 3, ?, 'pending')
+          ) VALUES (?, ?, ?, ?, ?, 'high', 'peer', ?, 1, 3, ?, 'not_started')
         `).run(
           userId,
           rId,
