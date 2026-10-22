@@ -57,7 +57,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
   const studyStreak = streaks?.study?.current_streak || 0;
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 transition-all max-w-full">
+    <header className="sticky top-0 z-40 w-full bg-slate-950/95 backdrop-blur-2xl border-b border-slate-800/90 shadow-md shadow-black/30">
       {/* Top Banner with Brand, Level, Streak, User Menu */}
       <div className="relative z-30 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2">
         {/* Brand */}
@@ -277,24 +277,23 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
         </div>
       )}
 
-      {/* Navigation Tabs Bar for Desktop & Tablet */}
-      <div className="relative z-10 border-t border-slate-800/60 bg-slate-950/60 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1.5 overflow-x-auto py-1.5 scrollbar-none touch-pan-x">
+      {/* Navigation Tabs Bar - Static & Sticky Mode Options */}
+      <div className="relative z-20 border-t border-slate-800/80 bg-slate-900/95 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex space-x-1.5 overflow-x-auto py-2 scrollbar-none touch-pan-x">
           {tabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            const isTasksTab = tab.id === 'tasks';
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`${isTasksTab ? 'hidden sm:flex' : 'flex'} items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 ${
                   isActive
                     ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/25 ring-1 ring-indigo-400/30'
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/80'
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span>{tab.label}</span>
               </button>
             );
