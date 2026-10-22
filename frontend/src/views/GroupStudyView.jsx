@@ -221,6 +221,32 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
     }
   }
 
+  const [inlineJoinCode, setInlineJoinCode] = useState('');
+  const [inlineJoinLoading, setInlineJoinLoading] = useState(false);
+
+  async function handleInlineJoin(e) {
+    if (e) e.preventDefault();
+    if (!inlineJoinCode.trim()) return;
+    setInlineJoinLoading(true);
+    try {
+      const res = await apiRequest('/study-rooms/join-by-name', {
+        method: 'POST',
+        body: { name: inlineJoinCode.trim() }
+      });
+      alert(res.message || 'Successfully joined group!');
+      setInlineJoinCode('');
+      await loadRooms();
+      if (res.room_id) {
+        loadRoomDetails(res.room_id);
+        setMobileView('details');
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to join group.');
+    } finally {
+      setInlineJoinLoading(false);
+    }
+  }
+
   async function openAddMemberModal() {
     setShowAddMemberModal(true);
     setMemberActionError('');
@@ -665,7 +691,9 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
         alert('🎉 Successfully joined study group!');
       }
       await loadRooms();
+      setSelectedRoomId(roomId);
       loadRoomDetails(roomId);
+      setMobileView('details');
     } catch (err) {
       alert(err.message);
     }
@@ -1256,7 +1284,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search groups by name or subject..."
+                placeholder="Search groups by name, subject, or code..."
                 className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner"
               />
               {searchQuery && (
@@ -1269,6 +1297,33 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
+            </div>
+
+            {/* Quick Join Inline Input: Enter Name or Code */}
+            <div className="p-2 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+              <div className="flex items-center space-x-1.5">
+                <input
+                  type="text"
+                  value={inlineJoinCode}
+                  onChange={e => setInlineJoinCode(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleInlineJoin(e);
+                    }
+                  }}
+                  placeholder="Join by Unique Name or Code..."
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 min-w-0"
+                />
+                <button
+                  type="button"
+                  onClick={handleInlineJoin}
+                  disabled={!inlineJoinCode.trim() || inlineJoinLoading}
+                  className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-40 text-white font-bold text-xs shadow-sm transition cursor-pointer shrink-0"
+                >
+                  {inlineJoinLoading ? 'Joining...' : 'Join'}
+                </button>
+              </div>
             </div>
 
             {/* Quick 1-Click "Create Group from Search" Pill if user typed something */}
@@ -1450,14 +1505,14 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                             e.stopPropagation();
                             handleJoinRoom(r.id);
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 cursor-pointer ${
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-sm ${
                             isPrivate
-                              ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30'
-                              : 'bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30'
+                              ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
+                              : 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-indigo-600/30'
                           }`}
                         >
-                          {isPrivate ? <Lock className="w-3 h-3" /> : <LogIn className="w-3 h-3" />}
-                          <span>{isPrivate ? 'Request' : 'Join'}</span>
+                          {isPrivate ? <Lock className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5 stroke-[3]" />}
+                          <span>{isPrivate ? 'Request to Join' : '+ Join Group'}</span>
                         </button>
                       )}
                     </div>
@@ -2894,6 +2949,135 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                     <p className="text-[11px] text-slate-400">Scheduled challenges, countdown timers, and bonus XP rewards.</p>
                   </div>
                 </div>
+              </div>
+
+              {/* Search & Join Study Groups Section */}
+              <div className="glass-panel rounded-3xl p-6 sm:p-7 shadow-xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="font-bold text-sm text-white flex items-center space-x-2">
+                      <Search className="w-4 h-4 text-indigo-400" />
+                      <span>Search & Join Study Groups</span>
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Search any group across the network, join public cohorts instantly, or request private access:
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setName(searchQuery.trim());
+                      setShowCreateModal(true);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer shrink-0 self-start sm:self-auto"
+                  >
+                    <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                    <span>+ Create New Group</span>
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search by group name, subject, or join code (e.g. Computer Science, Math, 8B3F2A1C)..."
+                    className="w-full bg-slate-950 border border-slate-700 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 shadow-inner"
+                  />
+                </div>
+
+                {/* Search & Join Results Grid */}
+                {filteredRooms.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {filteredRooms.slice(0, 6).map(r => {
+                      const isPrivate = r.room_type === 'private';
+                      const isOwner = r.owner_id === user?.id;
+                      const isMember = r.user_status === 'active';
+                      const isPending = r.user_status === 'pending';
+
+                      return (
+                        <div
+                          key={r.id}
+                          className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                                {r.subject}
+                              </span>
+                              <span className={`text-[10px] font-semibold flex items-center space-x-1 ${isPrivate ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                {isPrivate ? <Lock className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
+                                <span>{isPrivate ? 'Private' : 'Public'}</span>
+                              </span>
+                            </div>
+                            <h5 className="font-bold text-xs text-white truncate">{r.name}</h5>
+                            <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{r.description || 'Collaborative study cohort.'}</p>
+                          </div>
+
+                          <div className="mt-3 pt-2.5 border-t border-slate-900 flex items-center justify-between">
+                            <span className="text-[10px] text-slate-500">{r.member_count} member(s)</span>
+                            {isOwner ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  loadRoomDetails(r.id);
+                                  setMobileView('details');
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 text-[10px] font-bold border border-slate-700 cursor-pointer"
+                              >
+                                Manage (Admin)
+                              </button>
+                            ) : isMember ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  loadRoomDetails(r.id);
+                                  setMobileView('details');
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 flex items-center space-x-1 cursor-pointer"
+                              >
+                                <CheckCircle className="w-3 h-3 text-emerald-400" />
+                                <span>Open Group</span>
+                              </button>
+                            ) : isPending ? (
+                              <span className="text-amber-400 text-[10px] font-bold bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/30">
+                                ⏳ Pending Approval
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleJoinRoom(r.id)}
+                                className={`px-3 py-1 rounded-lg text-[10px] font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm ${
+                                  isPrivate
+                                    ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
+                                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
+                                }`}
+                              >
+                                {isPrivate ? <Lock className="w-3 h-3" /> : <Plus className="w-3 h-3 stroke-[3]" />}
+                                <span>{isPrivate ? 'Request to Join' : '+ Join Group'}</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-xs text-slate-500 space-y-2">
+                    <p>No study groups found matching "{searchQuery}".</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setName(searchQuery.trim());
+                        setShowCreateModal(true);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition cursor-pointer"
+                    >
+                      + Create "{searchQuery.trim()}" Group Now
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* 1-Click Starter Cohorts */}
