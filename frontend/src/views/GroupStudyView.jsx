@@ -333,16 +333,13 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
       const data = await apiRequest('/study-rooms');
       const roomList = Array.isArray(data) ? data : [];
       setRooms(roomList);
-      const myRooms = roomList.filter(r => r.user_status === 'active' || r.user_role);
-      if (myRooms.length > 0) {
-        if (!selectedRoomId || !myRooms.some(r => r.id === selectedRoomId)) {
-          loadRoomDetails(myRooms[0].id);
+      if (selectedRoomId) {
+        if (roomList.some(r => r.id === selectedRoomId)) {
+          loadRoomDetails(selectedRoomId);
+        } else {
+          setSelectedRoomId(null);
+          setRoomDetails(null);
         }
-      } else if (roomList.length > 0) {
-        loadRoomDetails(roomList[0].id);
-      } else {
-        setSelectedRoomId(null);
-        setRoomDetails(null);
       }
     } catch (e) {
       console.error('Failed to load study rooms:', e);
@@ -1052,6 +1049,71 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
         </div>
       </div>
 
+      {/* Prominent Function Banner: Create Group, Join Group, Launch Cohorts */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        {/* Card 1: Create Group */}
+        <div
+          onClick={() => {
+            setName('');
+            setShowCreateModal(true);
+          }}
+          className="p-4 rounded-2xl glass-panel border border-indigo-500/30 hover:border-indigo-500/70 transition cursor-pointer group hover:bg-slate-900/80 shadow-lg flex items-center space-x-3.5"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform shadow-md shadow-indigo-600/30">
+            <UserPlus className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center space-x-1.5">
+              <h4 className="font-extrabold text-sm text-white group-hover:text-indigo-300 transition">Create Group</h4>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300">New</span>
+            </div>
+            <p className="text-[11px] text-slate-400 truncate mt-0.5">Start public cohort or private with Admin approval</p>
+          </div>
+        </div>
+
+        {/* Card 2: Join Group */}
+        <div
+          onClick={() => {
+            setShowJoinByNameModal(true);
+            setJoinByNameError('');
+            setJoinByNameResults(null);
+          }}
+          className="p-4 rounded-2xl glass-panel border border-slate-700/80 hover:border-indigo-500/50 transition cursor-pointer group hover:bg-slate-900/80 shadow-md flex items-center space-x-3.5"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 shrink-0 group-hover:scale-105 transition-transform">
+            <Search className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center space-x-1.5">
+              <h4 className="font-extrabold text-sm text-white group-hover:text-indigo-300 transition">Join Group</h4>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">Search</span>
+            </div>
+            <p className="text-[11px] text-slate-400 truncate mt-0.5">Join by Unique Name, Code, or Admin request</p>
+          </div>
+        </div>
+
+        {/* Card 3: Instant Starter Groups */}
+        <div
+          onClick={() => {
+            setSelectedRoomId(null);
+            setRoomDetails(null);
+            setMobileView('details');
+          }}
+          className="p-4 rounded-2xl glass-panel border border-amber-500/25 hover:border-amber-500/60 transition cursor-pointer group hover:bg-slate-900/80 shadow-md flex items-center space-x-3.5"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-105 transition-transform">
+            <Zap className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center space-x-1.5">
+              <h4 className="font-extrabold text-sm text-white group-hover:text-amber-300 transition">Starter Groups</h4>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300">1-Click</span>
+            </div>
+            <p className="text-[11px] text-slate-400 truncate mt-0.5">CS, Math, Physics & General cohorts ready</p>
+          </div>
+        </div>
+      </div>
+
       {/* Mobile Screen Segmented Switcher */}
       <div className="flex lg:hidden rounded-2xl bg-slate-900/90 p-1 border border-slate-800">
         <button
@@ -1082,6 +1144,54 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Group List */}
         <div className={`space-y-3 ${mobileView === 'list' ? 'block' : 'hidden lg:block'}`}>
+          {/* Quick Action Buttons on Sidebar */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setName('');
+                setShowCreateModal(true);
+              }}
+              className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center space-x-1.5"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+              <span>+ Create Group</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowJoinByNameModal(true);
+                setJoinByNameError('');
+                setJoinByNameResults(null);
+              }}
+              className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-slate-700 hover:border-indigo-500/40 font-bold text-xs transition cursor-pointer flex items-center justify-center space-x-1.5"
+            >
+              <Search className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Join Group</span>
+            </button>
+          </div>
+
+          {/* Overview / Hub Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedRoomId(null);
+              setRoomDetails(null);
+              setMobileView('details');
+            }}
+            className={`w-full p-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer border ${
+              !selectedRoomId
+                ? 'bg-indigo-600/20 text-indigo-300 border-indigo-500/50 shadow-sm'
+                : 'bg-slate-900/80 hover:bg-slate-800 text-slate-300 border-slate-800'
+            }`}
+          >
+            <span className="flex items-center space-x-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Groups Hub & Starter Cohorts</span>
+            </span>
+            <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400 font-semibold">Overview</span>
+          </button>
+
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Groups ({filteredRooms.length})
@@ -1098,7 +1208,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                 title="Join Group by Unique Name (Admin Approval)"
               >
                 <Search className="w-3 h-3 text-indigo-400" />
-                <span className="hidden sm:inline">Join by Unique Name</span>
+                <span className="hidden sm:inline">Join by Name</span>
               </button>
               <button
                 type="button"
@@ -3731,7 +3841,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
               <h3 className="text-base font-bold text-white flex items-center space-x-2">
                 <Search className="w-4 h-4 text-indigo-400" />
-                <span>Join Group by Unique Name</span>
+                <span>Join Group by Unique Name or Code</span>
               </h3>
               <button
                 type="button"
@@ -3745,13 +3855,13 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 mb-4 text-xs text-amber-300 flex items-start space-x-2">
               <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <span>
-                Enter the unique group name to submit a join request. If the cohort is private, <strong>Group Admin approval</strong> is required.
+                Enter the unique group name or join code to submit a join request. If the cohort is private, <strong>Group Admin approval</strong> is required.
               </span>
             </div>
 
             <form onSubmit={handleQuickJoinByNameSubmit} className="space-y-4">
               <div>
-                <label className="text-xs text-slate-300 block mb-1 font-medium">Unique Group Name *</label>
+                <label className="text-xs text-slate-300 block mb-1 font-medium">Unique Group Name or Join Code *</label>
                 <input
                   type="text"
                   required
@@ -3760,7 +3870,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
                     setJoinByNameQuery(e.target.value);
                     if (joinByNameError) setJoinByNameError('');
                   }}
-                  placeholder="e.g. Distributed Systems & Algorithms"
+                  placeholder="e.g. Distributed Systems & Algorithms or 8B3F2A1C"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
                 />
               </div>

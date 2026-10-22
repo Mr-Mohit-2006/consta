@@ -64,8 +64,8 @@ router.get('/', authenticateToken, (req, res) => {
   const params = [userId, userId];
 
   if (search) {
-    query += ' AND (r.name LIKE ? OR r.description LIKE ?)';
-    params.push(`%${search}%`, `%${search}%`);
+    query += ' AND (r.name LIKE ? OR r.description LIKE ? OR LOWER(r.join_code) = ?)';
+    params.push(`%${search}%`, `%${search}%`, search.trim().toLowerCase());
   }
   if (subject) {
     query += ' AND r.subject = ?';
@@ -204,7 +204,7 @@ router.post('/join-by-name', authenticateToken, (req, res) => {
   }
 
   const cleanName = name.trim().toLowerCase();
-  const room = db.prepare('SELECT * FROM study_rooms WHERE LOWER(name) = ?').get(cleanName);
+  const room = db.prepare('SELECT * FROM study_rooms WHERE LOWER(name) = ? OR LOWER(join_code) = ?').get(cleanName, cleanName);
   if (!room) {
     return res.status(404).json({ error: `No study group found with the name "${name.trim()}".` });
   }
