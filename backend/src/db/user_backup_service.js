@@ -8,20 +8,40 @@ const BACKUP_FILE = process.env.USER_BACKUP_FILE || (
     : path.join(__dirname, 'persistent_users.json')
 );
 
+// Optional secondary path for persistent volume / cloud storage
+const SECONDARY_BACKUP_FILE = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'persistent_users.json')
+  : null;
+
 const DEFAULT_USERS = [];
 
 function getAllBackupUsers() {
+  // Try primary location first
   try {
     if (fs.existsSync(BACKUP_FILE)) {
       const content = fs.readFileSync(BACKUP_FILE, 'utf8');
       const users = JSON.parse(content);
-      if (Array.isArray(users)) {
+      if (Array.isArray(users) && users.length > 0) {
         return users;
       }
     }
   } catch (err) {
-    console.error('Error reading persistent_users.json:', err.message);
+    console.error('Error reading primary persistent_users.json:', err.message);
   }
+
+  // Try secondary location if available
+  if (SECONDARY_BACKUP_FILE && fs.existsSync(SECONDARY_BACKUP_FILE)) {
+    try {
+      const content = fs.readFileSync(SECONDARY_BACKUP_FILE, 'utf8');
+      const users = JSON.parse(content);
+      if (Array.isArray(users) && users.length > 0) {
+        return users;
+      }
+    } catch (err) {
+      console.error('Error reading secondary persistent_users.json:', err.message);
+    }
+  }
+
   return [];
 }
 
@@ -29,47 +49,85 @@ function saveAllBackupUsers(users) {
   try {
     fs.writeFileSync(BACKUP_FILE, JSON.stringify(users, null, 2), 'utf8');
   } catch (err) {
-    console.error('Error saving persistent_users.json:', err.message);
+    console.error('Error saving primary persistent_users.json:', err.message);
+  }
+
+  if (SECONDARY_BACKUP_FILE) {
+    try {
+      fs.writeFileSync(SECONDARY_BACKUP_FILE, JSON.stringify(users, null, 2), 'utf8');
+    } catch (err) {
+      console.error('Error saving secondary persistent_users.json:', err.message);
+    }
   }
 }
 
 function saveOrUpdateUser(userData) {
+  if (!userData || (!userData.username && !userData.email)) return;
   const users = getAllBackupUsers();
   const existingIndex = users.findIndex(
-    u => (u.username && u.username.toLowerCase() === userData.username.toLowerCase()) ||
-         (u.email && u.email.toLowerCase() === userData.email.toLowerCase())
+    u => (u.username && userData.username && u.username.toLowerCase() === userData.username.toLowerCase()) ||
+         (u.email && userData.email && u.email.toLowerCase() === userData.email.toLowerCase())
   );
+
+  const cleanUserData = {
+    ...userData,
+    username: userData.username ? userData.username.toLowerCase() : '',
+    email: userData.email ? userData.email.toLowerCase() : '',
+    updated_at: new Date().toISOString()
+  };
 
   if (existingIndex >= 0) {
     users[existingIndex] = {
       ...users[existingIndex],
-      ...userData,
+      ...cleanUserData,
+      // Preserve ID if already assigned
+      id: cleanUserData.id || users[existingIndex].id,
       profile: {
         ...(users[existingIndex].profile || {}),
-        ...(userData.profile || {})
+        ...(cleanUserData.profile || {})
       }
     };
   } else {
-    users.push(userData);
+    users.push({
+      ...cleanUserData,
+      created_at: cleanUserData.created_at || new Date().toISOString()
+    });
   }
 
   saveAllBackupUsers(users);
 }
 
 function updatePassword(email, newPasswordHash) {
+  if (!email || !newPasswordHash) return;
   const users = getAllBackupUsers();
   const target = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
   if (target) {
     target.password_hash = newPasswordHash;
+    target.updated_at = new Date().toISOString();
     saveAllBackupUsers(users);
   }
 }
 
 function restoreUsersToDb(db) {
   const users = getAllBackupUsers();
+  if (!users || users.length === 0) return;
+
   const todayStr = new Date().toISOString().slice(0, 10);
 
-  const insertUser = db.prepare(`
+  const insertUserWithId = db.prepare(`
+    INSERT INTO users (id, username, email, password_hash, full_name, bio, avatar_url, role, timezone)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      username = excluded.username,
+      email = excluded.email,
+      password_hash = excluded.password_hash,
+      full_name = excluded.full_name,
+      bio = excluded.bio,
+      avatar_url = excluded.avatar_url,
+      timezone = excluded.timezone
+  `);
+
+  const insertUserNoId = db.prepare(`
     INSERT INTO users (username, email, password_hash, full_name, bio, avatar_url, role, timezone)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(username) DO UPDATE SET
@@ -89,21 +147,37 @@ function restoreUsersToDb(db) {
   const insertStreak = db.prepare('INSERT OR IGNORE INTO streak_records (user_id, category, current_streak, longest_streak, last_activity_date) VALUES (?, ?, ?, ?, ?)');
 
   for (const u of users) {
+    if (!u.username || !u.email || !u.password_hash) continue;
     try {
-      insertUser.run(
-        u.username.toLowerCase(),
-        u.email.toLowerCase(),
-        u.password_hash,
-        u.full_name || u.username,
-        u.bio || '',
-        u.avatar_url || '',
-        u.role || 'student',
-        u.timezone || 'UTC'
-      );
+      let uid = u.id;
+      if (uid && Number(uid)) {
+        insertUserWithId.run(
+          Number(uid),
+          u.username.toLowerCase(),
+          u.email.toLowerCase(),
+          u.password_hash,
+          u.full_name || u.username,
+          u.bio || '',
+          u.avatar_url || '',
+          u.role || 'student',
+          u.timezone || 'UTC'
+        );
+      } else {
+        insertUserNoId.run(
+          u.username.toLowerCase(),
+          u.email.toLowerCase(),
+          u.password_hash,
+          u.full_name || u.username,
+          u.bio || '',
+          u.avatar_url || '',
+          u.role || 'student',
+          u.timezone || 'UTC'
+        );
+        const dbUser = db.prepare('SELECT id FROM users WHERE LOWER(username) = ?').get(u.username.toLowerCase());
+        if (dbUser) uid = dbUser.id;
+      }
 
-      const dbUser = db.prepare('SELECT id FROM users WHERE LOWER(username) = ?').get(u.username.toLowerCase());
-      if (dbUser) {
-        const uid = dbUser.id;
+      if (uid) {
         const prof = u.profile || {};
         insertProfile.run(
           uid,
@@ -118,7 +192,6 @@ function restoreUsersToDb(db) {
         );
 
         insertPref.run(uid);
-
         insertStreak.run(uid, 'overall', 1, 1, todayStr);
         insertStreak.run(uid, 'study', 1, 1, todayStr);
       }

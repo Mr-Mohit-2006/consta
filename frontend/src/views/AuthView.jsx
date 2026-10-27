@@ -12,7 +12,18 @@ export default function AuthView({ onSuccess }) {
   const [mode, setMode] = useState('login'); // 'login' | 'register' | 'forgot'
 
   // Login form state
-  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginIdentifier, setLoginIdentifier] = useState(() => {
+    try {
+      const cached = localStorage.getItem('consta_user');
+      if (cached) {
+        const u = JSON.parse(cached);
+        return u.username || u.email || '';
+      }
+      return localStorage.getItem('consta_last_login_id') || '';
+    } catch {
+      return '';
+    }
+  });
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -82,10 +93,15 @@ export default function AuthView({ onSuccess }) {
     setErrorMessage('');
     setResetSuccessMessage('');
     try {
+      localStorage.setItem('consta_last_login_id', loginIdentifier.trim());
       await login(loginIdentifier.trim(), loginPassword);
       if (onSuccess) onSuccess();
     } catch (err) {
-      setErrorMessage(err.message || 'Login failed. Please check your credentials.');
+      if (err.name === 'TypeError' || err.message?.includes('fetch') || [502, 503, 504].includes(err.status)) {
+        setErrorMessage('Cloud server is waking up from idle sleep (takes ~15-30s). Please wait a moment and tap Log In again.');
+      } else {
+        setErrorMessage(err.message || 'Login failed. Please check your credentials.');
+      }
     } finally {
       setLoading(false);
     }

@@ -9,6 +9,20 @@ const db = new DatabaseSync(dbPath);
 
 db.exec('PRAGMA foreign_keys = ON;');
 db.exec('PRAGMA journal_mode = WAL;');
+db.exec('PRAGMA synchronous = NORMAL;');
+db.exec('PRAGMA wal_autocheckpoint = 100;');
+
+function checkpointDb() {
+  try {
+    db.exec('PRAGMA wal_checkpoint(PASSIVE);');
+  } catch (e) {
+    // ignore
+  }
+}
+
+// Periodically flush WAL to disk every 30 seconds
+const checkpointInterval = setInterval(checkpointDb, 30000);
+if (checkpointInterval.unref) checkpointInterval.unref();
 
 function initDatabase() {
   db.exec(`
@@ -705,7 +719,14 @@ function seedData() {
   userBackupService.restoreUsersToDb(db);
 }
 
-function clearAllUserData() {
+function clearAllUserData(force = false) {
+  // Safeguard: Never clear production data unless explicitly in test environment or forced
+  const isTest = process.env.NODE_ENV === 'test' || (process.env.DB_PATH && process.env.DB_PATH.includes('test'));
+  if (!isTest && !force && !process.env.FORCE_CLEAR) {
+    console.warn('⚠️ Safeguard: clearAllUserData called outside of test environment. Ignored to protect user data.');
+    return;
+  }
+
   db.exec(`
     PRAGMA foreign_keys = OFF;
     DELETE FROM study_challenge_participants;
@@ -742,6 +763,7 @@ function clearAllUserData() {
     DELETE FROM sqlite_sequence WHERE name NOT IN ('level_definitions', 'learning_achievements', 'review_rubrics', 'review_criteria');
     PRAGMA foreign_keys = ON;
   `);
+  checkpointDb();
 }
 
 initDatabase();
@@ -749,5 +771,6 @@ initDatabase();
 module.exports = {
   db,
   initDatabase,
-  clearAllUserData
+  clearAllUserData,
+  checkpointDb
 };

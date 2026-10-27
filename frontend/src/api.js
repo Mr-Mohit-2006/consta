@@ -20,7 +20,7 @@ export function setStoredToken(token) {
   }
 }
 
-export async function apiRequest(endpoint, options = {}) {
+export async function apiRequest(endpoint, options = {}, retries = 2) {
   const token = getStoredToken();
   const headers = { ...(options.headers || {}) };
 
@@ -40,17 +40,32 @@ export async function apiRequest(endpoint, options = {}) {
       : (options.body ? JSON.stringify(options.body) : undefined)
   };
 
-  const response = await fetch(`${API_BASE}${endpoint}`, config);
-  const data = await response.json().catch(() => ({}));
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, config);
+    const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    const error = new Error(data.error || `HTTP error ${response.status}`);
-    error.status = response.status;
-    error.data = data;
-    throw error;
+    // If server is spinning up from cold sleep (e.g. Render free tier 502/503/504), wait and retry
+    if ([502, 503, 504].includes(response.status) && retries > 0) {
+      await new Promise(r => setTimeout(r, 2000));
+      return apiRequest(endpoint, options, retries - 1);
+    }
+
+    if (!response.ok) {
+      const error = new Error(data.error || `HTTP error ${response.status}`);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  } catch (err) {
+    // Retry on network drops / connection refused during cold boots
+    if (retries > 0 && (err.name === 'TypeError' || err.message?.includes('fetch'))) {
+      await new Promise(r => setTimeout(r, 2500));
+      return apiRequest(endpoint, options, retries - 1);
+    }
+    throw err;
   }
-
-  return data;
 }
 
 // WebSocket connection singleton

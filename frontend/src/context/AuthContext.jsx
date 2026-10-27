@@ -3,6 +3,39 @@ import { apiRequest, setStoredToken, getStoredToken, ChatSocket } from '../api';
 
 const AuthContext = createContext(null);
 
+// Client device vault helper for resilient persistent access across container sleep/restarts
+function getDeviceVault() {
+  try {
+    const raw = localStorage.getItem('consta_device_vault');
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveToDeviceVault(userData) {
+  if (!userData) return;
+  try {
+    const vault = getDeviceVault();
+    const idKey = (userData.username || userData.email || '').toLowerCase();
+    if (idKey) {
+      vault[idKey] = {
+        username: userData.username,
+        email: userData.email,
+        full_name: userData.full_name,
+        role: userData.role || 'student',
+        timezone: userData.timezone || 'UTC'
+      };
+      if (userData.email) {
+        vault[userData.email.toLowerCase()] = vault[idKey];
+      }
+      localStorage.setItem('consta_device_vault', JSON.stringify(vault));
+    }
+  } catch {
+    // ignore storage write errors
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
@@ -135,14 +168,37 @@ export function AuthProvider({ children }) {
   }, [user?.id]);
 
   async function login(identifier, password) {
-    const res = await apiRequest('/auth/login', {
-      method: 'POST',
-      body: { identifier, password }
-    });
+    const cleanId = (identifier || '').trim().toLowerCase();
+    const vault = getDeviceVault();
+    const cachedRecovery = vault[cleanId] || null;
+
+    let res;
+    try {
+      res = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: { identifier, password, clientRecovery: cachedRecovery }
+      });
+    } catch (loginErr) {
+      // If 401 and we have cached recovery data on this device, attempt self-healing account restore
+      if (loginErr.status === 401 && cachedRecovery) {
+        try {
+          res = await apiRequest('/auth/recover-account', {
+            method: 'POST',
+            body: { identifier, password, userProfile: cachedRecovery }
+          });
+        } catch {
+          throw loginErr;
+        }
+      } else {
+        throw loginErr;
+      }
+    }
+
     setStoredToken(res.token);
     if (res.user) {
       setUser(res.user);
       localStorage.setItem('consta_user', JSON.stringify(res.user));
+      saveToDeviceVault(res.user);
     }
     await loadMe();
     return res.user;
@@ -157,6 +213,14 @@ export function AuthProvider({ children }) {
     if (res.user) {
       setUser(res.user);
       localStorage.setItem('consta_user', JSON.stringify(res.user));
+      saveToDeviceVault({
+        ...res.user,
+        username: userData.username,
+        email: userData.email,
+        full_name: userData.full_name,
+        role: userData.role || 'student',
+        timezone: userData.timezone || 'UTC'
+      });
     }
     await loadMe();
     return res.user;

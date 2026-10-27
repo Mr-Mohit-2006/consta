@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { db } = require('../db/database');
+const { db, checkpointDb } = require('../db/database');
 const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
 const userBackupService = require('../db/user_backup_service');
 const XPService = require('../services/xp_service');
@@ -81,6 +81,7 @@ router.post('/register', (req, res) => {
   // Backup user for persistent multi-device & container restart recovery
   try {
     userBackupService.saveOrUpdateUser({
+      id: userId,
       username: cleanUsername,
       email: cleanEmail,
       password_hash: pwHash,
@@ -100,20 +101,21 @@ router.post('/register', (req, res) => {
         portfolio_links: []
       }
     });
+    checkpointDb();
   } catch (err) {
     console.warn('Backup save notice:', err.message);
   }
 
-  const token = jwt.sign({ id: userId, username, role: userRole }, JWT_SECRET, { expiresIn: '90d' });
+  const token = jwt.sign({ id: userId, username: cleanUsername, role: userRole }, JWT_SECRET, { expiresIn: '90d' });
 
   const user = db.prepare('SELECT id, username, email, full_name, bio, avatar_url, role, timezone, created_at FROM users WHERE id = ?').get(userId);
 
   res.status(201).json({ token, user });
 });
 
-// Login
+// Login with automatic cold-start restoration and client self-healing
 router.post('/login', (req, res) => {
-  const { identifier, password } = req.body; // username or email
+  const { identifier, password, clientRecovery } = req.body; // username or email
 
   if (!identifier || !password) {
     return res.status(400).json({ error: 'Identifier and password are required.' });
@@ -139,14 +141,100 @@ router.post('/login', (req, res) => {
     }
   }
 
+  // Client-assisted auto-recovery: if ephemeral container wiped the database, restore the user on-the-fly
+  if (!user && clientRecovery) {
+    try {
+      const recEmail = (clientRecovery.email || '').trim().toLowerCase();
+      const recUsername = (clientRecovery.username || '').trim().toLowerCase();
+      if ((recEmail === cleanId || recUsername === cleanId) && clientRecovery.full_name) {
+        const pwHash = bcrypt.hashSync(password, 8);
+        const ins = db.prepare(`
+          INSERT INTO users (username, email, password_hash, full_name, role, timezone)
+          VALUES (?, ?, ?, ?, ?, ?)
+          ON CONFLICT(username) DO UPDATE SET password_hash = excluded.password_hash
+        `).run(recUsername, recEmail, pwHash, clientRecovery.full_name, clientRecovery.role || 'student', clientRecovery.timezone || 'UTC');
+
+        const newId = Number(ins.lastInsertRowid);
+        db.prepare('INSERT OR IGNORE INTO user_profiles (user_id) VALUES (?)').run(newId);
+        db.prepare('INSERT OR IGNORE INTO notification_preferences (user_id) VALUES (?)').run(newId);
+        
+        user = db.prepare('SELECT * FROM users WHERE id = ?').get(newId);
+        userBackupService.saveOrUpdateUser({
+          id: newId,
+          username: recUsername,
+          email: recEmail,
+          password_hash: pwHash,
+          full_name: user.full_name,
+          role: user.role,
+          timezone: user.timezone
+        });
+        checkpointDb();
+      }
+    } catch (recErr) {
+      console.warn('Auto-recovery notice on login:', recErr.message);
+    }
+  }
+
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return res.status(401).json({ error: 'Invalid email/username or password.' });
   }
+
+  checkpointDb();
 
   const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
 
   delete user.password_hash;
   res.json({ token, user });
+});
+
+// Self-healing account recovery endpoint
+router.post('/recover-account', (req, res) => {
+  const { identifier, password, userProfile } = req.body;
+  if (!identifier || !password) {
+    return res.status(400).json({ error: 'Identifier and password required.' });
+  }
+
+  const cleanId = identifier.trim().toLowerCase();
+  let user = db.prepare('SELECT * FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?').get(cleanId, cleanId);
+
+  if (!user && userProfile) {
+    try {
+      const cleanUsername = (userProfile.username || cleanId).trim().toLowerCase();
+      const cleanEmail = (userProfile.email || `${cleanId}@consta.user`).trim().toLowerCase();
+      const pwHash = bcrypt.hashSync(password, 8);
+
+      const ins = db.prepare(`
+        INSERT INTO users (username, email, password_hash, full_name, role, timezone)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(cleanUsername, cleanEmail, pwHash, userProfile.full_name || cleanUsername, userProfile.role || 'student', userProfile.timezone || 'UTC');
+
+      const newId = Number(ins.lastInsertRowid);
+      db.prepare('INSERT OR IGNORE INTO user_profiles (user_id) VALUES (?)').run(newId);
+      db.prepare('INSERT OR IGNORE INTO notification_preferences (user_id) VALUES (?)').run(newId);
+
+      user = db.prepare('SELECT * FROM users WHERE id = ?').get(newId);
+      userBackupService.saveOrUpdateUser({
+        id: newId,
+        username: cleanUsername,
+        email: cleanEmail,
+        password_hash: pwHash,
+        full_name: user.full_name,
+        role: user.role,
+        timezone: user.timezone
+      });
+      checkpointDb();
+    } catch (e) {
+      console.error('Account recovery error:', e.message);
+    }
+  }
+
+  if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+    return res.status(401).json({ error: 'Invalid credentials. Unable to recover account.' });
+  }
+
+  const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '90d' });
+  delete user.password_hash;
+  res.json({ token, user, recovered: true });
 });
 
 // Request password reset code via email
@@ -237,9 +325,23 @@ router.get('/me', authenticateToken, (req, res) => {
   const streaks = StreakService.getUserStreaks(user.id);
   const progression = XPService.getUserProgression(user.id);
 
-  if (profile.skills) profile.skills = JSON.parse(profile.skills);
-  if (profile.subjects) profile.subjects = JSON.parse(profile.subjects);
-  if (profile.portfolio_links) profile.portfolio_links = JSON.parse(profile.portfolio_links);
+  if (profile.skills && typeof profile.skills === 'string') {
+    try { profile.skills = JSON.parse(profile.skills); } catch { profile.skills = []; }
+  } else if (!Array.isArray(profile.skills)) {
+    profile.skills = [];
+  }
+
+  if (profile.subjects && typeof profile.subjects === 'string') {
+    try { profile.subjects = JSON.parse(profile.subjects); } catch { profile.subjects = []; }
+  } else if (!Array.isArray(profile.subjects)) {
+    profile.subjects = [];
+  }
+
+  if (profile.portfolio_links && typeof profile.portfolio_links === 'string') {
+    try { profile.portfolio_links = JSON.parse(profile.portfolio_links); } catch { profile.portfolio_links = []; }
+  } else if (!Array.isArray(profile.portfolio_links)) {
+    profile.portfolio_links = [];
+  }
 
   res.json({
     user,

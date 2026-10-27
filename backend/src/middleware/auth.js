@@ -16,11 +16,19 @@ function authenticateToken(req, res, next) {
     const decoded = jwt.verify(token, JWT_SECRET);
     let user = db.prepare('SELECT id, username, email, full_name, role, timezone, avatar_url FROM users WHERE id = ?').get(decoded.id);
 
+    // Fallback lookup by username if ID changed or not found
+    if (!user && decoded.username) {
+      user = db.prepare('SELECT id, username, email, full_name, role, timezone, avatar_url FROM users WHERE LOWER(username) = ?').get(decoded.username.toLowerCase());
+    }
+
     if (!user) {
       // Re-hydrate users from persistent backup in case of container restart/ephemeral reset
       try {
         userBackupService.restoreUsersToDb(db);
         user = db.prepare('SELECT id, username, email, full_name, role, timezone, avatar_url FROM users WHERE id = ?').get(decoded.id);
+        if (!user && decoded.username) {
+          user = db.prepare('SELECT id, username, email, full_name, role, timezone, avatar_url FROM users WHERE LOWER(username) = ?').get(decoded.username.toLowerCase());
+        }
       } catch (e) {
         console.warn('Backup restore notice during auth:', e.message);
       }
