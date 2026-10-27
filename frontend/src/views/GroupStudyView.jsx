@@ -749,7 +749,7 @@ export default function GroupStudyView({ onNavigate, onBack, onOpenTask, onOpenC
             <div className="flex-1 min-w-0">{toast.message}</div>
             <button
               onClick={() => setToast(null)}
-              className="p-1 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+              className="p-1 hover:bg-slate-750 rounded-lg text-slate-400 hover:text-slate-100 cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>

@@ -178,19 +178,36 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 12px 28px -6px rgba(135, 59, 70, 0.12), 0 2px 6px rgba(51, 36, 38, 0.03);
 }
 
-/* Contrast safeguard: text-white on light cards renders as dark burgundy for readability */
-.glass-card .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-rose"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="from-indigo"]):not([class*="bg-[#"]):not(.badge-light),
-.glass-panel .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-rose"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="from-indigo"]):not([class*="bg-[#"]):not(.badge-light) {
+/* Contrast safeguard: text-white on general content defaults to main text (#332426), while buttons & dark badges keep pristine off-white (#FFFCF7) */
+.text-white {
   color: #332426;
 }
 
-/* Ensure buttons with burgundy background keep crisp off-white text */
 button.text-white,
 button .text-white,
+button[class*="bg-indigo"],
+button[class*="from-indigo"],
 [class*="bg-indigo-600"],
 [class*="bg-indigo-500"],
-[class*="from-indigo-600"] {
-  color: #FFFCF7;
+[class*="from-indigo-600"],
+[class*="bg-[#873B46]"],
+[class*="bg-[#642B35]"],
+[class*="bg-indigo-"] .text-white,
+[class*="from-indigo-"] .text-white,
+[class*="bg-rose-"] .text-white,
+[class*="bg-emerald-"] .text-white,
+.badge-light,
+.text-cream {
+  color: #FFFCF7 !important;
+}
+
+.hover\:text-white:hover {
+  color: #332426;
+}
+
+button.hover\:text-white:hover,
+button[class*="bg-indigo"]:hover {
+  color: #FFFCF7 !important;
 }
 
 /* Form controls contrast & focus indicators */

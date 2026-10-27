@@ -426,7 +426,7 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
               chatMode === 'group'
                 ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-600/30 ring-1 ring-indigo-400/40'
-                : 'bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-slate-100 hover:bg-slate-800'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -445,7 +445,7 @@ export default function ChatDiscussionView({ initialChatRoomId, onNavigate, onBa
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
               chatMode === 'friends'
                 ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/30 ring-1 ring-emerald-400/40'
-                : 'bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-slate-100 hover:bg-slate-800'
             }`}
           >
             <UserCheck className="w-4 h-4" />
