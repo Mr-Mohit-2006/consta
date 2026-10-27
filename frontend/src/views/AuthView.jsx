@@ -228,57 +228,57 @@ export default function AuthView({ onSuccess }) {
           </div>
 
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-black border-2 border-white flex items-center justify-center shadow-2xl shadow-black/90">
-              <GraduationCap className="w-7 h-7 text-white stroke-[2.5]" />
+            <div className="w-12 h-12 rounded-2xl bg-indigo-600 border border-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-600/20">
+              <GraduationCap className="w-7 h-7 text-indigo-50 stroke-[2.5]" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">CONSTA</h1>
-              <span className="text-xs uppercase tracking-widest text-slate-300 font-bold">Study & Growth Network</span>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100 tracking-tight">CONSTA</h1>
+              <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Study & Growth Network</span>
             </div>
           </div>
 
-          <p className="text-base text-slate-300 leading-relaxed max-w-lg mb-8">
+          <p className="text-base text-slate-400 leading-relaxed max-w-lg mb-8">
             A collaborative workspace where students connect, solve doubts in real-time with instant photo uploads, maintain daily study streaks, and level up together.
           </p>
 
           {/* Feature Highlights Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-lg">
-            <div className="glass-card rounded-2xl p-3.5 border border-slate-800 flex items-start space-x-3">
-              <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 shrink-0">
+            <div className="glass-card rounded-2xl p-3.5 border border-slate-700 flex items-start space-x-3">
+              <div className="p-2 rounded-xl bg-indigo-950 text-indigo-600 shrink-0">
                 <MessageSquare className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Live Doubt Chat</h4>
+                <h4 className="text-xs font-bold text-slate-100">Live Doubt Chat</h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">Upload photos & diagrams instantly with zero refresh.</p>
               </div>
             </div>
 
-            <div className="glass-card rounded-2xl p-3.5 border border-slate-800 flex items-start space-x-3">
-              <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 shrink-0">
+            <div className="glass-card rounded-2xl p-3.5 border border-slate-700 flex items-start space-x-3">
+              <div className="p-2 rounded-xl bg-indigo-950 text-indigo-600 shrink-0">
                 <Users className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Study Groups & Admin</h4>
+                <h4 className="text-xs font-bold text-slate-100">Study Groups & Admin</h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">Group creator is Admin; easily join or leave groups & manage tasks.</p>
               </div>
             </div>
 
-            <div className="glass-card rounded-2xl p-3.5 border border-slate-800 flex items-start space-x-3">
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0">
+            <div className="glass-card rounded-2xl p-3.5 border border-slate-700 flex items-start space-x-3">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
                 <Flame className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Streaks & XP</h4>
+                <h4 className="text-xs font-bold text-slate-100">Streaks & XP</h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">Stay consistent with heatmaps and level-up rewards.</p>
               </div>
             </div>
 
-            <div className="glass-card rounded-2xl p-3.5 border border-slate-800 flex items-start space-x-3">
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
+            <div className="glass-card rounded-2xl p-3.5 border border-slate-700 flex items-start space-x-3">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Privacy Controls</h4>
+                <h4 className="text-xs font-bold text-slate-100">Privacy Controls</h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">Public or Friends-Only mode, ID search, custom reset.</p>
               </div>
             </div>
@@ -287,10 +287,10 @@ export default function AuthView({ onSuccess }) {
 
         {/* Right Column: Interactive Form Card */}
         <div className="lg:col-span-6 w-full max-w-md mx-auto">
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-700/60 relative">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-700 relative">
             {/* Mode Switcher Tabs */}
             {mode !== 'forgot' ? (
-              <div className="flex rounded-2xl bg-slate-950/80 p-1 mb-6 border border-slate-800/80">
+              <div className="flex rounded-2xl bg-slate-900 p-1 mb-6 border border-slate-700">
                 <button
                   type="button"
                   onClick={() => {
@@ -300,8 +300,8 @@ export default function AuthView({ onSuccess }) {
                   }}
                   className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center space-x-1.5 ${
                     mode === 'login'
-                      ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/25'
+                      : 'text-slate-400 hover:text-slate-100'
                   }`}
                 >
                   <User className="w-3.5 h-3.5" />
@@ -316,8 +316,8 @@ export default function AuthView({ onSuccess }) {
                   }}
                   className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center space-x-1.5 ${
                     mode === 'register'
-                      ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/25'
+                      : 'text-slate-400 hover:text-slate-100'
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
@@ -374,7 +374,7 @@ export default function AuthView({ onSuccess }) {
                       value={loginIdentifier}
                       onChange={e => setLoginIdentifier(e.target.value)}
                       placeholder="Enter your email or username"
-                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                     />
                   </div>
                 </div>
@@ -406,7 +406,7 @@ export default function AuthView({ onSuccess }) {
                       value={loginPassword}
                       onChange={e => setLoginPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                     />
                     <button
                       type="button"
@@ -455,7 +455,7 @@ export default function AuthView({ onSuccess }) {
                       <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-2">
                         <Mail className="w-5 h-5" />
                       </div>
-                      <h3 className="text-sm font-bold text-white">Reset via Registered Email</h3>
+                      <h3 className="text-sm font-bold text-slate-100">Reset via Registered Email</h3>
                       <p className="text-[11px] text-slate-400 mt-1">
                         We will send a 6-digit verification code to your email address to reset your password.
                       </p>
@@ -471,7 +471,7 @@ export default function AuthView({ onSuccess }) {
                           value={forgotEmail}
                           onChange={e => setForgotEmail(e.target.value)}
                           placeholder="youremail@example.com"
-                          className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                          className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                         />
                       </div>
                     </div>
@@ -492,22 +492,22 @@ export default function AuthView({ onSuccess }) {
                       <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-2">
                         <KeyRound className="w-5 h-5" />
                       </div>
-                      <h3 className="text-sm font-bold text-white">Enter Verification Code</h3>
+                      <h3 className="text-sm font-bold text-slate-100">Enter Verification Code</h3>
                       <p className="text-[11px] text-slate-400 mt-1">
-                        Code sent to <span className="text-indigo-300 font-semibold">{forgotEmail}</span>
+                        Code sent to <span className="text-indigo-600 font-semibold">{forgotEmail}</span>
                       </p>
                     </div>
 
                     {sentDemoCode && (
-                      <div className="p-3 rounded-xl bg-indigo-950/40 border border-indigo-800/60 text-xs text-indigo-300 flex items-center justify-between">
+                      <div className="p-3 rounded-xl bg-indigo-950 border border-slate-700 text-xs text-indigo-600 flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
-                          <span>Code delivered: <strong className="font-mono text-white tracking-widest bg-slate-950 px-2 py-0.5 rounded border border-indigo-500/40">{sentDemoCode}</strong></span>
+                          <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                          <span>Code delivered: <strong className="font-mono text-slate-100 tracking-widest bg-slate-900 px-2 py-0.5 rounded border border-slate-700">{sentDemoCode}</strong></span>
                         </div>
                         <button
                           type="button"
                           onClick={() => setForgotCode(sentDemoCode)}
-                          className="text-[10px] text-indigo-400 hover:underline font-bold"
+                          className="text-[10px] text-indigo-600 hover:underline font-bold"
                         >
                           Auto-fill
                         </button>
@@ -525,7 +525,7 @@ export default function AuthView({ onSuccess }) {
                           value={forgotCode}
                           onChange={e => setForgotCode(e.target.value)}
                           placeholder="e.g. 123456"
-                          className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white font-mono tracking-widest placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                          className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-slate-100 font-mono tracking-widest placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                         />
                       </div>
                     </div>
@@ -541,7 +541,7 @@ export default function AuthView({ onSuccess }) {
                           value={forgotNewPassword}
                           onChange={e => setForgotNewPassword(e.target.value)}
                           placeholder="At least 6 characters"
-                          className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                          className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                         />
                         <button
                           type="button"
@@ -564,7 +564,7 @@ export default function AuthView({ onSuccess }) {
                           value={forgotConfirmPassword}
                           onChange={e => setForgotConfirmPassword(e.target.value)}
                           placeholder="Re-enter your new password"
-                          className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                          className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                         />
                       </div>
                     </div>
@@ -605,7 +605,7 @@ export default function AuthView({ onSuccess }) {
                       value={regFullName}
                       onChange={e => setRegFullName(e.target.value)}
                       placeholder="Your Full Name"
-                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                     />
                   </div>
                 </div>
@@ -627,7 +627,7 @@ export default function AuthView({ onSuccess }) {
                       value={regEmail}
                       onChange={e => setRegEmail(e.target.value)}
                       placeholder="youremail@example.com"
-                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                     />
                   </div>
                 </div>
@@ -647,7 +647,7 @@ export default function AuthView({ onSuccess }) {
                     value={regUsername}
                     onChange={e => setRegUsername(e.target.value)}
                     placeholder="your_unique_username"
-                    className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                    className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-100 font-mono placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                   />
                 </div>
 
@@ -662,7 +662,7 @@ export default function AuthView({ onSuccess }) {
                       value={regPassword}
                       onChange={e => setRegPassword(e.target.value)}
                       placeholder="At least 6 characters"
-                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-10 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-10 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
                     />
                     <button
                       type="button"
@@ -681,7 +681,7 @@ export default function AuthView({ onSuccess }) {
                     value={regBio}
                     onChange={e => setRegBio(e.target.value)}
                     placeholder="e.g. Computer Science student passionate about algorithms"
-                    className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition"
+                    className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition"
                   />
                 </div>
 

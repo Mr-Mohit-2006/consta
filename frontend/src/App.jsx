@@ -92,7 +92,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-[#C58B91]/30 selection:text-[#332426]">
       {/* Platform Header */}
       <Header
         activeTab={activeTab}

@@ -1,86 +1,110 @@
 @import "tailwindcss";
 
 @theme {
-  --color-main-bg: #21130F;
-  --color-sidebar: #2B1B15;
-  --color-cards: #342018;
-  --color-primary: #A66A43;
-  --color-primary-hover: #BD8258;
-  --color-accent: #E0B58A;
-  --color-main-text: #FFF3E6;
-  --color-secondary-text: #D6B8A4;
-  --color-borders: #594033;
-  --color-success: #86A878;
+  /* Reusable Cream + Burgundy Design Tokens */
+  --color-main-bg: #FAF4EB;
+  --color-secondary-bg: #F0E5D8;
+  --color-card-bg: #FFFCF7;
+  --color-primary-burgundy: #873B46;
+  --color-dark-burgundy: #642B35;
+  --color-main-text: #332426;
+  --color-secondary-text: #78666A;
+  --color-borders: #E7D8CE;
+  --color-soft-accent: #C58B91;
+  --color-light-burgundy: #F4E2E3;
 
-  /* Remapped slate palette to user's warm color grading */
-  --color-slate-950: #21130F; /* Main background */
-  --color-slate-900: #2B1B15; /* Sidebar / secondary surface */
-  --color-slate-850: #2F1E17;
-  --color-slate-800: #342018; /* Cards */
-  --color-slate-700: #594033; /* Borders */
-  --color-slate-600: #735443;
-  --color-slate-500: #A88674;
-  --color-slate-400: #D6B8A4; /* Secondary text */
-  --color-slate-300: #EAD5C7;
-  --color-slate-200: #F6E9DE;
-  --color-slate-100: #FFF3E6; /* Main text */
-  --color-slate-50: #FFFFFF;
+  /* Remapped slate palette to Cream + Burgundy design tokens */
+  --color-slate-950: #FAF4EB; /* Main background */
+  --color-slate-900: #F0E5D8; /* Secondary background / navbar surface */
+  --color-slate-850: #F7EFE6; /* Intermediate warm surface */
+  --color-slate-800: #FFFCF7; /* Card background */
+  --color-slate-700: #E7D8CE; /* Borders */
+  --color-slate-600: #D8C5B8; /* Secondary borders */
+  --color-slate-500: #A39094; /* Placeholder / subtle muted */
+  --color-slate-400: #78666A; /* Secondary text */
+  --color-slate-300: #5A4549; /* Medium contrast text */
+  --color-slate-200: #433033; /* Subheadings */
+  --color-slate-100: #332426; /* Main text */
+  --color-slate-50: #1F1416;  /* Deep text */
 
-  /* Remapped indigo palette to Primary buttons & Accent */
-  --color-indigo-950: #261611;
-  --color-indigo-900: #3D2218;
-  --color-indigo-800: #543022;
-  --color-indigo-700: #7A4B2F;
-  --color-indigo-600: #A66A43; /* Primary buttons */
-  --color-indigo-500: #BD8258; /* Button hover */
-  --color-indigo-400: #E0B58A; /* Accent */
-  --color-indigo-300: #E8C8A6;
-  --color-indigo-200: #F2DDC5;
-  --color-indigo-100: #FFF3E6;
-  --color-indigo-50: #FFFAF5;
+  /* Remapped indigo palette to Burgundy & Soft Accents */
+  --color-indigo-950: #F4E2E3; /* Light burgundy highlight */
+  --color-indigo-900: #F8ECEE; /* Soft burgundy tint */
+  --color-indigo-800: #EAD2D4; /* Light blush wash */
+  --color-indigo-700: #C58B91; /* Soft accent */
+  --color-indigo-600: #873B46; /* Primary burgundy */
+  --color-indigo-500: #642B35; /* Dark burgundy hover */
+  --color-indigo-400: #873B46; /* Burgundy accent text */
+  --color-indigo-300: #642B35; /* Burgundy medium text */
+  --color-indigo-200: #C58B91; /* Soft accent */
+  --color-indigo-100: #FAF4EB; /* Cream */
+  --color-indigo-50: #FFFCF7;  /* Card off-white */
 
-  /* Remapped emerald & green palette to Success */
-  --color-emerald-950: #1B2618;
-  --color-emerald-900: #273623;
-  --color-emerald-800: #374E31;
-  --color-emerald-700: #4B6B43;
-  --color-emerald-600: #688E5B;
-  --color-emerald-500: #86A878; /* Success */
-  --color-emerald-400: #97B789;
-  --color-emerald-300: #B4CCA9;
-  --color-emerald-200: #D1E1CB;
-  --color-emerald-100: #EEF5EB;
+  /* Harmonized Emerald / Success states */
+  --color-emerald-950: #F1F6F0;
+  --color-emerald-900: #E2ECE0;
+  --color-emerald-800: #C7DEC3;
+  --color-emerald-700: #5D8B55;
+  --color-emerald-600: #446C3D;
+  --color-emerald-500: #446C3D;
+  --color-emerald-400: #5D8B55;
+  --color-emerald-300: #7DA475;
+  --color-emerald-200: #AEC8A8;
+  --color-emerald-100: #DEECDA;
 
-  --color-green-500: #86A878;
-  --color-green-400: #97B789;
+  --color-green-600: #446C3D;
+  --color-green-500: #446C3D;
+  --color-green-400: #5D8B55;
 
-  /* Remapped amber palette to harmonized Warm Accents */
-  --color-amber-600: #BD8258;
-  --color-amber-500: #BD8258;
-  --color-amber-400: #E0B58A;
-  --color-amber-300: #FFF3E6;
+  /* Harmonized Amber / Gold for streaks */
+  --color-amber-950: #FDF7EE;
+  --color-amber-900: #F9ECD6;
+  --color-amber-600: #A0522D;
+  --color-amber-500: #B86B33;
+  --color-amber-400: #B86B33;
+  --color-amber-300: #873B46;
+
+  /* Harmonized Rose & Purple to match Burgundy palette */
+  --color-rose-950: #F4E2E3;
+  --color-rose-900: #F8ECEE;
+  --color-rose-600: #873B46;
+  --color-rose-500: #A84B58;
+  --color-rose-400: #873B46;
+
+  --color-purple-950: #F4E2E3;
+  --color-purple-900: #F8ECEE;
+  --color-purple-600: #873B46;
+  --color-purple-500: #642B35;
+  --color-purple-400: #C58B91;
+
+  /* Harmonized Cyan to soft accent */
+  --color-cyan-950: #F4E2E3;
+  --color-cyan-900: #F0E5D8;
+  --color-cyan-600: #873B46;
+  --color-cyan-500: #A85A65;
+  --color-cyan-400: #873B46;
 }
 
 :root {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  color-scheme: dark;
-  --main-bg: #21130F;
-  --sidebar-bg: #2B1B15;
-  --card-bg: #342018;
-  --primary-btn: #A66A43;
-  --primary-hover: #BD8258;
-  --accent: #E0B58A;
-  --main-text: #FFF3E6;
-  --secondary-text: #D6B8A4;
-  --borders: #594033;
-  --success: #86A878;
+  color-scheme: light;
+  --main-bg: #FAF4EB;
+  --secondary-bg: #F0E5D8;
+  --card-bg: #FFFCF7;
+  --primary-burgundy: #873B46;
+  --dark-burgundy: #642B35;
+  --main-text: #332426;
+  --secondary-text: #78666A;
+  --borders: #E7D8CE;
+  --soft-accent: #C58B91;
+  --light-burgundy: #F4E2E3;
 }
 
 html, body {
   max-width: 100vw;
   overflow-x: clip;
-  background-color: #21130F;
-  color: #FFF3E6;
+  background-color: #FAF4EB;
+  color: #332426;
 }
 
 *, *::before, *::after {
@@ -91,12 +115,13 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #21130F;
-  color: #FFF3E6;
+  background-color: #FAF4EB;
+  color: #332426;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(166, 106, 67, 0.14) 0px, transparent 48%),
-    radial-gradient(at 100% 0%, rgba(224, 181, 138, 0.10) 0px, transparent 48%),
-    radial-gradient(at 50% 100%, rgba(89, 64, 51, 0.18) 0px, transparent 48%);
+    radial-gradient(at 0% 0%, rgba(135, 59, 70, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(197, 139, 145, 0.07) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(240, 229, 216, 0.70) 0px, transparent 60%),
+    linear-gradient(180deg, #FAF4EB 0%, #F8EFE4 50%, #FAF4EB 100%);
   background-attachment: fixed;
   overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
@@ -120,19 +145,26 @@ button, a, input, select, textarea {
   touch-action: manipulation;
 }
 
-/* Glassmorphism utilities tailored to the warm palette */
+/* Headings and readable text typography */
+h1, h2, h3, h4, h5, h6 {
+  color: #332426;
+}
+
+/* Card & Surface utilities for Cream + Burgundy theme */
 .glass-panel {
-  background: rgba(43, 27, 21, 0.88);
+  background: rgba(255, 252, 247, 0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid #594033;
+  border: 1px solid #E7D8CE;
+  box-shadow: 0 4px 20px -2px rgba(51, 36, 38, 0.05), 0 1px 3px rgba(51, 36, 38, 0.02);
+  color: #332426;
 }
 
 .glass-card {
-  background: rgba(52, 32, 24, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid #594033;
+  background: #FFFCF7;
+  border: 1px solid #E7D8CE;
+  box-shadow: 0 2px 10px -2px rgba(51, 36, 38, 0.04), 0 1px 3px rgba(51, 36, 38, 0.02);
+  color: #332426;
 }
 
 .glass-card-hover {
@@ -140,35 +172,71 @@ button, a, input, select, textarea {
 }
 
 .glass-card-hover:hover {
-  background: rgba(52, 32, 24, 0.98);
-  border-color: #A66A43;
+  background: #FFFFFF;
+  border-color: #C58B91;
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px -10px rgba(166, 106, 67, 0.28);
+  box-shadow: 0 12px 28px -6px rgba(135, 59, 70, 0.12), 0 2px 6px rgba(51, 36, 38, 0.03);
+}
+
+/* Contrast safeguard: text-white on light cards renders as dark burgundy for readability */
+.glass-card .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-rose"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="from-indigo"]):not([class*="bg-[#"]):not(.badge-light),
+.glass-panel .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-rose"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="from-indigo"]):not([class*="bg-[#"]):not(.badge-light) {
+  color: #332426;
+}
+
+/* Ensure buttons with burgundy background keep crisp off-white text */
+button.text-white,
+button .text-white,
+[class*="bg-indigo-600"],
+[class*="bg-indigo-500"],
+[class*="from-indigo-600"] {
+  color: #FFFCF7;
+}
+
+/* Form controls contrast & focus indicators */
+input, textarea, select {
+  color: #332426 !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #78666A !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #873B46 !important;
+  box-shadow: 0 0 0 1px #873B46 !important;
+}
+
+:focus-visible {
+  outline: 2px solid #873B46;
+  outline-offset: 2px;
 }
 
 /* Warm glow accents */
+.glow-burgundy,
 .glow-indigo {
-  box-shadow: 0 0 28px -5px rgba(166, 106, 67, 0.50);
+  box-shadow: 0 0 24px -4px rgba(135, 59, 70, 0.25);
 }
 
+.glow-accent,
 .glow-cyan {
-  box-shadow: 0 0 28px -5px rgba(224, 181, 138, 0.45);
+  box-shadow: 0 0 24px -4px rgba(197, 139, 145, 0.25);
 }
 
 .glow-amber {
-  box-shadow: 0 0 28px -5px rgba(189, 130, 88, 0.45);
+  box-shadow: 0 0 24px -4px rgba(184, 107, 51, 0.25);
 }
 
 .glow-emerald {
-  box-shadow: 0 0 28px -5px rgba(134, 168, 120, 0.45);
+  box-shadow: 0 0 24px -4px rgba(68, 108, 61, 0.25);
 }
 
 /* Subtle grid texture */
 .bg-grid-pattern {
   background-size: 32px 32px;
   background-image: 
-    linear-gradient(to right, rgba(224, 181, 138, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(224, 181, 138, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(135, 59, 70, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(135, 59, 70, 0.04) 1px, transparent 1px);
 }
 
 /* Smooth mobile touch scrolling */
@@ -186,12 +254,12 @@ button, a, input, select, textarea {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #21130F;
+  background: #F0E5D8;
 }
 ::-webkit-scrollbar-thumb {
-  background: #594033;
+  background: #E7D8CE;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #A66A43;
+  background: #873B46;
 }

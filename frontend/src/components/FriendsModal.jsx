@@ -186,28 +186,28 @@ export default function FriendsModal({ isOpen, onClose }) {
   const incomingCount = requests.incoming?.length || 0;
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+    <div className="fixed inset-0 z-[80] bg-[#332426]/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-3xl w-full max-w-lg shadow-xl overflow-hidden flex flex-col max-h-[88vh]">
         {/* Header */}
-        <div className="px-5 sm:px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+        <div className="px-5 sm:px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800">
           <div className="flex items-center space-x-2">
-            <Users className="w-5 h-5 text-indigo-400" />
-            <h3 className="font-bold text-sm text-white">Friends Network</h3>
+            <Users className="w-5 h-5 text-indigo-600" />
+            <h3 className="font-bold text-sm text-slate-100">Friends Network</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-slate-100 rounded-xl hover:bg-slate-900 transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex border-b border-slate-800 bg-slate-950/40 px-4 sm:px-6 pt-2 overflow-x-auto scrollbar-none">
+        <div className="flex border-b border-slate-700 bg-slate-900/60 px-4 sm:px-6 pt-2 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setTab('friends')}
             className={`pb-2.5 text-xs font-semibold mr-5 border-b-2 transition whitespace-nowrap cursor-pointer ${
-              tab === 'friends' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300'
+              tab === 'friends' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
             My Friends ({friends.length})
@@ -215,12 +215,12 @@ export default function FriendsModal({ isOpen, onClose }) {
           <button
             onClick={() => setTab('requests')}
             className={`pb-2.5 text-xs font-semibold mr-5 border-b-2 transition whitespace-nowrap flex items-center space-x-1.5 cursor-pointer ${
-              tab === 'requests' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300'
+              tab === 'requests' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
             <span>Friend Requests</span>
             {incomingCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-indigo-500 text-white text-[10px] font-bold">
+              <span className="px-1.5 py-0.2 rounded-full bg-indigo-600 text-white text-[10px] font-bold">
                 {incomingCount}
               </span>
             )}
@@ -228,7 +228,7 @@ export default function FriendsModal({ isOpen, onClose }) {
           <button
             onClick={() => setTab('add')}
             className={`pb-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap cursor-pointer ${
-              tab === 'add' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300'
+              tab === 'add' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
             🔍 Add Friend

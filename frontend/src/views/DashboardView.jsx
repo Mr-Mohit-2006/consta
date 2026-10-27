@@ -56,46 +56,46 @@ export default function DashboardView({ onNavigate }) {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950/80 via-slate-900 to-slate-900/90 border border-indigo-900/40 p-6 sm:p-8 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950/70 via-slate-800 to-slate-900/60 border border-slate-700 p-6 sm:p-8 shadow-xs">
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-950 border border-indigo-700/40 text-indigo-600 text-xs font-semibold mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
             <span>CONSTA Collaborative Growth Module</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
             Welcome back, {user?.full_name?.split(' ')[0] || 'Learner'}!
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
             Ready for today's learning? Track focused study sessions, collaborate in study groups, submit work with multi-version revisions, and level up your consistency streak.
           </p>
 
           <div className="flex flex-wrap gap-2.5 mt-5">
             <button
               onClick={() => onNavigate('solo')}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center space-x-2 shadow-md shadow-indigo-600/20 transition cursor-pointer"
             >
-              <BookOpen className="w-4 h-4" />
+              <BookOpen className="w-4 h-4 text-white" />
               <span>Start Solo Session</span>
             </button>
             <button
               onClick={() => onNavigate('group')}
-              className="px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-xs flex items-center space-x-2 transition cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center space-x-2 transition cursor-pointer"
             >
-              <Users className="w-4 h-4 text-cyan-400" />
+              <Users className="w-4 h-4 text-indigo-600" />
               <span>Join Study Rooms</span>
             </button>
             <button
               onClick={() => onNavigate('tasks')}
-              className="hidden sm:flex px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-xs items-center space-x-2 transition cursor-pointer"
+              className="hidden sm:flex px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-slate-200 border border-slate-700 font-semibold text-xs items-center space-x-2 transition cursor-pointer"
             >
-              <CheckSquare className="w-4 h-4 text-purple-400" />
+              <CheckSquare className="w-4 h-4 text-indigo-600" />
               <span>Study Tasks</span>
             </button>
           </div>
         </div>
 
-        <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-0 right-1/3 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-1/3 w-64 h-64 bg-indigo-700/5 rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* Active Session Alert if running */}

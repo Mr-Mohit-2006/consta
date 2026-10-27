@@ -44,7 +44,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
   const studyStreak = streaks?.study?.current_streak || 0;
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-slate-950/95 backdrop-blur-2xl border-b border-slate-800/90 shadow-md shadow-black/30">
+    <header className="sticky top-0 z-40 w-full bg-slate-950/95 backdrop-blur-2xl border-b border-slate-700/80 shadow-xs">
       {/* Top Banner with Brand, Level, Streak, User Menu */}
       <div className="relative z-30 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2">
         {/* Brand */}
@@ -52,13 +52,13 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
           className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0 min-w-0"
           onClick={() => setActiveTab('dashboard')}
         >
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-black border-2 border-white flex items-center justify-center shadow-lg shadow-black/80 group-hover:scale-105 transition-transform duration-200 shrink-0">
-            <GraduationCap className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-600 border border-indigo-700 flex items-center justify-center shadow-md shadow-indigo-600/20 group-hover:bg-indigo-500 transition-all duration-200 shrink-0">
+            <GraduationCap className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-indigo-50 stroke-[2.5]" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center space-x-1.5 sm:space-x-2">
-              <span className="font-black text-base sm:text-lg tracking-wider text-white">CONSTA</span>
-              <span className="hidden sm:inline-flex text-[10px] uppercase font-extrabold tracking-widest px-2 py-0.5 rounded-full bg-white text-black border border-white">
+              <span className="font-black text-base sm:text-lg tracking-wider text-slate-100">CONSTA</span>
+              <span className="hidden sm:inline-flex text-[10px] uppercase font-extrabold tracking-widest px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-600 border border-slate-700">
                 Study Network
               </span>
             </div>
@@ -71,20 +71,20 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
           {/* Level Progress Widget */}
           <div
             onClick={() => setActiveTab('gamification')}
-            className="hidden md:flex items-center space-x-3 bg-slate-900/90 hover:bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-slate-700 cursor-pointer transition shadow-xs"
+            className="hidden md:flex items-center space-x-3 bg-slate-900/90 hover:bg-slate-850 px-3 py-1.5 rounded-xl border border-slate-700 cursor-pointer transition shadow-xs"
             title="Click to view XP Ledger and Level progression"
           >
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600/40 to-indigo-500/20 border border-indigo-500/40 flex items-center justify-center font-bold text-xs text-indigo-300">
+            <div className="w-7 h-7 rounded-lg bg-indigo-950 border border-indigo-700/50 flex items-center justify-center font-bold text-xs text-indigo-600">
               L{currentLevel}
             </div>
             <div className="flex flex-col">
               <div className="flex items-center justify-between text-xs space-x-2">
                 <span className="font-semibold text-slate-200 text-[11px]">{currentTitle}</span>
-                <span className="text-indigo-400 font-mono font-bold text-[11px]">{currentXp} XP</span>
+                <span className="text-indigo-600 font-mono font-bold text-[11px]">{currentXp} XP</span>
               </div>
-              <div className="w-28 bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1 ring-1 ring-slate-700/50">
+              <div className="w-28 bg-slate-700/60 h-1.5 rounded-full overflow-hidden mt-1">
                 <div
-                  className="bg-gradient-to-r from-indigo-500 via-indigo-400 to-cyan-400 h-full rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 h-full rounded-full transition-all duration-500"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
@@ -143,11 +143,11 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
 
             {userMenuOpen && (
               <div
-                className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] bg-slate-900 border border-slate-700/90 rounded-2xl shadow-2xl py-2 z-[100] text-xs animate-in fade-in zoom-in-95 duration-150 ring-1 ring-white/10"
+                className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] bg-slate-800 border border-slate-700 rounded-2xl shadow-xl py-2 z-[100] text-xs animate-in fade-in zoom-in-95 duration-150"
               >
-                <div className="px-4 py-3 border-b border-slate-800">
-                  <div className="font-bold text-white text-sm truncate">{user?.full_name}</div>
-                  <div className="text-[11px] text-indigo-400 font-mono truncate">@{user?.username} · #{user?.id}</div>
+                <div className="px-4 py-3 border-b border-slate-700">
+                  <div className="font-bold text-slate-100 text-sm truncate">{user?.full_name}</div>
+                  <div className="text-[11px] text-indigo-600 font-mono truncate">@{user?.username} · #{user?.id}</div>
                   <div className="text-[10px] text-slate-400 mt-0.5 truncate">{user?.email}</div>
                 </div>
 
@@ -158,9 +158,9 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
                       setActiveTab('profile');
                       setUserMenuOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-slate-800/80 text-slate-300 hover:text-white flex items-center space-x-2.5 transition cursor-pointer"
+                    className="w-full text-left px-4 py-2 hover:bg-slate-900 text-slate-300 hover:text-slate-100 flex items-center space-x-2.5 transition cursor-pointer"
                   >
-                    <User className="w-4 h-4 text-indigo-400 shrink-0" />
+                    <User className="w-4 h-4 text-indigo-600 shrink-0" />
                     <span className="font-medium">My Profile & Settings</span>
                   </button>
                   <button
@@ -169,9 +169,9 @@ export default function Header({ activeTab, setActiveTab, onOpenNotifications, o
                       logout();
                       setUserMenuOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-rose-500/10 text-rose-400 flex items-center space-x-2.5 transition cursor-pointer"
+                    className="w-full text-left px-4 py-2 hover:bg-indigo-950 text-indigo-600 flex items-center space-x-2.5 transition cursor-pointer"
                   >
-                    <LogOut className="w-4 h-4 text-rose-400 shrink-0" />
+                    <LogOut className="w-4 h-4 text-indigo-600 shrink-0" />
                     <span className="font-medium">Sign Out</span>
                   </button>
                 </div>

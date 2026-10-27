@@ -61,25 +61,25 @@ export default function NotificationModal({ isOpen, onClose, onNotificationClick
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-[80] bg-[#332426]/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800">
           <div className="flex items-center space-x-2">
-            <Bell className="w-5 h-5 text-indigo-400" />
-            <h3 className="font-semibold text-white">Notifications & Alerts</h3>
+            <Bell className="w-5 h-5 text-indigo-600" />
+            <h3 className="font-semibold text-slate-100">Notifications & Alerts</h3>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setTab(tab === 'list' ? 'preferences' : 'list')}
-              className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition"
+              className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-900 rounded-lg transition"
               title="Preferences"
             >
               <Settings className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition"
+              className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-900 rounded-lg transition"
             >
               <X className="w-4 h-4" />
             </button>
@@ -87,11 +87,11 @@ export default function NotificationModal({ isOpen, onClose, onNotificationClick
         </div>
 
         {/* Tab Controls */}
-        <div className="flex border-b border-slate-800 bg-slate-950/40 px-5 pt-2">
+        <div className="flex border-b border-slate-700 bg-slate-900/60 px-5 pt-2">
           <button
             onClick={() => setTab('list')}
             className={`pb-2 text-sm font-medium mr-6 border-b-2 transition ${
-              tab === 'list' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300'
+              tab === 'list' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
             Recent Alerts ({notifications.filter(n => !n.is_read).length} unread)
@@ -99,7 +99,7 @@ export default function NotificationModal({ isOpen, onClose, onNotificationClick
           <button
             onClick={() => setTab('preferences')}
             className={`pb-2 text-sm font-medium border-b-2 transition ${
-              tab === 'preferences' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300'
+              tab === 'preferences' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
             Preferences & Quiet Hours
