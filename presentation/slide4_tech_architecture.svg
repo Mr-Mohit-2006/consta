@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="60%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+
+    <linearGradient id="cardGrad4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFFCF7"/>
+    </linearGradient>
+
+    <filter id="cardShadow4" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#332426" flood-opacity="0.04"/>
+    </filter>
+
+    <pattern id="gridPattern4" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.25"/>
+    </pattern>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bgGrad4)"/>
+  <rect width="1920" height="1080" fill="url(#gridPattern4)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      SYSTEM ARCHITECTURE &amp; TOOLS
+    </text>
+    <text x="56" y="44" font-family="'Inter', -apple-system, sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      Modern Full-Stack Technology Ecosystem
+    </text>
+
+    <rect x="1540" y="5" width="180" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1630" y="28" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="700" fill="#873B46">
+      TECH SPECIFICATIONS
+    </text>
+  </g>
+
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- 4 Architecture Cards Grid (2x2) -->
+  <g transform="translate(100, 200)">
+    <!-- 1. Frontend Layer -->
+    <g transform="translate(0, 0)">
+      <rect width="830" height="330" rx="24" fill="url(#cardGrad4)" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow4)"/>
+      <rect x="40" y="35" width="48" height="48" rx="14" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="64" y="65" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="20" font-weight="900" fill="#873B46">⚛</text>
+
+      <text x="105" y="55" font-family="'Inter', -apple-system, sans-serif" font-size="22" font-weight="800" fill="#332426">Frontend Client Architecture</text>
+      <text x="105" y="78" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="600" fill="#873B46">High-Performance Reactive UI with Tailwind v4</text>
+
+      <line x1="40" y1="105" x2="790" y2="105" stroke="#F0E5D8" stroke-width="1.5"/>
+
+      <!-- Pills -->
+      <g transform="translate(40, 130)">
+        <rect width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="80" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">React 19 Hooks</text>
+
+        <rect x="175" y="0" width="165" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="257" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">Tailwind CSS v4</text>
+
+        <rect x="355" y="0" width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="435" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">Vite 8 Bundler</text>
+
+        <rect x="530" y="0" width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="610" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">Lucide SVG Icons</text>
+      </g>
+
+      <text x="40" y="210" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Built with clean component separation (Solo, Group, Tasks, Doubts, Streaks, Analytics).
+      </text>
+      <text x="40" y="240" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Custom Cream + Burgundy design tokens for accessible contrast and responsive ergonomics.
+      </text>
+      <text x="40" y="270" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Client-side auto-reconnection and optimistic UI updates for lag-free workflows.
+      </text>
+    </g>
+
+    <!-- 2. Backend & Real-Time Layer -->
+    <g transform="translate(890, 0)">
+      <rect width="830" height="330" rx="24" fill="url(#cardGrad4)" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow4)"/>
+      <rect x="40" y="35" width="48" height="48" rx="14" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="64" y="65" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="20" font-weight="900" fill="#873B46">⚡</text>
+
+      <text x="105" y="55" font-family="'Inter', -apple-system, sans-serif" font-size="22" font-weight="800" fill="#332426">Backend &amp; Real-Time Streaming</text>
+      <text x="105" y="78" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="600" fill="#873B46">Node.js 22 + Express REST + WebSockets</text>
+
+      <line x1="40" y1="105" x2="790" y2="105" stroke="#F0E5D8" stroke-width="1.5"/>
+
+      <!-- Pills -->
+      <g transform="translate(40, 130)">
+        <rect width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="80" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">Node.js (>=22.5)</text>
+
+        <rect x="175" y="0" width="165" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="257" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">Express.js API</text>
+
+        <rect x="355" y="0" width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="435" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">ws WebSockets</text>
+
+        <rect x="530" y="0" width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="610" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">Multer Uploads</text>
+      </g>
+
+      <text x="40" y="210" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Bidirectional WebSocket engine for real-time doubt clearing without page refreshes.
+      </text>
+      <text x="40" y="240" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Live user presence indicators, typing broadcast, and instant notifications.
+      </text>
+      <text x="40" y="270" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Secure multipart file processing for handwritten diagrams, homework photos, and PDFs.
+      </text>
+    </g>
+
+    <!-- 3. Database & Reliability Layer -->
+    <g transform="translate(0, 360)">
+      <rect width="830" height="330" rx="24" fill="url(#cardGrad4)" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow4)"/>
+      <rect x="40" y="35" width="48" height="48" rx="14" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="64" y="65" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="20" font-weight="900" fill="#873B46">🗄</text>
+
+      <text x="105" y="55" font-family="'Inter', -apple-system, sans-serif" font-size="22" font-weight="800" fill="#332426">Data Persistence &amp; Integrity</text>
+      <text x="105" y="78" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="600" fill="#873B46">Native SQLite with WAL Auto-Checkpointing</text>
+
+      <line x1="40" y1="105" x2="790" y2="105" stroke="#F0E5D8" stroke-width="1.5"/>
+
+      <!-- Pills -->
+      <g transform="translate(40, 130)">
+        <rect width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="80" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">node:sqlite Engine</text>
+
+        <rect x="175" y="0" width="165" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="257" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">WAL Mode Enabled</text>
+
+        <rect x="355" y="0" width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="435" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">JSON Backup Sync</text>
+
+        <rect x="530" y="0" width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="610" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">Auto-Checkpoints</text>
+      </g>
+
+      <text x="40" y="210" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Zero-dependency high-throughput storage utilizing Node 22 native SQLite driver.
+      </text>
+      <text x="40" y="240" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Write-Ahead Logging (WAL) ensures lock-free concurrent reads and snappy writes.
+      </text>
+      <text x="40" y="270" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Fail-safe fallback persistence service guarantees zero user data loss on cloud restarts.
+      </text>
+    </g>
+
+    <!-- 4. Security & QA Verification -->
+    <g transform="translate(890, 360)">
+      <rect width="830" height="330" rx="24" fill="url(#cardGrad4)" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow4)"/>
+      <rect x="40" y="35" width="48" height="48" rx="14" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="64" y="65" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="20" font-weight="900" fill="#873B46">🛡</text>
+
+      <text x="105" y="55" font-family="'Inter', -apple-system, sans-serif" font-size="22" font-weight="800" fill="#332426">Security &amp; Automated Verification</text>
+      <text x="105" y="78" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="600" fill="#873B46">JWT Auth + 33 Automated Regression Tests</text>
+
+      <line x1="40" y1="105" x2="790" y2="105" stroke="#F0E5D8" stroke-width="1.5"/>
+
+      <!-- Pills -->
+      <g transform="translate(40, 130)">
+        <rect width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="80" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">JWT Bearer Auth</text>
+
+        <rect x="175" y="0" width="165" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="257" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">bcryptjs Hashing</text>
+
+        <rect x="355" y="0" width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="435" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">33 Pass Tests</text>
+
+        <rect x="530" y="0" width="160" height="36" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+        <text x="610" y="23" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">Role Governance</text>
+      </g>
+
+      <text x="40" y="210" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Cryptographically salted passwords and stateless token-based authorization.
+      </text>
+      <text x="40" y="240" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Comprehensive end-to-end multi-user test suite executing on every continuous build.
+      </text>
+      <text x="40" y="270" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="400" fill="#78666A">
+        • Granular privacy permissions protecting study streaks, task work, and private profiles.
+      </text>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • CONFIDENTIAL &amp; PROPRIETARY
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">
+      SLIDE 04
+    </text>
+  </g>
+</svg>

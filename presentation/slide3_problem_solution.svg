@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="50%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+
+    <linearGradient id="problemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF8F8"/>
+      <stop offset="100%" stop-color="#FDF1F2"/>
+    </linearGradient>
+
+    <linearGradient id="solutionGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFFCF7"/>
+    </linearGradient>
+
+    <filter id="cardShadow3" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#332426" flood-opacity="0.05"/>
+    </filter>
+
+    <pattern id="gridPattern3" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.3"/>
+    </pattern>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1920" height="1080" fill="url(#bgGrad3)"/>
+  <rect width="1920" height="1080" fill="url(#gridPattern3)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <!-- Brand Icon -->
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      PROBLEM &amp; VALUE PROPOSITION
+    </text>
+    <text x="56" y="44" font-family="'Inter', -apple-system, sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      The Challenge in Modern Learning vs. The CONSTA Solution
+    </text>
+
+    <!-- Top Right Tag -->
+    <rect x="1540" y="5" width="180" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1630" y="28" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="700" fill="#873B46">
+      VALUE PROPOSITION
+    </text>
+  </g>
+
+  <!-- Underline Divider -->
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- Problem vs Solution Two-Column Cards -->
+  <g transform="translate(100, 200)">
+    <!-- Left Column: The Problem -->
+    <g transform="translate(0, 0)">
+      <rect width="830" height="710" rx="28" fill="url(#problemGrad)" stroke="#EAD2D4" stroke-width="2" filter="url(#cardShadow3)"/>
+
+      <!-- Problem Header Badge -->
+      <rect x="50" y="45" width="180" height="42" rx="21" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+      <text x="140" y="72" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="800" fill="#873B46" letter-spacing="1">
+        THE PROBLEMS
+      </text>
+
+      <text x="50" y="140" font-family="'Inter', -apple-system, sans-serif" font-size="28" font-weight="900" fill="#332426">
+        Friction in Traditional Study Habits
+      </text>
+      <text x="50" y="172" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="500" fill="#78666A">
+        Key pain points students face with conventional tools
+      </text>
+
+      <line x1="50" y1="205" x2="780" y2="205" stroke="#EAD2D4" stroke-width="1.5"/>
+
+      <!-- Problem Points -->
+      <g transform="translate(50, 240)">
+        <!-- P1 -->
+        <g transform="translate(0, 0)">
+          <circle cx="20" cy="20" r="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+          <text x="20" y="26" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#873B46">✕</text>
+          <text x="56" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="800" fill="#332426">Passive "Fake Productivity"</text>
+          <text x="56" y="46" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="400" fill="#78666A">Timers run in the background without tangible, verifiable output or retained knowledge.</text>
+        </g>
+
+        <!-- P2 -->
+        <g transform="translate(0, 105)">
+          <circle cx="20" cy="20" r="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+          <text x="20" y="26" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#873B46">✕</text>
+          <text x="56" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="800" fill="#332426">Unstructured Group Chaos</text>
+          <text x="56" y="46" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="400" fill="#78666A">Study groups in WhatsApp/Discord mix banter with work; tasks, files, and deadlines get lost.</text>
+        </g>
+
+        <!-- P3 -->
+        <g transform="translate(0, 210)">
+          <circle cx="20" cy="20" r="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+          <text x="20" y="26" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#873B46">✕</text>
+          <text x="56" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="800" fill="#332426">Zero Revision Tracking</text>
+          <text x="56" y="46" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="400" fill="#78666A">Assignments receive a single grade; students rarely iterate on mistakes or learn step-by-step.</text>
+        </g>
+
+        <!-- P4 -->
+        <g transform="translate(0, 315)">
+          <circle cx="20" cy="20" r="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+          <text x="20" y="26" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#873B46">✕</text>
+          <text x="56" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="800" fill="#332426">Superficial Exploitable Badges</text>
+          <text x="56" y="46" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="400" fill="#78666A">Gamification can be easily gamed with auto-clicks; points fail to reflect true study effort.</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Right Column: The Solution -->
+    <g transform="translate(890, 0)">
+      <rect width="830" height="710" rx="28" fill="url(#solutionGrad)" stroke="#C58B91" stroke-width="2" filter="url(#cardShadow3)"/>
+
+      <!-- Solution Header Badge -->
+      <rect x="50" y="45" width="200" height="42" rx="21" fill="#873B46"/>
+      <text x="150" y="72" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="800" fill="#FFFCF7" letter-spacing="1">
+        CONSTA SOLUTION
+      </text>
+
+      <text x="50" y="140" font-family="'Inter', -apple-system, sans-serif" font-size="28" font-weight="900" fill="#332426">
+        Authentic Accountability Engine
+      </text>
+      <text x="50" y="172" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="500" fill="#873B46">
+        Engineered for verified mastery and peer collaboration
+      </text>
+
+      <line x1="50" y1="205" x2="780" y2="205" stroke="#E7D8CE" stroke-width="1.5"/>
+
+      <!-- Solution Points -->
+      <g transform="translate(50, 240)">
+        <!-- S1 -->
+        <g transform="translate(0, 0)">
+          <circle cx="20" cy="20" r="18" fill="#873B46"/>
+          <text x="20" y="26" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="56" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="800" fill="#332426">Outcome Checklist &amp; Roadblock Log</text>
+          <text x="56" y="46" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="400" fill="#78666A">XP is earned only when specific learning objectives are achieved; roadblock tracker records sticky concepts.</text>
+        </g>
+
+        <!-- S2 -->
+        <g transform="translate(0, 105)">
+          <circle cx="20" cy="20" r="18" fill="#873B46"/>
+          <text x="20" y="26" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="56" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="800" fill="#332426">Structured Cohorts with Admin Roles</text>
+          <text x="56" y="46" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="400" fill="#78666A">Dedicated study rooms with member management, unique IDs, group task topics, and deadline timers.</text>
+        </g>
+
+        <!-- S3 -->
+        <g transform="translate(0, 210)">
+          <circle cx="20" cy="20" r="18" fill="#873B46"/>
+          <text x="20" y="26" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="56" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="800" fill="#332426">Multi-Version (v1-v3) &amp; Rubric Feedback</text>
+          <text x="56" y="46" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="400" fill="#78666A">Preserves progressive revisions, multi-page image uploads, and criterion-based rubric scorecards.</text>
+        </g>
+
+        <!-- S4 -->
+        <g transform="translate(0, 315)">
+          <circle cx="20" cy="20" r="18" fill="#873B46"/>
+          <text x="20" y="26" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="56" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="800" fill="#332426">Auditable XP Ledger &amp; Live Doubt Chat</text>
+          <text x="56" y="46" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="400" fill="#78666A">Every XP point is logged with source IDs; instant WebSockets chat with "Accepted Solution" badges (+15 XP).</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • CONFIDENTIAL &amp; PROPRIETARY
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#873B46">
+      SLIDE 03
+    </text>
+  </g>
+</svg>

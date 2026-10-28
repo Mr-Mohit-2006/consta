@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Dark Burgundy Background Gradient -->
+    <linearGradient id="darkBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#873B46"/>
+      <stop offset="50%" stop-color="#732F3A"/>
+      <stop offset="100%" stop-color="#55212A"/>
+    </linearGradient>
+
+    <radialGradient id="darkGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#C58B91" stop-opacity="0.25"/>
+      <stop offset="60%" stop-color="#873B46" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#55212A" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="creamCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+
+    <pattern id="gridPatternDark" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#FFFCF7" stroke-width="1" stroke-opacity="0.06"/>
+    </pattern>
+
+    <filter id="shadowDark" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#darkBgGrad)"/>
+  <rect width="1920" height="1080" fill="url(#darkGlow)"/>
+  <rect width="1920" height="1080" fill="url(#gridPatternDark)"/>
+
+  <!-- Geometric Accent Rings in Background -->
+  <circle cx="960" cy="460" r="380" fill="none" stroke="#FFFCF7" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.15"/>
+  <circle cx="960" cy="460" r="480" fill="none" stroke="#C58B91" stroke-width="1" opacity="0.12"/>
+
+  <!-- Top Brand Mark -->
+  <g transform="translate(960, 160)" text-anchor="middle">
+    <rect x="-30" y="-30" width="60" height="60" rx="18" fill="#FFFCF7"/>
+    <path d="M 0 -10 L -14 -2 L 0 6 L 14 -2 Z M -8 2 L -8 8 C -8 11 8 11 8 8 L 8 2" fill="none" stroke="#873B46" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="0" y="65" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="800" fill="#F4E2E3" letter-spacing="4">
+      CONSTA PLATFORM
+    </text>
+  </g>
+
+  <!-- Center Call-To-Action & Summary -->
+  <g transform="translate(960, 340)" text-anchor="middle">
+    <text x="0" y="0" font-family="'Inter', -apple-system, sans-serif" font-size="64" font-weight="900" fill="#FFFCF7" letter-spacing="-1">
+      Empowering Every Student's Potential
+    </text>
+
+    <text x="0" y="55" font-family="'Inter', -apple-system, sans-serif" font-size="22" font-weight="400" fill="#EAD2D4">
+      A transparent, collaborative, and rewarding study experience designed for long-term consistency.
+    </text>
+
+    <!-- Key Metrics Ribbon -->
+    <g transform="translate(0, 140)">
+      <!-- Metric 1 -->
+      <g transform="translate(-450, 0)">
+        <rect x="-140" y="-30" width="280" height="110" rx="20" fill="rgba(255,252,247,0.08)" stroke="rgba(255,252,247,0.18)" stroke-width="1.5"/>
+        <text x="0" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="36" font-weight="900" fill="#FFFCF7">100%</text>
+        <text x="0" y="50" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="600" fill="#F4E2E3">OUTCOME VERIFIED XP</text>
+      </g>
+
+      <!-- Metric 2 -->
+      <g transform="translate(-150, 0)">
+        <rect x="-140" y="-30" width="280" height="110" rx="20" fill="rgba(255,252,247,0.08)" stroke="rgba(255,252,247,0.18)" stroke-width="1.5"/>
+        <text x="0" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="36" font-weight="900" fill="#FFFCF7">&lt; 100ms</text>
+        <text x="0" y="50" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="600" fill="#F4E2E3">WEBSOCKET REAL-TIME</text>
+      </g>
+
+      <!-- Metric 3 -->
+      <g transform="translate(150, 0)">
+        <rect x="-140" y="-30" width="280" height="110" rx="20" fill="rgba(255,252,247,0.08)" stroke="rgba(255,252,247,0.18)" stroke-width="1.5"/>
+        <text x="0" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="36" font-weight="900" fill="#FFFCF7">v1 → vn</text>
+        <text x="0" y="50" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="600" fill="#F4E2E3">MULTI-VERSION REVISIONS</text>
+      </g>
+
+      <!-- Metric 4 -->
+      <g transform="translate(450, 0)">
+        <rect x="-140" y="-30" width="280" height="110" rx="20" fill="rgba(255,252,247,0.08)" stroke="rgba(255,252,247,0.18)" stroke-width="1.5"/>
+        <text x="0" y="20" font-family="'Inter', -apple-system, sans-serif" font-size="36" font-weight="900" fill="#FFFCF7">33 / 33</text>
+        <text x="0" y="50" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="600" fill="#F4E2E3">AUTOMATED TESTS PASS</text>
+      </g>
+    </g>
+
+    <!-- Thank you badge -->
+    <g transform="translate(0, 360)">
+      <text x="0" y="0" font-family="'Inter', -apple-system, sans-serif" font-size="44" font-weight="900" fill="#FFFCF7">
+        Thank You!
+      </text>
+      <text x="0" y="40" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="500" fill="#EAD2D4">
+        Questions &amp; Discussion
+      </text>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="rgba(255,252,247,0.15)" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="600" fill="#EAD2D4">
+      CONSTA PLATFORM • PRESENTATION CONCLUSION
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#FFFCF7">
+      SLIDE 05
+    </text>
+  </g>
+</svg>
