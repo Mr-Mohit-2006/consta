@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="s7_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="60%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+    <pattern id="s7_grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.3"/>
+    </pattern>
+    <filter id="s7_cardShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#332426" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#s7_bg)"/>
+  <rect width="1920" height="1080" fill="url(#s7_grid)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      SYSTEM ARCHITECTURE
+    </text>
+    <text x="56" y="44" font-family="'Manrope', sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      End-to-End Technical Architecture &amp; Data Pipeline
+    </text>
+
+    <rect x="1560" y="5" width="160" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1640" y="28" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46">
+      ARCHITECTURE
+    </text>
+  </g>
+
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- Architecture Flow Pipeline Box -->
+  <g transform="translate(100, 190)">
+    <rect width="1720" height="480" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s7_cardShadow)"/>
+    
+    <text x="40" y="45" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">
+      System Pipeline: User Interface → Client State → Express API / WS → Native SQLite (WAL)
+    </text>
+    <line x1="40" y1="65" x2="1680" y2="65" stroke="#F0E5D8" stroke-width="1.2"/>
+
+    <!-- Layer 1: Client UI -->
+    <g transform="translate(50, 100)">
+      <rect width="340" height="340" rx="20" fill="#FAF4EB" stroke="#C58B91" stroke-width="1.5"/>
+      <rect x="25" y="25" width="46" height="46" rx="14" fill="#873B46"/>
+      <text x="48" y="54" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="18" font-weight="900" fill="#FFFCF7">01</text>
+      <text x="85" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">Frontend Client</text>
+      <line x1="25" y1="90" x2="315" y2="90" stroke="#E7D8CE" stroke-width="1"/>
+
+      <text x="25" y="130" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#873B46">React 19 + Tailwind v4</text>
+      <text x="25" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Centralized AuthContext</text>
+      <text x="25" y="195" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Solo Study Checklist Timer</text>
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Cohort Workspace Tabs</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Multi-Version Upload Form</text>
+      <text x="25" y="285" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Native WebSocket Chat Client</text>
+      <text x="25" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Daily Streak Heatmap UI</text>
+    </g>
+
+    <!-- Transport Arrows: REST & WebSockets -->
+    <g transform="translate(410, 230)">
+      <!-- REST Arrow -->
+      <line x1="0" y1="0" x2="80" y2="0" stroke="#873B46" stroke-width="3"/>
+      <polygon points="80,-7 92,0 80,7" fill="#873B46"/>
+      <text x="45" y="-12" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46">REST APIs</text>
+
+      <!-- WebSockets Arrow -->
+      <line x1="92" y1="50" x2="12" y2="50" stroke="#642B35" stroke-width="3"/>
+      <polygon points="12,43 0,50 12,57" fill="#642B35"/>
+      <text x="45" y="70" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#642B35">WebSockets</text>
+    </g>
+
+    <!-- Layer 2: API & Application Logic -->
+    <g transform="translate(520, 100)">
+      <rect width="360" height="340" rx="20" fill="#FAF4EB" stroke="#C58B91" stroke-width="1.5"/>
+      <rect x="25" y="25" width="46" height="46" rx="14" fill="#873B46"/>
+      <text x="48" y="54" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="18" font-weight="900" fill="#FFFCF7">02</text>
+      <text x="85" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">Application Server</text>
+      <line x1="25" y1="90" x2="335" y2="90" stroke="#E7D8CE" stroke-width="1"/>
+
+      <text x="25" y="130" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#873B46">Node.js 22 + Express.js</text>
+      <text x="25" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• JWT Bearer Authentication</text>
+      <text x="25" y="195" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Role-Based Permissions (Admin)</text>
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• 8-Stage Task State Controller</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Multer Multipart Image Engine</text>
+      <text x="25" y="285" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Rubric Evaluation Parser</text>
+      <text x="25" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Audited XP Calculator</text>
+    </g>
+
+    <!-- WS Broadcast Channel -->
+    <g transform="translate(900, 100)">
+      <rect width="340" height="340" rx="20" fill="#FAF4EB" stroke="#C58B91" stroke-width="1.5"/>
+      <rect x="25" y="25" width="46" height="46" rx="14" fill="#873B46"/>
+      <text x="48" y="54" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="18" font-weight="900" fill="#FFFCF7">03</text>
+      <text x="85" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">Real-Time Hub</text>
+      <line x1="25" y1="90" x2="315" y2="90" stroke="#E7D8CE" stroke-width="1"/>
+
+      <text x="25" y="130" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#873B46">ws WebSocket Server</text>
+      <text x="25" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Low-Latency Duplex Streaming</text>
+      <text x="25" y="195" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Live Typing Indicators</text>
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Cohort Presence Counters</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Accepted Solution Broadcast</text>
+      <text x="25" y="285" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Instant Friend Task Alerts</text>
+      <text x="25" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Zero Page Reload Updates</text>
+    </g>
+
+    <!-- Arrow to Database -->
+    <g transform="translate(1260, 260)">
+      <line x1="0" y1="0" x2="60" y2="0" stroke="#873B46" stroke-width="3"/>
+      <polygon points="60,-7 72,0 60,7" fill="#873B46"/>
+      <text x="35" y="-12" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#873B46">SQL WAL</text>
+    </g>
+
+    <!-- Layer 3: Database & Backup -->
+    <g transform="translate(1350, 100)">
+      <rect width="320" height="340" rx="20" fill="#FAF4EB" stroke="#C58B91" stroke-width="1.5"/>
+      <rect x="25" y="25" width="46" height="46" rx="14" fill="#873B46"/>
+      <text x="48" y="54" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="18" font-weight="900" fill="#FFFCF7">04</text>
+      <text x="85" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">SQLite Storage</text>
+      <line x1="25" y1="90" x2="295" y2="90" stroke="#E7D8CE" stroke-width="1"/>
+
+      <text x="25" y="130" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#873B46">node:sqlite Engine</text>
+      <text x="25" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• PRAGMA journal_mode = WAL</text>
+      <text x="25" y="195" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Auto-checkpointing (TRUNCATE)</text>
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Append-only `xp_transactions`</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• User JSON Backup Recovery</text>
+      <text x="25" y="285" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Zero-Loss Data Persistence</text>
+      <text x="25" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">• Concurrency Optimization</text>
+    </g>
+  </g>
+
+  <!-- Bottom Architecture Explanatory Cards (3 horizontal cards) -->
+  <g transform="translate(100, 700)">
+    <!-- Card 1 -->
+    <g transform="translate(0, 0)">
+      <rect width="550" height="255" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s7_cardShadow)"/>
+      <text x="35" y="45" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#873B46">1. REST API Requests</text>
+      <line x1="35" y1="65" x2="515" y2="65" stroke="#F0E5D8" stroke-width="1.2"/>
+      <text x="35" y="100" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">
+        Manages structured state operations: user authentication, session checklist completion, task lifecycle transitions, and peer review submissions.
+      </text>
+      <text x="35" y="170" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#332426">
+        Protected with JWT bearer headers and input validation.
+      </text>
+    </g>
+
+    <!-- Card 2 -->
+    <g transform="translate(585, 0)">
+      <rect width="550" height="255" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s7_cardShadow)"/>
+      <text x="35" y="45" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#873B46">2. WebSocket Real-Time Broadcast</text>
+      <line x1="35" y1="65" x2="515" y2="65" stroke="#F0E5D8" stroke-width="1.2"/>
+      <text x="35" y="100" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">
+        Powers instantaneous doubt resolution without page refresh. Dispatches live messages, typing signals, accepted solution pins, and cohort activity.
+      </text>
+      <text x="35" y="170" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#332426">
+        Maintains persistent duplex socket connections (&lt;100ms).
+      </text>
+    </g>
+
+    <!-- Card 3 -->
+    <g transform="translate(1170, 0)">
+      <rect width="550" height="255" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s7_cardShadow)"/>
+      <text x="35" y="45" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#873B46">3. WAL Mode Database Resilience</text>
+      <line x1="35" y1="65" x2="515" y2="65" stroke="#F0E5D8" stroke-width="1.2"/>
+      <text x="35" y="100" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">
+        Write-Ahead Logging isolates readers from writers, ensuring high concurrency. Automated checkpoints and secondary JSON backup prevent cold-start loss.
+      </text>
+      <text x="35" y="170" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#332426">
+        Zero external database server overhead; robust persistence.
+      </text>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • SYSTEM ARCHITECTURE
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">
+      SLIDE 07 / 14
+    </text>
+  </g>
+</svg>

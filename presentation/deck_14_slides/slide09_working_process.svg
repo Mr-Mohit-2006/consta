@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="s9_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="60%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+    <pattern id="s9_grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.3"/>
+    </pattern>
+    <filter id="s9_cardShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#332426" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#s9_bg)"/>
+  <rect width="1920" height="1080" fill="url(#s9_grid)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      WORKING PROCESS &amp; USER JOURNEY
+    </text>
+    <text x="56" y="44" font-family="'Manrope', sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      How a Student Uses CONSTA From Registration to Mastery
+    </text>
+
+    <rect x="1560" y="5" width="160" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1640" y="28" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46">
+      5-STAGE FLOW
+    </text>
+  </g>
+
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- 5 Sequential Workflow Cards (Horizontal Stepper Layout) -->
+  <g transform="translate(100, 190)">
+    <!-- Stage 1 -->
+    <g transform="translate(0, 0)">
+      <rect width="320" height="760" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s9_cardShadow)"/>
+      <rect x="25" y="30" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="53" y="65" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="22" font-weight="900" fill="#873B46">01</text>
+      
+      <text x="95" y="52" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">Account Setup</text>
+      <text x="95" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Auth &amp; Profile</text>
+      <line x1="25" y1="105" x2="295" y2="105" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="25" y="145" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Quick Registration</text>
+      <text x="25" y="175" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">User signs up with a unique username and email.</text>
+
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Password Hashing</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Passwords secured via bcryptjs (10 salt rounds).</text>
+
+      <text x="25" y="305" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• JWT Bearer Token</text>
+      <text x="25" y="335" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Stateless session token issued for secure requests.</text>
+
+      <text x="25" y="385" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Profile &amp; Unique ID</text>
+      <text x="25" y="415" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Assigned numerical ID for fast friend &amp; group search.</text>
+
+      <!-- Step Indicator Badge -->
+      <g transform="translate(25, 680)">
+        <rect width="270" height="42" rx="12" fill="#F4E2E3"/>
+        <text x="135" y="26" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">STEP 1: ONBOARDING</text>
+      </g>
+    </g>
+
+    <!-- Stage 2 -->
+    <g transform="translate(350, 0)">
+      <rect width="320" height="760" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s9_cardShadow)"/>
+      <rect x="25" y="30" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="53" y="65" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="22" font-weight="900" fill="#873B46">02</text>
+      
+      <text x="95" y="52" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">Solo Focus Study</text>
+      <text x="95" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Objectives &amp; Timer</text>
+      <line x1="25" y1="105" x2="295" y2="105" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="25" y="145" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Configure Study Plan</text>
+      <text x="25" y="175" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Select subject, topic, and difficulty level.</text>
+
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Focus Timer Runs</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Timer tracks time separately from completion proof.</text>
+
+      <text x="25" y="305" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Check Off Objectives</text>
+      <text x="25" y="335" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Learner actively verifies achieved checklist milestones.</text>
+
+      <text x="25" y="385" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Log Roadblocks</text>
+      <text x="25" y="415" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Captures confusing topics; AI provides breakdowns.</text>
+
+      <g transform="translate(25, 680)">
+        <rect width="270" height="42" rx="12" fill="#F4E2E3"/>
+        <text x="135" y="26" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">STEP 2: SOLO MASTERY</text>
+      </g>
+    </g>
+
+    <!-- Stage 3 -->
+    <g transform="translate(700, 0)">
+      <rect width="320" height="760" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s9_cardShadow)"/>
+      <rect x="25" y="30" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="53" y="65" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="22" font-weight="900" fill="#873B46">03</text>
+      
+      <text x="95" y="52" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">Cohort Study</text>
+      <text x="95" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Admin &amp; Tasks</text>
+      <line x1="25" y1="105" x2="295" y2="105" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="25" y="145" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Create or Join Group</text>
+      <text x="25" y="175" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Join public cohorts or request private entry.</text>
+
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Creator is Admin</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Admin creates group tasks with sub-topic checklists.</text>
+
+      <text x="25" y="305" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Duration Timers</text>
+      <text x="25" y="335" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Countdown timer in days keeps cohorts accountable.</text>
+
+      <text x="25" y="385" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Member Management</text>
+      <text x="25" y="415" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Admin approves join requests and assigns challenges.</text>
+
+      <g transform="translate(25, 680)">
+        <rect width="270" height="42" rx="12" fill="#F4E2E3"/>
+        <text x="135" y="26" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">STEP 3: TEAMWORK</text>
+      </g>
+    </g>
+
+    <!-- Stage 4 -->
+    <g transform="translate(1050, 0)">
+      <rect width="320" height="760" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s9_cardShadow)"/>
+      <rect x="25" y="30" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="53" y="65" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="22" font-weight="900" fill="#873B46">04</text>
+      
+      <text x="95" y="52" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">Task Iterations</text>
+      <text x="95" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Multi-Version (v1→v2)</text>
+      <line x1="25" y1="105" x2="295" y2="105" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="25" y="145" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Upload Coursework</text>
+      <text x="25" y="175" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Text, diagram photos, code links, or PDFs.</text>
+
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• 8-Stage State Machine</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Transitions to `submitted` and `under_review`.</text>
+
+      <text x="25" y="305" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Rubric Peer Review</text>
+      <text x="25" y="335" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Graded on Correctness, Clarity, Method, Completeness.</text>
+
+      <text x="25" y="385" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Submit Revisions</text>
+      <text x="25" y="415" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Uploads v2 iteration addressing feedback changelogs.</text>
+
+      <g transform="translate(25, 680)">
+        <rect width="270" height="42" rx="12" fill="#F4E2E3"/>
+        <text x="135" y="26" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">STEP 4: REVISION</text>
+      </g>
+    </g>
+
+    <!-- Stage 5 -->
+    <g transform="translate(1400, 0)">
+      <rect width="320" height="760" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s9_cardShadow)"/>
+      <rect x="25" y="30" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="53" y="65" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="22" font-weight="900" fill="#873B46">05</text>
+      
+      <text x="95" y="52" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">Doubts &amp; Growth</text>
+      <text x="95" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Real-Time &amp; XP</text>
+      <line x1="25" y1="105" x2="295" y2="105" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="25" y="145" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Ask Doubts Instantly</text>
+      <text x="25" y="175" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">WebSockets stream diagrams with zero page reload.</text>
+
+      <text x="25" y="225" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Accepted Solutions</text>
+      <text x="25" y="255" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Peer mentor earns +15 XP for verified answers.</text>
+
+      <text x="25" y="305" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Audited XP Ledger</text>
+      <text x="25" y="335" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Every reward is tracked with source references.</text>
+
+      <text x="25" y="385" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Consistency Heatmap</text>
+      <text x="25" y="415" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Builds streak calendar and unlocks new rank titles.</text>
+
+      <g transform="translate(25, 680)">
+        <rect width="270" height="42" rx="12" fill="#F4E2E3"/>
+        <text x="135" y="26" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">STEP 5: GROWTH</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • WORKING PROCESS &amp; USER JOURNEY
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">
+      SLIDE 09 / 14
+    </text>
+  </g>
+</svg>

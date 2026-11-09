@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="s1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="45%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+    <radialGradient id="s1_glow" cx="88%" cy="12%" r="55%">
+      <stop offset="0%" stop-color="#873B46" stop-opacity="0.18"/>
+      <stop offset="65%" stop-color="#C58B91" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#FAF4EB" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="s1_burgundy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#873B46"/>
+      <stop offset="100%" stop-color="#642B35"/>
+    </linearGradient>
+    <pattern id="s1_grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.4"/>
+    </pattern>
+    <filter id="s1_shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#332426" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#s1_bg)"/>
+  <rect width="1920" height="1080" fill="url(#s1_glow)"/>
+  <rect width="1920" height="1080" fill="url(#s1_grid)"/>
+
+  <!-- Top Right Geometric Wave Accent -->
+  <path d="M 1360 0 C 1540 120, 1720 280, 1920 310 L 1920 0 Z" fill="url(#s1_burgundy)" opacity="0.95"/>
+  <path d="M 1440 0 C 1600 150, 1750 230, 1920 260 L 1920 0 Z" fill="#C58B91" opacity="0.35"/>
+  <circle cx="1660" cy="210" r="180" fill="none" stroke="#FAF4EB" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.4"/>
+
+  <!-- Top Academic Pill Badge -->
+  <g transform="translate(120, 95)">
+    <rect width="470" height="52" rx="26" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1.5"/>
+    <rect x="7" y="7" width="38" height="38" rx="19" fill="url(#s1_burgundy)"/>
+    <path d="M 26 18 L 16 24 L 26 30 L 36 24 Z M 20 27 L 20 32 C 20 34 32 34 32 32 L 32 27" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="60" y="32" font-family="'Manrope', 'Poppins', sans-serif" font-size="13" font-weight="800" letter-spacing="2.5" fill="#873B46">
+      COLLEGE MINOR PROJECT PRESENTATION • 2026
+    </text>
+  </g>
+
+  <!-- Main Hero Title Section -->
+  <g transform="translate(120, 275)">
+    <text x="0" y="0" font-family="'Manrope', 'Poppins', sans-serif" font-size="22" font-weight="800" letter-spacing="4" fill="#873B46">
+      B.TECH COMPUTER SCIENCE &amp; ENGINEERING
+    </text>
+    <text x="0" y="115" font-family="'Manrope', 'Poppins', sans-serif" font-size="112" font-weight="900" letter-spacing="-2" fill="#332426">
+      CONSTA
+    </text>
+
+    <!-- Accent Underline Bars -->
+    <rect x="0" y="155" width="280" height="8" rx="4" fill="url(#s1_burgundy)"/>
+    <rect x="295" y="155" width="45" height="8" rx="4" fill="#C58B91"/>
+
+    <!-- Full Project Title -->
+    <text x="0" y="235" font-family="'Manrope', 'Poppins', sans-serif" font-size="38" font-weight="800" fill="#332426">
+      Collaborative Study &amp; Personal Growth Platform
+    </text>
+
+    <!-- Official Tagline -->
+    <g transform="translate(0, 275)">
+      <rect width="760" height="50" rx="14" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5"/>
+      <text x="24" y="32" font-family="'Manrope', 'Poppins', sans-serif" font-size="19" font-weight="700" fill="#873B46">
+        “Track Your Progress. Learn Together. Grow Every Day.”
+      </text>
+    </g>
+
+    <!-- Key Architecture Badges -->
+    <g transform="translate(0, 365)">
+      <rect width="130" height="40" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+      <text x="65" y="25" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">React 19</text>
+
+      <rect x="145" y="0" width="160" height="40" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+      <text x="225" y="25" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">Tailwind v4</text>
+
+      <rect x="320" y="0" width="140" height="40" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+      <text x="390" y="25" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">Node.js 22</text>
+
+      <rect x="475" y="0" width="150" height="40" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+      <text x="550" y="25" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">WebSockets</text>
+
+      <rect x="640" y="0" width="160" height="40" rx="10" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+      <text x="720" y="25" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">SQLite WAL</text>
+    </g>
+  </g>
+
+  <!-- Presenter & Academic Details Card -->
+  <g transform="translate(120, 855)">
+    <rect width="680" height="115" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s1_shadow)"/>
+    <circle cx="58" cy="58" r="32" fill="#F4E2E3" stroke="#873B46" stroke-width="2"/>
+    <path d="M 58 44 A 10 10 0 1 0 58 64 A 10 10 0 1 0 58 44 Z M 42 72 C 42 66 49 63 58 63 C 67 63 74 66 74 72" fill="none" stroke="#873B46" stroke-width="2.5" stroke-linecap="round"/>
+    
+    <text x="110" y="46" font-family="'Manrope', 'Poppins', sans-serif" font-size="19" font-weight="800" fill="#332426">
+      Presented by: Mohit Kumar
+    </text>
+    <text x="110" y="73" font-family="'Manrope', 'Poppins', sans-serif" font-size="15" font-weight="600" fill="#873B46">
+      Department of Computer Science &amp; Engineering
+    </text>
+    <text x="110" y="97" font-family="'Manrope', 'Poppins', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+      Bachelor of Technology • Academic Year 2025–2026
+    </text>
+
+    <!-- Slide Index -->
+    <rect x="1540" y="32" width="140" height="48" rx="14" fill="#F0E5D8" stroke="#E7D8CE" stroke-width="1.5"/>
+    <text x="1610" y="62" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="800" fill="#873B46">
+      SLIDE 01 / 14
+    </text>
+  </g>
+</svg>

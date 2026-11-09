@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="s2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="60%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+    <pattern id="s2_grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.3"/>
+    </pattern>
+    <filter id="s2_cardShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#332426" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#s2_bg)"/>
+  <rect width="1920" height="1080" fill="url(#s2_grid)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      INTRODUCTION &amp; OVERVIEW
+    </text>
+    <text x="56" y="44" font-family="'Manrope', sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      What is CONSTA &amp; Its Core Purpose
+    </text>
+
+    <rect x="1560" y="5" width="160" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1640" y="28" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46">
+      OVERVIEW
+    </text>
+  </g>
+
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- Main Hero Banner Card -->
+  <g transform="translate(100, 190)">
+    <rect width="1720" height="160" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s2_cardShadow)"/>
+    <rect x="35" y="35" width="90" height="90" rx="22" fill="#F4E2E3" stroke="#873B46" stroke-width="2"/>
+    <path d="M 80 60 L 62 70 L 80 80 L 98 70 Z M 70 75 L 70 85 C 70 88 90 88 90 85 L 90 75" fill="none" stroke="#873B46" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="150" y="65" font-family="'Manrope', sans-serif" font-size="24" font-weight="900" fill="#332426">
+      CONSTA is a Next-Generation Collaborative Study &amp; Personal Productivity Platform
+    </text>
+    <text x="150" y="98" font-family="'Manrope', sans-serif" font-size="16" font-weight="500" fill="#78666A">
+      Engineered for students and study groups to eliminate "fake productivity" and transform casual online study into verifiable learning achievements.
+    </text>
+  </g>
+
+  <!-- 3 Pillar Cards -->
+  <g transform="translate(100, 385)">
+    <!-- Pillar 1 -->
+    <g transform="translate(0, 0)">
+      <rect width="550" height="420" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s2_cardShadow)"/>
+      <rect x="35" y="35" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <circle cx="63" cy="63" r="14" fill="none" stroke="#873B46" stroke-width="2.5"/>
+      <polyline points="63,55 63,63 70,63" fill="none" stroke="#873B46" stroke-width="2.5" stroke-linecap="round"/>
+
+      <text x="105" y="55" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#332426">1. Solo Discipline</text>
+      <text x="105" y="78" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#873B46">Outcome-Driven Focus</text>
+      <line x1="35" y1="110" x2="515" y2="110" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="35" y="150" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Verifiable Objectives</text>
+      <text x="35" y="180" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Decouples timer duration from points. XP is earned only by completing actual learning objectives.</text>
+
+      <text x="35" y="235" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Roadblock Logger</text>
+      <text x="35" y="265" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Captures sticky concepts, difficult derivations, and questions encountered during study.</text>
+
+      <text x="35" y="320" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Pedagogical AI Breakdown</text>
+      <text x="35" y="350" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Provides instant contextual explanations when students get stuck.</text>
+    </g>
+
+    <!-- Pillar 2 -->
+    <g transform="translate(585, 0)">
+      <rect width="550" height="420" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s2_cardShadow)"/>
+      <rect x="35" y="35" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <path d="M 53 71 A 8 8 0 1 0 53 55 A 8 8 0 1 0 53 71 Z M 73 71 A 6 6 0 1 0 73 59 A 6 6 0 1 0 73 71 Z" fill="none" stroke="#873B46" stroke-width="2.5"/>
+
+      <text x="105" y="55" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#332426">2. Cohort Governance</text>
+      <text x="105" y="78" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#873B46">Structured Study Rooms</text>
+      <line x1="35" y1="110" x2="515" y2="110" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="35" y="150" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Dedicated Group Rooms</text>
+      <text x="35" y="180" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Public or private study rooms with approval queues and unique numerical student ID invites.</text>
+
+      <text x="35" y="235" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Creator is Admin</text>
+      <text x="35" y="265" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Group creator assigns tasks, sets countdown timers in days, and oversees member progress.</text>
+
+      <text x="35" y="320" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Real-Time Doubt Chat</text>
+      <text x="35" y="350" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Sub-100ms WebSocket messaging with whiteboard diagram and photo sharing.</text>
+    </g>
+
+    <!-- Pillar 3 -->
+    <g transform="translate(1170, 0)">
+      <rect width="550" height="420" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s2_cardShadow)"/>
+      <rect x="35" y="35" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <rect x="49" y="49" width="28" height="28" rx="6" fill="none" stroke="#873B46" stroke-width="2.5"/>
+      <path d="M 55 63 L 61 69 L 71 55" fill="none" stroke="#873B46" stroke-width="2.5" stroke-linecap="round"/>
+
+      <text x="105" y="55" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#332426">3. Revision &amp; Growth</text>
+      <text x="105" y="78" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#873B46">Iterative Academic Mastery</text>
+      <line x1="35" y1="110" x2="515" y2="110" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="35" y="150" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Multi-Version Tasks (v1 → v2)</text>
+      <text x="35" y="180" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Supports progressive iterations with changelog notes rather than single-shot final grades.</text>
+
+      <text x="35" y="235" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Rubric Scorecards</text>
+      <text x="35" y="265" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Structured peer reviews based on Correctness, Completeness, Clarity, and Methodology.</text>
+
+      <text x="35" y="320" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Audited XP &amp; Streaks</text>
+      <text x="35" y="350" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Append-only database ledger records verified XP, streak heatmaps, and rank progression.</text>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • INTRODUCTION &amp; CORE PURPOSE
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">
+      SLIDE 02 / 14
+    </text>
+  </g>
+</svg>

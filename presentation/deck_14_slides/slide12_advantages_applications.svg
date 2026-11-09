@@ -1,0 +1,246 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap');
+      .font-sans { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    </style>
+    <linearGradient id="bgGrad12" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="50%" stop-color="#F4ECE1"/>
+      <stop offset="100%" stop-color="#EFE3D5"/>
+    </linearGradient>
+    <linearGradient id="primaryBurgundy12" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#873B46"/>
+      <stop offset="100%" stop-color="#642B35"/>
+    </linearGradient>
+    <filter id="cardShadow12" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#332426" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGrad12)"/>
+
+  <!-- Top Header Navigation -->
+  <g transform="translate(100, 70)">
+    <rect width="100" height="34" rx="17" fill="#873B46" fill-opacity="0.12"/>
+    <text x="50" y="22" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46" text-anchor="middle" letter-spacing="1.5">SLIDE 12</text>
+    <text x="120" y="23" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#78666A" letter-spacing="2">VALUE DELIVERABLE &amp; IMPACT</text>
+    <text x="1720" y="23" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#873B46" text-anchor="end">CONSTA</text>
+  </g>
+
+  <!-- Slide Heading -->
+  <g transform="translate(100, 135)">
+    <text font-family="'Manrope', sans-serif" font-size="44" font-weight="800" fill="#332426" letter-spacing="-1">Advantages &amp; Multi-Tier Applications</text>
+    <text y="42" font-family="'Manrope', sans-serif" font-size="20" font-weight="500" fill="#78666A">
+      Engineered to deliver tangible, measurable benefits across students, study cohorts, and educational institutions.
+    </text>
+  </g>
+
+  <!-- 3 Major Application Pillars (3 Columns) -->
+  <g transform="translate(100, 240)">
+
+    <!-- Column 1: For Individual Students -->
+    <g transform="translate(0, 0)">
+      <rect width="545" height="730" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow12)"/>
+
+      <!-- Card Top Badge & Header -->
+      <g transform="translate(35, 35)">
+        <rect width="56" height="56" rx="16" fill="#FAF4EB" stroke="#E7D8CE"/>
+        <text x="28" y="37" font-family="'Manrope', sans-serif" font-size="26" font-weight="800" fill="#873B46" text-anchor="middle">🎓</text>
+        <rect x="70" y="6" width="130" height="24" rx="12" fill="#873B46" fill-opacity="0.12"/>
+        <text x="135" y="22" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#873B46" text-anchor="middle" letter-spacing="1">TIER 01: LEARNERS</text>
+        <text x="70" y="50" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Individual Students</text>
+      </g>
+
+      <line x1="35" y1="120" x2="510" y2="120" stroke="#E7D8CE" stroke-width="1"/>
+
+      <!-- Value Proposition Summary -->
+      <g transform="translate(35, 140)">
+        <rect width="475" height="70" rx="14" fill="#FAF4EB"/>
+        <text x="20" y="30" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#873B46" letter-spacing="0.5">PRIMARY VALUE IMPACT</text>
+        <text x="20" y="52" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Autonomous habit mastery &amp; elimination of procrastination</text>
+      </g>
+
+      <!-- Detailed Advantage Points -->
+      <g transform="translate(35, 235)">
+        <!-- Advantage 1 -->
+        <g transform="translate(0, 0)">
+          <circle cx="12" cy="12" r="12" fill="#F4E2E3"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">01</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Deep Focus Study Sessions</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Integrated Pomodoro timer with structured subject checklists removes distraction-inducing multitasking.</text>
+        </g>
+
+        <!-- Advantage 2 -->
+        <g transform="translate(0, 95)">
+          <circle cx="12" cy="12" r="12" fill="#F4E2E3"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">02</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Draft-to-Mastery Revision Loop</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Iterate code and essay submissions (v1 → v2) based on actionable feedback instead of fearing one-shot failure.</text>
+        </g>
+
+        <!-- Advantage 3 -->
+        <g transform="translate(0, 190)">
+          <circle cx="12" cy="12" r="12" fill="#F4E2E3"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">03</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Audited Streak &amp; XP Progression</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Every point earned is tied directly to verified study minutes and approved task milestones, boosting motivation.</text>
+        </g>
+
+        <!-- Advantage 4 -->
+        <g transform="translate(0, 285)">
+          <circle cx="12" cy="12" r="12" fill="#F4E2E3"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">04</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Rapid Roadblock Resolution</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Solve conceptual roadblocks in real-time within cohort doubt channels instead of staying stuck for days.</text>
+        </g>
+      </g>
+
+      <!-- Bottom Metric Callout -->
+      <g transform="translate(35, 640)">
+        <rect width="475" height="55" rx="12" fill="#873B46" fill-opacity="0.08" stroke="#873B46" stroke-opacity="0.2"/>
+        <text x="20" y="33" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#873B46">Average Daily Focus Increase:</text>
+        <text x="455" y="33" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#873B46" text-anchor="end">+42% Study Velocity</text>
+      </g>
+    </g>
+
+    <!-- Column 2: For Study Groups & Cohorts -->
+    <g transform="translate(585, 0)">
+      <rect width="545" height="730" rx="24" fill="#FFFCF7" stroke="#873B46" stroke-width="2" filter="url(#cardShadow12)"/>
+
+      <!-- Card Top Badge & Header -->
+      <g transform="translate(35, 35)">
+        <rect width="56" height="56" rx="16" fill="#873B46"/>
+        <text x="28" y="37" font-family="'Manrope', sans-serif" font-size="26" font-weight="800" fill="#FFFFFF" text-anchor="middle">👥</text>
+        <rect x="70" y="6" width="130" height="24" rx="12" fill="#873B46" fill-opacity="0.12"/>
+        <text x="135" y="22" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#873B46" text-anchor="middle" letter-spacing="1">TIER 02: COHORTS</text>
+        <text x="70" y="50" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Peer Study Groups</text>
+      </g>
+
+      <line x1="35" y1="120" x2="510" y2="120" stroke="#E7D8CE" stroke-width="1"/>
+
+      <!-- Value Proposition Summary -->
+      <g transform="translate(35, 140)">
+        <rect width="475" height="70" rx="14" fill="#FAF4EB"/>
+        <text x="20" y="30" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#873B46" letter-spacing="0.5">PRIMARY VALUE IMPACT</text>
+        <text x="20" y="52" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Social accountability &amp; structured task alignment</text>
+      </g>
+
+      <!-- Detailed Advantage Points -->
+      <g transform="translate(35, 235)">
+        <!-- Advantage 1 -->
+        <g transform="translate(0, 0)">
+          <circle cx="12" cy="12" r="12" fill="#873B46"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">01</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Context-Aware Collaboration</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Replaces chaotic WhatsApp/Telegram chats with structured channels dedicated to single project goals.</text>
+        </g>
+
+        <!-- Advantage 2 -->
+        <g transform="translate(0, 95)">
+          <circle cx="12" cy="12" r="12" fill="#873B46"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">02</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Constructive Rubric Feedback</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Multi-point peer review rubrics eliminate superficial 'looks good' replies, giving actionable evaluation.</text>
+        </g>
+
+        <!-- Advantage 3 -->
+        <g transform="translate(0, 190)">
+          <circle cx="12" cy="12" r="12" fill="#873B46"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">03</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Incentivized Doubt Mentorship</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Senior and proactive peers earn XP badges when their solutions are marked 'Accepted Answer'.</text>
+        </g>
+
+        <!-- Advantage 4 -->
+        <g transform="translate(0, 285)">
+          <circle cx="12" cy="12" r="12" fill="#873B46"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">04</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Lead Governance &amp; Deadlines</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Group creators assign milestones, review pending submissions, and maintain project momentum.</text>
+        </g>
+      </g>
+
+      <!-- Bottom Metric Callout -->
+      <g transform="translate(35, 640)">
+        <rect width="475" height="55" rx="12" fill="#873B46" fill-opacity="0.08" stroke="#873B46" stroke-opacity="0.2"/>
+        <text x="20" y="33" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#873B46">Group Task Completion Rate:</text>
+        <text x="455" y="33" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#873B46" text-anchor="end">88% vs 45% Standard</text>
+      </g>
+    </g>
+
+    <!-- Column 3: For Educational Institutions -->
+    <g transform="translate(1170, 0)">
+      <rect width="545" height="730" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow12)"/>
+
+      <!-- Card Top Badge & Header -->
+      <g transform="translate(35, 35)">
+        <rect width="56" height="56" rx="16" fill="#FAF4EB" stroke="#E7D8CE"/>
+        <text x="28" y="37" font-family="'Manrope', sans-serif" font-size="26" font-weight="800" fill="#873B46" text-anchor="middle">🏛️</text>
+        <rect x="70" y="6" width="130" height="24" rx="12" fill="#873B46" fill-opacity="0.12"/>
+        <text x="135" y="22" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#873B46" text-anchor="middle" letter-spacing="1">TIER 03: FACULTY &amp; COLL.</text>
+        <text x="70" y="50" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Academic Institutions</text>
+      </g>
+
+      <line x1="35" y1="120" x2="510" y2="120" stroke="#E7D8CE" stroke-width="1"/>
+
+      <!-- Value Proposition Summary -->
+      <g transform="translate(35, 140)">
+        <rect width="475" height="70" rx="14" fill="#FAF4EB"/>
+        <text x="20" y="30" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#873B46" letter-spacing="0.5">PRIMARY VALUE IMPACT</text>
+        <text x="20" y="52" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Audited progress metrics &amp; lowered faculty grading load</text>
+      </g>
+
+      <!-- Detailed Advantage Points -->
+      <g transform="translate(35, 235)">
+        <!-- Advantage 1 -->
+        <g transform="translate(0, 0)">
+          <circle cx="12" cy="12" r="12" fill="#F4E2E3"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">01</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Audited Academic Metrics</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Faculty view genuine engagement analytics, daily active study hours, and task revision logs instead of superficial roll-calls.</text>
+        </g>
+
+        <!-- Advantage 2 -->
+        <g transform="translate(0, 95)">
+          <circle cx="12" cy="12" r="12" fill="#F4E2E3"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">02</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Peer-Led Doubt Relief</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">High volume repetitive foundational doubts are resolved organically by peers, freeing professors for advanced research.</text>
+        </g>
+
+        <!-- Advantage 3 -->
+        <g transform="translate(0, 190)">
+          <circle cx="12" cy="12" r="12" fill="#F4E2E3"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">03</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Zero-Cost Lightweight Deployment</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Self-contained SQLite engine requires no heavy cloud database clusters, making campus intranet hosting frictionless.</text>
+        </g>
+
+        <!-- Advantage 4 -->
+        <g transform="translate(0, 285)">
+          <circle cx="12" cy="12" r="12" fill="#F4E2E3"/>
+          <text x="12" y="17" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">04</text>
+          <text x="35" y="16" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">Transparent Academic Integrity</text>
+          <text x="35" y="38" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Every assignment submission keeps explicit timestamps and revision diffs, discouraging last-minute plagiarism.</text>
+        </g>
+      </g>
+
+      <!-- Bottom Metric Callout -->
+      <g transform="translate(35, 640)">
+        <rect width="475" height="55" rx="12" fill="#873B46" fill-opacity="0.08" stroke="#873B46" stroke-opacity="0.2"/>
+        <text x="20" y="33" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#873B46">Infrastructure Cost Reduction:</text>
+        <text x="455" y="33" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#873B46" text-anchor="end">90% Less Server Overhead</text>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 1010)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1.5"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#78666A">CONSTA Academic Minor Project • Advantages &amp; Real-World Applications</text>
+    <text x="1720" y="32" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#873B46" text-anchor="end">Slide 12 of 14</text>
+  </g>
+</svg>

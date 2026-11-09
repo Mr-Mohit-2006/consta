@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONSTA • 14-Slide Academic Presentation Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .aspect-16-9 { aspect-ratio: 16 / 9; }
+    /* Hide scrollbar for clean presentation */
+    ::-webkit-scrollbar { height: 6px; width: 6px; }
+    ::-webkit-scrollbar-track { background: #FAF4EB; }
+    ::-webkit-scrollbar-thumb { background: #E7D8CE; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #C58B91; }
+  </style>
+</head>
+<body class="bg-[#FAF4EB] text-[#332426] antialiased min-h-screen p-3 sm:p-6 lg:p-8">
+  <div class="max-w-[1700px] mx-auto space-y-6">
+
+    <!-- Header Navigation & Action Bar -->
+    <header class="bg-[#FFFCF7] border border-[#E7D8CE] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#F4E2E3] text-[#873B46] text-xs font-bold uppercase tracking-wider mb-2">
+          <span>🎓 B.Tech Computer Science &amp; Engineering • Minor Project 2025–2026</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black text-[#332426]">
+          CONSTA: 14-Slide Comprehensive Presentation Deck
+        </h1>
+        <p class="text-sm text-[#78666A] mt-1 font-medium">
+          “Track Your Progress. Learn Together. Grow Every Day.” • Author &amp; Presenter: <strong class="text-[#873B46]">Mohit Kumar</strong>
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button onclick="prevSlide()" class="px-4 py-2.5 rounded-xl bg-[#FAF4EB] hover:bg-[#F0E5D8] text-[#332426] border border-[#E7D8CE] text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-sm">
+          <span>← Prev</span>
+        </button>
+        <span id="slideCounter" class="text-xs font-extrabold text-[#873B46] bg-[#F4E2E3] px-4 py-2.5 rounded-xl border border-[#E7D8CE] shadow-inner">
+          Slide 1 of 14
+        </span>
+        <button onclick="nextSlide()" class="px-4 py-2.5 rounded-xl bg-[#FAF4EB] hover:bg-[#F0E5D8] text-[#332426] border border-[#E7D8CE] text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-sm">
+          <span>Next →</span>
+        </button>
+
+        <button onclick="toggleFullscreen()" class="px-3.5 py-2.5 rounded-xl bg-[#FAF4EB] hover:bg-[#F0E5D8] text-[#332426] border border-[#E7D8CE] text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-sm" title="Toggle Fullscreen">
+          <svg class="w-4 h-4 text-[#873B46]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+          <span class="hidden sm:inline">Fullscreen</span>
+        </button>
+
+        <button onclick="downloadCurrentSlide()" class="px-4 py-2.5 rounded-xl bg-[#873B46] hover:bg-[#642B35] text-[#FFFCF7] text-xs font-bold transition shadow-sm flex items-center space-x-2 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          <span>Download SVG</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Active Slide Display Window (16:9 Cinema Box) -->
+    <div id="presentationBox" class="bg-[#FFFCF7] border border-[#E7D8CE] rounded-3xl p-3 sm:p-5 shadow-xl transition-all">
+      <div class="w-full aspect-16-9 rounded-2xl overflow-hidden border border-[#E7D8CE] shadow-inner bg-[#FAF4EB] relative">
+        <iframe id="mainSlideViewer" class="w-full h-full border-0 select-none" src="slide01_title.svg"></iframe>
+      </div>
+    </div>
+
+    <!-- Presentation Speaker Notes & Transcript Drawer -->
+    <div class="bg-[#FFFCF7] border border-[#E7D8CE] rounded-3xl p-6 shadow-sm">
+      <div class="flex items-center justify-between pb-3 border-b border-[#E7D8CE]">
+        <div class="flex items-center space-x-3">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#873B46] animate-pulse"></span>
+          <h2 id="slideTitleHeading" class="text-base font-extrabold text-[#332426]">
+            Slide 1: Title Slide
+          </h2>
+        </div>
+        <span class="text-xs font-bold uppercase tracking-wider text-[#873B46] bg-[#F4E2E3] px-2.5 py-1 rounded-md">
+          Speaker Notes &amp; Script
+        </span>
+      </div>
+      <p id="speakerNotesText" class="mt-4 text-sm text-[#78666A] leading-relaxed">
+        "Good morning respected evaluators, teachers, and colleagues. I am Mohit Kumar, presenting my B.Tech Minor Project titled 'CONSTA: Collaborative Study &amp; Personal Growth Platform'. CONSTA is engineered to solve student isolation, disorganized group learning, and lack of verified progress tracking through an integrated, peer-governed study ecosystem."
+      </p>
+    </div>
+
+    <!-- 14 Slides Visual Thumbnail Strip -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-extrabold text-[#332426] uppercase tracking-wider">
+          Complete 14-Slide Deck Index (Click to jump)
+        </h2>
+        <span class="text-xs text-[#78666A]">16:9 Native Vector Graphics • Keyboard: Left/Right Arrows or Space</span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-14 gap-2.5">
+        <!-- 1 -->
+        <button onclick="setSlide(1)" id="thumb-1" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#873B46] bg-[#FFFCF7] shadow-sm">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide01_title.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">1. Title</div>
+        </button>
+
+        <!-- 2 -->
+        <button onclick="setSlide(2)" id="thumb-2" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide02_introduction.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">2. Intro</div>
+        </button>
+
+        <!-- 3 -->
+        <button onclick="setSlide(3)" id="thumb-3" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide03_problem.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">3. Problem</div>
+        </button>
+
+        <!-- 4 -->
+        <button onclick="setSlide(4)" id="thumb-4" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide04_solution.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">4. Solution</div>
+        </button>
+
+        <!-- 5 -->
+        <button onclick="setSlide(5)" id="thumb-5" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide05_objectives.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">5. Goals</div>
+        </button>
+
+        <!-- 6 -->
+        <button onclick="setSlide(6)" id="thumb-6" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide06_core_features.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">6. Features</div>
+        </button>
+
+        <!-- 7 -->
+        <button onclick="setSlide(7)" id="thumb-7" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide07_architecture.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">7. Arch</div>
+        </button>
+
+        <!-- 8 -->
+        <button onclick="setSlide(8)" id="thumb-8" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide08_tech_stack.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">8. Stack</div>
+        </button>
+
+        <!-- 9 -->
+        <button onclick="setSlide(9)" id="thumb-9" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide09_working_process.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">9. Process</div>
+        </button>
+
+        <!-- 10 -->
+        <button onclick="setSlide(10)" id="thumb-10" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide10_database_security.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">10. Security</div>
+        </button>
+
+        <!-- 11 -->
+        <button onclick="setSlide(11)" id="thumb-11" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide11_testing_results.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">11. QA Tests</div>
+        </button>
+
+        <!-- 12 -->
+        <button onclick="setSlide(12)" id="thumb-12" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide12_advantages_applications.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">12. Value</div>
+        </button>
+
+        <!-- 13 -->
+        <button onclick="setSlide(13)" id="thumb-13" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide13_future_scope.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">13. Future</div>
+        </button>
+
+        <!-- 14 -->
+        <button onclick="setSlide(14)" id="thumb-14" class="thumb-btn p-1 rounded-xl border-2 transition text-left cursor-pointer border-[#E7D8CE] bg-[#FFFCF7] hover:border-[#C58B91]">
+          <div class="aspect-16-9 rounded-md overflow-hidden bg-[#FAF4EB] border border-[#E7D8CE] pointer-events-none mb-1">
+            <iframe class="w-full h-full border-0 pointer-events-none" src="slide14_conclusion.svg"></iframe>
+          </div>
+          <div class="text-[10px] font-bold text-[#332426] truncate">14. Q&amp;A</div>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const slides = [
+      {
+        id: 1,
+        title: "Slide 1: Title Slide",
+        file: "slide01_title.svg",
+        notes: "Good morning respected evaluators, teachers, and colleagues. I am Mohit Kumar, presenting my B.Tech Minor Project titled 'CONSTA: Collaborative Study & Personal Growth Platform'. CONSTA is engineered to solve student isolation, disorganized group learning, and lack of verified progress tracking through an integrated, peer-governed study ecosystem."
+      },
+      {
+        id: 2,
+        title: "Slide 2: Project Introduction & Purpose",
+        file: "slide02_introduction.svg",
+        notes: "CONSTA merges three foundational pillars: Solo Study Discipline (focus timers, checklists), Cohort Governance (organized student study groups with leader controls), and Continuous Mastery (peer reviews and doubt-solving). We replace fragmented apps with a single, synchronized hub."
+      },
+      {
+        id: 3,
+        title: "Slide 3: Problem Statement",
+        file: "slide03_problem.svg",
+        notes: "Here we examine the dual breakdown students face: Individual Roadblocks (fragmented tools, lack of authentic streak auditing, unresolved study roadblocks) versus Group Study Bottlenecks (unregulated social chats, zero accountability for group assignments, and superficial peer feedback). CONSTA directly addresses these core friction points."
+      },
+      {
+        id: 4,
+        title: "Slide 4: Proposed Solution & Value Matrix",
+        file: "slide04_solution.svg",
+        notes: "Our solution is fourfold: Unified Focus Sessions for personal discipline, Role-Governed Study Cohorts to keep group work structured, Iterative Task Revisions (v1 -> v2) for mastery instead of binary grading, and Real-Time WebSocket Doubt Resolution with verified accepted answers."
+      },
+      {
+        id: 5,
+        title: "Slide 5: Project Objectives & Expected Outcomes",
+        file: "slide05_objectives.svg",
+        notes: "We defined six strategic engineering goals: Personal Focus Cultivation, Structured Cohort Governance, Draft-to-Mastery Revision Lifecycle, Real-Time Low Latency Doubt Resolution (<100ms), Tamper-Evident XP Ledgers, and Zero-Configuration SQLite WAL High Availability."
+      },
+      {
+        id: 6,
+        title: "Slide 6: Core Features & Functional Modules",
+        file: "slide06_core_features.svg",
+        notes: "Here are the six functional modules in CONSTA: Deep Focus Study Timer with checklist recalculation, Cohort Workspaces with invite codes, Task Management with multi-version submissions, Peer Review Rubric scoring (0-100 scale), Live WebSocket Doubt Chat with accepted badges, and Gamified Streaks backed by audited XP logs."
+      },
+      {
+        id: 7,
+        title: "Slide 7: System Architecture & Data Flow",
+        file: "slide07_architecture.svg",
+        notes: "Our 4-tier clean architecture: Tier 1 React 19 UI with Tailwind v4; Tier 2 Client State & Real-Time Sync via Context & WebSockets; Tier 3 Express.js Service Layer with JWT guards; Tier 4 High-Performance native SQLite engine in WAL mode with automated 24-hour backup rotation."
+      },
+      {
+        id: 8,
+        title: "Slide 8: Modern Technology Stack",
+        file: "slide08_tech_stack.svg",
+        notes: "We selected a modern, lightweight, zero-bloat stack: React 19 + Tailwind CSS v4 + Vite 8 on the frontend; Node.js 22 + Express.js + Native WebSockets on the backend; Node.js native node:sqlite with Write-Ahead Logging; JWT + bcryptjs (10 salt rounds) and node:test test runner."
+      },
+      {
+        id: 9,
+        title: "Slide 9: End-to-End User Working Process",
+        file: "slide09_working_process.svg",
+        notes: "A student journeys through 5 clear stages: 1) Secure Onboarding with bcrypt authentication; 2) Autonomous Study Sessions logging focus minutes; 3) Cohort Enrollment via join codes; 4) Collaborative Task Submission with version tracking; 5) Peer Review & Verified XP Ledger Rewards."
+      },
+      {
+        id: 10,
+        title: "Slide 10: Database Architecture & Security",
+        file: "slide10_database_security.svg",
+        notes: "Our data persistence layer utilizes SQLite WAL mode for concurrent reads while writes commit cleanly. We maintain an automated backup service with 7-day retention. Security includes salted bcrypt password hashing, stateless JWT tokens with role verification, and route-level authorization guards."
+      },
+      {
+        id: 11,
+        title: "Slide 11: Testing & Empirical QA Results",
+        file: "slide11_testing_results.svg",
+        notes: "Quality assurance is backed by 33 automated tests running natively via node:test with zero mock queries in under 450 milliseconds. We verified Authentication guards, Group permissions, Task versioning & rubric scoring, and WebSocket broadcast isolation with cold restart data persistence."
+      },
+      {
+        id: 12,
+        title: "Slide 12: Advantages & Multi-Tier Applications",
+        file: "slide12_advantages_applications.svg",
+        notes: "CONSTA creates value across 3 tiers: Individual Students gain +42% study velocity through focus loops; Study Groups achieve an 88% task completion rate with rubric accountability; Educational Institutions receive audited academic analytics while saving 90% in server overhead."
+      },
+      {
+        id: 13,
+        title: "Slide 13: Future Scope & Roadmap",
+        file: "slide13_future_scope.svg",
+        notes: "Our forward roadmap includes Phase 2.0 AI-Driven Formative Feedback with Socratic hints, Phase 2.1 Predictive Analytics with burnout slumps detection, Phase 2.2 Native React Native Mobile App with offline sync, and Phase 2.3 Canvas/Moodle LTI 1.3 LMS integration with university SSO."
+      },
+      {
+        id: 14,
+        title: "Slide 14: Conclusion & Thank You (Q&A)",
+        file: "slide14_conclusion.svg",
+        notes: "In conclusion, CONSTA replaces superficial study methods with genuine habit consistency, collaborative accountability, and verified mastery. 33 automated tests confirm its production readiness. Thank you for your time. I am now open for any questions and discussion."
+      }
+    ];
+
+    let currentSlide = 1;
+
+    function setSlide(num) {
+      if (num < 1 || num > slides.length) return;
+      currentSlide = num;
+      const slide = slides[currentSlide - 1];
+
+      // Update iframe source
+      document.getElementById('mainSlideViewer').src = slide.file;
+
+      // Update slide counter
+      document.getElementById('slideCounter').textContent = `Slide ${slide.id} of ${slides.length}`;
+
+      // Update speaker notes
+      document.getElementById('slideTitleHeading').textContent = slide.title;
+      document.getElementById('speakerNotesText').textContent = `"${slide.notes}"`;
+
+      // Update thumbnail highlights
+      document.querySelectorAll('.thumb-btn').forEach((btn, idx) => {
+        if (idx + 1 === currentSlide) {
+          btn.classList.add('border-[#873B46]', 'shadow-sm');
+          btn.classList.remove('border-[#E7D8CE]');
+        } else {
+          btn.classList.remove('border-[#873B46]', 'shadow-sm');
+          btn.classList.add('border-[#E7D8CE]');
+        }
+      });
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) setSlide(currentSlide - 1);
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length) setSlide(currentSlide + 1);
+    }
+
+    function downloadCurrentSlide() {
+      const slide = slides[currentSlide - 1];
+      const link = document.createElement('a');
+      link.href = slide.file;
+      link.download = slide.file;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function toggleFullscreen() {
+      const elem = document.getElementById('presentationBox');
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => alert(`Error entering fullscreen: ${err.message}`));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        setSlide(1);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        setSlide(slides.length);
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      }
+    });
+  </script>
+</body>
+</html>

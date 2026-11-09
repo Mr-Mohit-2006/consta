@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="s6_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="60%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+    <pattern id="s6_grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.25"/>
+    </pattern>
+    <filter id="s6_cardShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#332426" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#s6_bg)"/>
+  <rect width="1920" height="1080" fill="url(#s6_grid)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      CORE FEATURES &amp; FUNCTIONAL MODULES
+    </text>
+    <text x="56" y="44" font-family="'Manrope', sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      Comprehensive End-to-End Learning Platform
+    </text>
+
+    <rect x="1560" y="5" width="160" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1640" y="28" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46">
+      6 PILLARS
+    </text>
+  </g>
+
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- 6 Feature Cards Grid (3 Columns x 2 Rows) -->
+  <g transform="translate(100, 190)">
+    <!-- 1. Solo Study Focus -->
+    <g transform="translate(0, 0)">
+      <rect width="550" height="365" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s6_cardShadow)"/>
+      <rect x="30" y="30" width="54" height="54" rx="16" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <circle cx="57" cy="57" r="14" fill="none" stroke="#873B46" stroke-width="2.5"/>
+      <polyline points="57,49 57,57 63,57" fill="none" stroke="#873B46" stroke-width="2.5" stroke-linecap="round"/>
+
+      <text x="100" y="52" font-family="'Manrope', sans-serif" font-size="21" font-weight="800" fill="#332426">1. Solo Study Focus</text>
+      <text x="100" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Timer + Verifiable Outcome Checklists</text>
+      <line x1="30" y1="100" x2="520" y2="100" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="30" y="135" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Custom Pomodoro Focus Sessions</text>
+      <text x="30" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Configure duration, subject, and difficulty (Beginner to Expert).</text>
+
+      <text x="30" y="210" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Concrete Objective Checklist</text>
+      <text x="30" y="240" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Running a timer alone awards no XP; completion of goals is required.</text>
+
+      <text x="30" y="285" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Roadblock Logger &amp; AI Explainer</text>
+      <text x="30" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Captures confusing topics; AI provides structured concept breakdowns.</text>
+    </g>
+
+    <!-- 2. Collaborative Study Groups -->
+    <g transform="translate(585, 0)">
+      <rect width="550" height="365" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s6_cardShadow)"/>
+      <rect x="30" y="30" width="54" height="54" rx="16" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <path d="M 48 65 A 8 8 0 1 0 48 49 A 8 8 0 1 0 48 65 Z M 66 65 A 6 6 0 1 0 66 53 A 6 6 0 1 0 66 65 Z" fill="none" stroke="#873B46" stroke-width="2.5"/>
+
+      <text x="100" y="52" font-family="'Manrope', sans-serif" font-size="21" font-weight="800" fill="#332426">2. Study Groups</text>
+      <text x="100" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Structured Cohorts &amp; Admin Workspaces</text>
+      <line x1="30" y1="100" x2="520" y2="100" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="30" y="135" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Creator is Designated Admin</text>
+      <text x="30" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Group creator assigns tasks, sets countdowns, and moderates members.</text>
+
+      <text x="30" y="210" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Public &amp; Private Rooms</text>
+      <text x="30" y="240" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Approval queues protect private cohorts; supports unique student IDs.</text>
+
+      <text x="30" y="285" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Sub-Topic Checklist &amp; Countdown Timers</text>
+      <text x="30" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Visual progress bar tracks completion across all cohort members.</text>
+    </g>
+
+    <!-- 3. Task Management & Revisions -->
+    <g transform="translate(1170, 0)">
+      <rect width="550" height="365" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s6_cardShadow)"/>
+      <rect x="30" y="30" width="54" height="54" rx="16" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <rect x="43" y="43" width="28" height="28" rx="6" fill="none" stroke="#873B46" stroke-width="2.5"/>
+      <path d="M 49 57 L 55 63 L 65 49" fill="none" stroke="#873B46" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <text x="100" y="52" font-family="'Manrope', sans-serif" font-size="21" font-weight="800" fill="#332426">3. Task Management</text>
+      <text x="100" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Multi-Version Submissions (v1 → v2)</text>
+      <line x1="30" y1="100" x2="520" y2="100" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="30" y="135" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• 8-Stage Complete Task State Machine</text>
+      <text x="30" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Tracks from `not_started` to `submitted`, `under_review`, and `completed`.</text>
+
+      <text x="30" y="210" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Multi-Format Submissions</text>
+      <text x="30" y="240" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Text derivations, handwritten photos, code links, and PDFs (up to 15MB).</text>
+
+      <text x="30" y="285" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Iteration History &amp; Changelogs</text>
+      <text x="30" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Preserves earlier drafts and shows revision notes upon re-submission.</text>
+    </g>
+
+    <!-- 4. Peer Reviews & Rubrics -->
+    <g transform="translate(0, 395)">
+      <rect width="550" height="365" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s6_cardShadow)"/>
+      <rect x="30" y="30" width="54" height="54" rx="16" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <circle cx="57" cy="51" r="12" fill="none" stroke="#873B46" stroke-width="2.5"/>
+      <path d="M 51 61 L 47 73 L 57 69 L 67 73 L 63 61" fill="none" stroke="#873B46" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <text x="100" y="52" font-family="'Manrope', sans-serif" font-size="21" font-weight="800" fill="#332426">4. Peer Reviews &amp; Rubrics</text>
+      <text x="100" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Constructive Formative Feedback</text>
+      <line x1="30" y1="100" x2="520" y2="100" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="30" y="135" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• 4-Criterion Standardized Rubric</text>
+      <text x="30" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Scored on Correctness, Completeness, Clarity, and Methodology.</text>
+
+      <text x="30" y="210" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Assistive AI Preliminary Assessment</text>
+      <text x="30" y="240" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Parses work and highlights missing steps with confidence metrics.</text>
+
+      <text x="30" y="285" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Request Revision Action</text>
+      <text x="30" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Allows reviewers to ask for improvements before giving final approval.</text>
+    </g>
+
+    <!-- 5. Real-Time Doubt Chat -->
+    <g transform="translate(585, 395)">
+      <rect width="550" height="365" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s6_cardShadow)"/>
+      <rect x="30" y="30" width="54" height="54" rx="16" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <path d="M 45 43 L 69 43 C 73 43 75 45 75 49 L 75 63 C 75 67 73 69 69 69 L 55 69 L 45 77 L 45 69 C 41 69 39 67 39 63 L 39 49 C 39 45 41 43 45 43 Z" fill="none" stroke="#873B46" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <text x="100" y="52" font-family="'Manrope', sans-serif" font-size="21" font-weight="800" fill="#332426">5. Doubt-Solving Chat</text>
+      <text x="100" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Zero-Refresh WebSockets &amp; Photos</text>
+      <line x1="30" y1="100" x2="520" y2="100" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="30" y="135" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Sub-100ms Bidirectional Streaming</text>
+      <text x="30" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Instant message dispatch with live typing and presence indicators.</text>
+
+      <text x="30" y="210" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Whiteboard &amp; Notebook Image Uploads</text>
+      <text x="30" y="240" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Students share photos of handwritten derivations directly into chat.</text>
+
+      <text x="30" y="285" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Accepted Solution Badge (+15 XP)</text>
+      <text x="30" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Author marks verified answer; solver is credited +15 XP in ledger.</text>
+    </g>
+
+    <!-- 6. XP, Streaks & Gamification -->
+    <g transform="translate(1170, 395)">
+      <rect width="550" height="365" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s6_cardShadow)"/>
+      <rect x="30" y="30" width="54" height="54" rx="16" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <path d="M 57 43 C 51 51 49 55 49 61 A 8 8 0 0 0 65 61 C 65 55 61 51 57 43 Z" fill="none" stroke="#873B46" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <text x="100" y="52" font-family="'Manrope', sans-serif" font-size="21" font-weight="800" fill="#332426">6. XP, Streaks &amp; Ranks</text>
+      <text x="100" y="74" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#873B46">Anti-Exploit Audited Gamification</text>
+      <line x1="30" y1="100" x2="520" y2="100" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <text x="30" y="135" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Auditable `xp_transactions` Ledger</text>
+      <text x="30" y="165" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Every reward and penalty is logged with source reference IDs.</text>
+
+      <text x="30" y="210" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Daily Consistency Heatmap</text>
+      <text x="30" y="240" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Visualizes study consistency across months (GitHub-style calendar).</text>
+
+      <text x="30" y="285" font-family="'Manrope', sans-serif" font-size="15" font-weight="700" fill="#332426">• Tiered Level Progression</text>
+      <text x="30" y="315" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Earn titles from Novice Explorer (L1) to Master Scholar (L10).</text>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • CORE FEATURES &amp; FUNCTIONAL MODULES
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">
+      SLIDE 06 / 14
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap');
+      .font-sans { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    </style>
+    <linearGradient id="bgGrad13" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="50%" stop-color="#F4ECE1"/>
+      <stop offset="100%" stop-color="#EFE3D5"/>
+    </linearGradient>
+    <linearGradient id="primaryBurgundy13" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#873B46"/>
+      <stop offset="100%" stop-color="#642B35"/>
+    </linearGradient>
+    <filter id="cardShadow13" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#332426" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGrad13)"/>
+
+  <!-- Top Header Navigation -->
+  <g transform="translate(100, 70)">
+    <rect width="100" height="34" rx="17" fill="#873B46" fill-opacity="0.12"/>
+    <text x="50" y="22" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46" text-anchor="middle" letter-spacing="1.5">SLIDE 13</text>
+    <text x="120" y="23" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#78666A" letter-spacing="2">ROADMAP &amp; EXPANSION</text>
+    <text x="1720" y="23" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#873B46" text-anchor="end">CONSTA</text>
+  </g>
+
+  <!-- Slide Heading -->
+  <g transform="translate(100, 135)">
+    <text font-family="'Manrope', sans-serif" font-size="44" font-weight="800" fill="#332426" letter-spacing="-1">Future Scope &amp; Engineering Roadmap</text>
+    <text y="42" font-family="'Manrope', sans-serif" font-size="20" font-weight="500" fill="#78666A">
+      Next-generation capabilities designed to expand CONSTA into an intelligent, multi-platform academic platform.
+    </text>
+  </g>
+
+  <!-- 4 Strategic Pillars (2x2 Grid) -->
+  <g transform="translate(100, 240)">
+
+    <!-- Card 1: AI-Powered Formative Feedback -->
+    <g transform="translate(0, 0)">
+      <rect width="840" height="350" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow13)"/>
+      <rect x="35" y="35" width="56" height="56" rx="16" fill="#FAF4EB" stroke="#E7D8CE"/>
+      <text x="63" y="70" font-family="'Manrope', sans-serif" font-size="26" font-weight="800" fill="#873B46" text-anchor="middle">🤖</text>
+
+      <rect x="110" y="35" width="105" height="26" rx="13" fill="#873B46" fill-opacity="0.12"/>
+      <text x="162" y="52" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">PHASE 2.0</text>
+      <text x="110" y="85" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">AI-Driven Formative Feedback</text>
+
+      <text x="35" y="125" font-family="'Manrope', sans-serif" font-size="15" font-weight="500" fill="#78666A">
+        Embedding lightweight, local pedagogical LLMs to guide students before final peer evaluation.
+      </text>
+
+      <g transform="translate(35, 155)">
+        <circle cx="10" cy="20" r="5" fill="#873B46"/>
+        <text x="28" y="24" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Socratic Pre-Submission Hints</text>
+        <text x="28" y="44" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Analyzes code syntax and essays to offer guiding questions without giving answers.</text>
+
+        <circle cx="10" cy="75" r="5" fill="#873B46"/>
+        <text x="28" y="79" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Duplicate Doubt Detection &amp; Auto-Clustering</text>
+        <text x="28" y="99" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Detects similar previous questions in cohort history to give instant resolution suggestions.</text>
+
+        <circle cx="10" cy="130" r="5" fill="#873B46"/>
+        <text x="28" y="134" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">AI Rubric Calibrator for Fair Peer Grading</text>
+        <text x="28" y="154" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Flags overly harsh or inflated peer reviews, ensuring objective scoring standards.</text>
+      </g>
+    </g>
+
+    <!-- Card 2: Advanced Predictive Analytics -->
+    <g transform="translate(880, 0)">
+      <rect width="840" height="350" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow13)"/>
+      <rect x="35" y="35" width="56" height="56" rx="16" fill="#FAF4EB" stroke="#E7D8CE"/>
+      <text x="63" y="70" font-family="'Manrope', sans-serif" font-size="26" font-weight="800" fill="#873B46" text-anchor="middle">📊</text>
+
+      <rect x="110" y="35" width="105" height="26" rx="13" fill="#873B46" fill-opacity="0.12"/>
+      <text x="162" y="52" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">PHASE 2.1</text>
+      <text x="110" y="85" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Advanced Study Analytics</text>
+
+      <text x="35" y="125" font-family="'Manrope', sans-serif" font-size="15" font-weight="500" fill="#78666A">
+        Transforming raw focus minutes and task submissions into predictive behavioral insights.
+      </text>
+
+      <g transform="translate(35, 155)">
+        <circle cx="10" cy="20" r="5" fill="#873B46"/>
+        <text x="28" y="24" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Cohort Velocity &amp; Roadblock Heatmaps</text>
+        <text x="28" y="44" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Identifies specific assignment topics causing frequent doubt spikes or completion delays.</text>
+
+        <circle cx="10" cy="75" r="5" fill="#873B46"/>
+        <text x="28" y="79" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Early Burnout &amp; Slump Detection</text>
+        <text x="28" y="99" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Detects abnormal drops in streak regularity and gently advises rest breaks or lighter task loads.</text>
+
+        <circle cx="10" cy="130" r="5" fill="#873B46"/>
+        <text x="28" y="134" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Subject Retention Cycle Recommendations</text>
+        <text x="28" y="154" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Spaced repetition schedules calculated automatically from historical focus logs.</text>
+      </g>
+    </g>
+
+    <!-- Card 3: Mobile Native App (React Native) -->
+    <g transform="translate(0, 380)">
+      <rect width="840" height="350" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow13)"/>
+      <rect x="35" y="35" width="56" height="56" rx="16" fill="#FAF4EB" stroke="#E7D8CE"/>
+      <text x="63" y="70" font-family="'Manrope', sans-serif" font-size="26" font-weight="800" fill="#873B46" text-anchor="middle">📱</text>
+
+      <rect x="110" y="35" width="105" height="26" rx="13" fill="#873B46" fill-opacity="0.12"/>
+      <text x="162" y="52" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">PHASE 2.2</text>
+      <text x="110" y="85" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Native Mobile Experience</text>
+
+      <text x="35" y="125" font-family="'Manrope', sans-serif" font-size="15" font-weight="500" fill="#78666A">
+        Extending CONSTA beyond the browser to Android and iOS with native offline capabilities.
+      </text>
+
+      <g transform="translate(35, 155)">
+        <circle cx="10" cy="20" r="5" fill="#873B46"/>
+        <text x="28" y="24" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Offline Focus Timer &amp; Background Sync</text>
+        <text x="28" y="44" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Run study sessions offline in library environments; auto-syncs XP when reconnected.</text>
+
+        <circle cx="10" cy="75" r="5" fill="#873B46"/>
+        <text x="28" y="79" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Real-Time Mobile Push Notifications</text>
+        <text x="28" y="99" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Instant alerts when peer reviews are published or when a doubt question gets an answer.</text>
+
+        <circle cx="10" cy="130" r="5" fill="#873B46"/>
+        <text x="28" y="134" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Camera OCR &amp; Handwritten Doubt Capture</text>
+        <text x="28" y="154" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Snap notebook equations or textbook diagrams directly into cohort discussion threads.</text>
+      </g>
+    </g>
+
+    <!-- Card 4: Institutional LMS Integration -->
+    <g transform="translate(880, 380)">
+      <rect width="840" height="350" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow13)"/>
+      <rect x="35" y="35" width="56" height="56" rx="16" fill="#FAF4EB" stroke="#E7D8CE"/>
+      <text x="63" y="70" font-family="'Manrope', sans-serif" font-size="26" font-weight="800" fill="#873B46" text-anchor="middle">🔗</text>
+
+      <rect x="110" y="35" width="105" height="26" rx="13" fill="#873B46" fill-opacity="0.12"/>
+      <text x="162" y="52" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" text-anchor="middle">PHASE 2.3</text>
+      <text x="110" y="85" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">LMS Interoperability &amp; SSO</text>
+
+      <text x="35" y="125" font-family="'Manrope', sans-serif" font-size="15" font-weight="500" fill="#78666A">
+        Bridging informal peer collaboration with official university academic infrastructure.
+      </text>
+
+      <g transform="translate(35, 155)">
+        <circle cx="10" cy="20" r="5" fill="#873B46"/>
+        <text x="28" y="24" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">LTI 1.3 Standard Compatibility</text>
+        <text x="28" y="44" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Direct embed and gradebook synchronization with Canvas, Moodle, and Google Classroom.</text>
+
+        <circle cx="10" cy="75" r="5" fill="#873B46"/>
+        <text x="28" y="79" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">University Single Sign-On (SAML / OAuth2)</text>
+        <text x="28" y="99" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Frictionless campus login using official college student roll numbers and institutional emails.</text>
+
+        <circle cx="10" cy="130" r="5" fill="#873B46"/>
+        <text x="28" y="134" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Verifiable Mentor Credential Certificates</text>
+        <text x="28" y="154" font-family="'Manrope', sans-serif" font-size="13.5" font-weight="500" fill="#78666A">Export tamper-evident cryptographic badges proving peer tutoring hours for resume credit.</text>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 1010)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1.5"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#78666A">CONSTA Academic Minor Project • Future Scope &amp; Product Roadmap</text>
+    <text x="1720" y="32" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#873B46" text-anchor="end">Slide 13 of 14</text>
+  </g>
+</svg>

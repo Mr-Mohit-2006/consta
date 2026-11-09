@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+      .font-sans { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+    <linearGradient id="bgGrad11" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="50%" stop-color="#F4ECE1"/>
+      <stop offset="100%" stop-color="#EFE3D5"/>
+    </linearGradient>
+    <linearGradient id="primaryBurgundy11" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#873B46"/>
+      <stop offset="100%" stop-color="#642B35"/>
+    </linearGradient>
+    <linearGradient id="metricGradGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2E7D32"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+    <filter id="cardShadow11" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#332426" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGrad11)"/>
+
+  <!-- Top Header Navigation -->
+  <g transform="translate(100, 70)">
+    <rect width="100" height="34" rx="17" fill="#873B46" fill-opacity="0.12"/>
+    <text x="50" y="22" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46" text-anchor="middle" letter-spacing="1.5">SLIDE 11</text>
+    <text x="120" y="23" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#78666A" letter-spacing="2">EMPIRICAL VERIFICATION &amp; QA</text>
+    <text x="1720" y="23" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#873B46" text-anchor="end">CONSTA</text>
+  </g>
+
+  <!-- Slide Heading -->
+  <g transform="translate(100, 135)">
+    <text font-family="'Manrope', sans-serif" font-size="44" font-weight="800" fill="#332426" letter-spacing="-1">Automated Test Suites &amp; Empirical Results</text>
+    <text y="42" font-family="'Manrope', sans-serif" font-size="20" font-weight="500" fill="#78666A">
+      33 comprehensive automated end-to-end and unit tests executed via native Node.js test runner across all critical services.
+    </text>
+  </g>
+
+  <!-- Metric KPI Bar (4 Cards) -->
+  <g transform="translate(100, 240)">
+    <!-- KPI 1 -->
+    <rect width="400" height="125" rx="20" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow11)"/>
+    <rect x="25" y="25" width="46" height="46" rx="12" fill="#E8F5E9"/>
+    <text x="48" y="55" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#2E7D32" text-anchor="middle">✓</text>
+    <text x="85" y="52" font-family="'Manrope', sans-serif" font-size="36" font-weight="800" fill="#1B5E20">33 / 33</text>
+    <text x="85" y="78" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#2E7D32">100% Pass Rate (0 Failures)</text>
+    <text x="25" y="105" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Strict assertion coverage across all endpoints</text>
+
+    <!-- KPI 2 -->
+    <g transform="translate(440, 0)">
+      <rect width="400" height="125" rx="20" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow11)"/>
+      <rect x="25" y="25" width="46" height="46" rx="12" fill="#F4E2E3"/>
+      <text x="48" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#873B46" text-anchor="middle">⚡</text>
+      <text x="85" y="52" font-family="'Manrope', sans-serif" font-size="36" font-weight="800" fill="#873B46">&lt; 450 ms</text>
+      <text x="85" y="78" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#642B35">Total Suite Execution Time</text>
+      <text x="25" y="105" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Instant CI/CD local test cycle feedback</text>
+    </g>
+
+    <!-- KPI 3 -->
+    <g transform="translate(880, 0)">
+      <rect width="400" height="125" rx="20" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow11)"/>
+      <rect x="25" y="25" width="46" height="46" rx="12" fill="#FAF4EB"/>
+      <text x="48" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#873B46" text-anchor="middle">📦</text>
+      <text x="85" y="52" font-family="'Manrope', sans-serif" font-size="36" font-weight="800" fill="#332426">Zero</text>
+      <text x="85" y="78" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#873B46">External Test Dependencies</text>
+      <text x="25" y="105" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Native node:test and node:assert runner</text>
+    </g>
+
+    <!-- KPI 4 -->
+    <g transform="translate(1320, 0)">
+      <rect width="400" height="125" rx="20" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow11)"/>
+      <rect x="25" y="25" width="46" height="46" rx="12" fill="#E8EDF5"/>
+      <text x="48" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#2E5B88" text-anchor="middle">🗄️</text>
+      <text x="85" y="52" font-family="'Manrope', sans-serif" font-size="36" font-weight="800" fill="#2E5B88">Real DB</text>
+      <text x="85" y="78" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#1C3854">Zero Mock SQLite Execution</text>
+      <text x="25" y="105" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Real in-memory schemas with full constraints</text>
+    </g>
+  </g>
+
+  <!-- 4 Module Test Deep-Dive Cards (2x2 Grid) -->
+  <g transform="translate(100, 400)">
+
+    <!-- Module 1: Auth & Session Security -->
+    <g transform="translate(0, 0)">
+      <rect width="840" height="270" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow11)"/>
+      <rect x="30" y="30" width="50" height="50" rx="14" fill="#FAF4EB" stroke="#E7D8CE"/>
+      <text x="55" y="63" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#873B46" text-anchor="middle">🔑</text>
+
+      <text x="96" y="52" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#332426">Authentication &amp; Session Guard Tests</text>
+      <rect x="660" y="32" width="145" height="28" rx="8" fill="#E8F5E9"/>
+      <text x="732" y="51" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#1B5E20" text-anchor="middle">8 TESTS PASSING</text>
+
+      <text x="96" y="76" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Verified secure credential hashing, JWT token life-cycles, and header validations</text>
+
+      <g transform="translate(30, 110)">
+        <circle cx="10" cy="15" r="4" fill="#2E7D32"/>
+        <text x="25" y="19" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Registration with password complexity validation &amp; bcrypt 10-salt hashing</text>
+
+        <circle cx="10" cy="50" r="4" fill="#2E7D32"/>
+        <text x="25" y="54" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">JWT signature verification, expiration bounds, and malformed header rejection (401)</text>
+
+        <circle cx="10" cy="85" r="4" fill="#2E7D32"/>
+        <text x="25" y="89" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Secure password reset flow with cryptographic single-use verification tokens</text>
+
+        <circle cx="10" cy="120" r="4" fill="#2E7D32"/>
+        <text x="25" y="124" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Role escalation defense: Regular members strictly forbidden from admin routes (403)</text>
+      </g>
+    </g>
+
+    <!-- Module 2: Cohorts & Role Governance -->
+    <g transform="translate(880, 0)">
+      <rect width="840" height="270" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow11)"/>
+      <rect x="30" y="30" width="50" height="50" rx="14" fill="#FAF4EB" stroke="#E7D8CE"/>
+      <text x="55" y="63" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#873B46" text-anchor="middle">👥</text>
+
+      <text x="96" y="52" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#332426">Cohort Governance &amp; Membership Tests</text>
+      <rect x="660" y="32" width="145" height="28" rx="8" fill="#E8F5E9"/>
+      <text x="732" y="51" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#1B5E20" text-anchor="middle">9 TESTS PASSING</text>
+
+      <text x="96" y="76" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Strict membership barriers, group ownership rules, and join-code integrity</text>
+
+      <g transform="translate(30, 110)">
+        <circle cx="10" cy="15" r="4" fill="#2E7D32"/>
+        <text x="25" y="19" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Group creation, unique invite code generation, and duplicate code collision handling</text>
+
+        <circle cx="10" cy="50" r="4" fill="#2E7D32"/>
+        <text x="25" y="54" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Group join verification ensuring users cannot double-join or access private groups</text>
+
+        <circle cx="10" cy="85" r="4" fill="#2E7D32"/>
+        <text x="25" y="89" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Task assignment authorization: only Group Leaders/Admins can publish official tasks</text>
+
+        <circle cx="10" cy="120" r="4" fill="#2E7D32"/>
+        <text x="25" y="124" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Cascading delete policies for group disbandment and member departure sanitization</text>
+      </g>
+    </g>
+
+    <!-- Module 3: Tasks, Multi-Version & Rubric Scoring -->
+    <g transform="translate(0, 300)">
+      <rect width="840" height="270" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow11)"/>
+      <rect x="30" y="30" width="50" height="50" rx="14" fill="#FAF4EB" stroke="#E7D8CE"/>
+      <text x="55" y="63" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#873B46" text-anchor="middle">📝</text>
+
+      <text x="96" y="52" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#332426">Task Life-Cycle &amp; Peer Rubric Tests</text>
+      <rect x="660" y="32" width="145" height="28" rx="8" fill="#E8F5E9"/>
+      <text x="732" y="51" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#1B5E20" text-anchor="middle">8 TESTS PASSING</text>
+
+      <text x="96" y="76" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Multi-version tracking, checklist state transitions, and audited score clamps</text>
+
+      <g transform="translate(30, 110)">
+        <circle cx="10" cy="15" r="4" fill="#2E7D32"/>
+        <text x="25" y="19" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Submission version increments (v1 → v2) preserving full commit histories</text>
+
+        <circle cx="10" cy="50" r="4" fill="#2E7D32"/>
+        <text x="25" y="54" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Peer review rubric grading strictly validated within bound [0, 100] scale</text>
+
+        <circle cx="10" cy="85" r="4" fill="#2E7D32"/>
+        <text x="25" y="89" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Checklist sub-item toggling with real-time completion ratio recalculation</text>
+
+        <circle cx="10" cy="120" r="4" fill="#2E7D32"/>
+        <text x="25" y="124" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Audited XP ledger events: +50 XP awarded exclusively on approved milestone reviews</text>
+      </g>
+    </g>
+
+    <!-- Module 4: Real-Time WebSockets & Database Persistence -->
+    <g transform="translate(880, 300)">
+      <rect width="840" height="270" rx="22" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#cardShadow11)"/>
+      <rect x="30" y="30" width="50" height="50" rx="14" fill="#FAF4EB" stroke="#E7D8CE"/>
+      <text x="55" y="63" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#873B46" text-anchor="middle">⚡</text>
+
+      <text x="96" y="52" font-family="'Manrope', sans-serif" font-size="22" font-weight="800" fill="#332426">WebSockets &amp; SQLite Persistence Tests</text>
+      <rect x="660" y="32" width="145" height="28" rx="8" fill="#E8F5E9"/>
+      <text x="732" y="51" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#1B5E20" text-anchor="middle">8 TESTS PASSING</text>
+
+      <text x="96" y="76" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Sub-100ms message delivery, resolved answer flagging, and WAL durability</text>
+
+      <g transform="translate(30, 110)">
+        <circle cx="10" cy="15" r="4" fill="#2E7D32"/>
+        <text x="25" y="19" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">WebSocket room isolation: Broadcast events stay confined to designated cohort channel</text>
+
+        <circle cx="10" cy="50" r="4" fill="#2E7D32"/>
+        <text x="25" y="54" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Doubt thread resolution test: marks solution and highlights author with +25 XP bonus</text>
+
+        <circle cx="10" cy="85" r="4" fill="#2E7D32"/>
+        <text x="25" y="89" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">WAL checkpointing: In-flight transactions written to disk before connection termination</text>
+
+        <circle cx="10" cy="120" r="4" fill="#2E7D32"/>
+        <text x="25" y="124" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#332426">Cold restart recovery: 100% data integrity verified after unannounced server restart</text>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 1010)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1.5"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#78666A">CONSTA Academic Minor Project • Automated QA Verification</text>
+    <text x="1720" y="32" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#873B46" text-anchor="end">Slide 11 of 14</text>
+  </g>
+</svg>

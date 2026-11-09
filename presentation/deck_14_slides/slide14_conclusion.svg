@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+      .font-sans { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+    <linearGradient id="burgundyBgGrad14" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#873B46"/>
+      <stop offset="50%" stop-color="#642B35"/>
+      <stop offset="100%" stop-color="#431921"/>
+    </linearGradient>
+    <linearGradient id="cardGradDark14" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="100%" stop-color="#F2E6D8"/>
+    </linearGradient>
+    <filter id="heroShadow14" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#burgundyBgGrad14)"/>
+
+  <!-- Subtle Ambient Background Accents -->
+  <circle cx="200" cy="180" r="280" fill="#FAF4EB" fill-opacity="0.03"/>
+  <circle cx="1750" cy="880" r="320" fill="#FAF4EB" fill-opacity="0.04"/>
+
+  <!-- Top Header Navigation -->
+  <g transform="translate(100, 70)">
+    <rect width="100" height="34" rx="17" fill="#FAF4EB" fill-opacity="0.15"/>
+    <text x="50" y="22" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#FAF4EB" text-anchor="middle" letter-spacing="1.5">SLIDE 14</text>
+    <text x="120" y="23" font-family="'Manrope', sans-serif" font-size="14" font-weight="700" fill="#F4E2E3" letter-spacing="2">PROJECT CONCLUSION &amp; Q&amp;A</text>
+    <text x="1720" y="23" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#FAF4EB" text-anchor="end">CONSTA</text>
+  </g>
+
+  <!-- Slide Heading -->
+  <g transform="translate(100, 135)">
+    <text font-family="'Manrope', sans-serif" font-size="44" font-weight="800" fill="#FAF4EB" letter-spacing="-1">Project Conclusion &amp; Key Takeaways</text>
+    <text y="42" font-family="'Manrope', sans-serif" font-size="20" font-weight="500" fill="#E7D8CE">
+      CONSTA successfully demonstrates how modern web engineering can solve fundamental learning and accountability bottlenecks.
+    </text>
+  </g>
+
+  <!-- 4 Conclusion Highlights Grid -->
+  <g transform="translate(100, 240)">
+
+    <!-- Highlight 1 -->
+    <g transform="translate(0, 0)">
+      <rect width="400" height="230" rx="20" fill="#FAF4EB" fill-opacity="0.08" stroke="#FAF4EB" stroke-opacity="0.15"/>
+      <rect x="25" y="25" width="46" height="46" rx="12" fill="#FAF4EB" fill-opacity="0.15"/>
+      <text x="48" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#FAF4EB" text-anchor="middle">🎯</text>
+      <text x="25" y="105" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#FAF4EB">Unified Workspace</text>
+      <text x="25" y="135" font-family="'Manrope', sans-serif" font-size="14.5" font-weight="500" fill="#E7D8CE">
+        Consolidated solo study sessions, cohort assignments, and real-time doubt resolution into one frictionless ecosystem.
+      </text>
+    </g>
+
+    <!-- Highlight 2 -->
+    <g transform="translate(440, 0)">
+      <rect width="400" height="230" rx="20" fill="#FAF4EB" fill-opacity="0.08" stroke="#FAF4EB" stroke-opacity="0.15"/>
+      <rect x="25" y="25" width="46" height="46" rx="12" fill="#FAF4EB" fill-opacity="0.15"/>
+      <text x="48" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#FAF4EB" text-anchor="middle">🔄</text>
+      <text x="25" y="105" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#FAF4EB">Iterative Growth</text>
+      <text x="25" y="135" font-family="'Manrope', sans-serif" font-size="14.5" font-weight="500" fill="#E7D8CE">
+        Transformed traditional binary grading into continuous mastery through multi-version submissions and actionable rubrics.
+      </text>
+    </g>
+
+    <!-- Highlight 3 -->
+    <g transform="translate(880, 0)">
+      <rect width="400" height="230" rx="20" fill="#FAF4EB" fill-opacity="0.08" stroke="#FAF4EB" stroke-opacity="0.15"/>
+      <rect x="25" y="25" width="46" height="46" rx="12" fill="#FAF4EB" fill-opacity="0.15"/>
+      <text x="48" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#FAF4EB" text-anchor="middle">🛡️</text>
+      <text x="25" y="105" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#FAF4EB">Reliable &amp; Audited</text>
+      <text x="25" y="135" font-family="'Manrope', sans-serif" font-size="14.5" font-weight="500" fill="#E7D8CE">
+        Backed by 33 automated test suites, native SQLite WAL durability, and verifiable transaction logs for academic integrity.
+      </text>
+    </g>
+
+    <!-- Highlight 4 -->
+    <g transform="translate(1320, 0)">
+      <rect width="400" height="230" rx="20" fill="#FAF4EB" fill-opacity="0.08" stroke="#FAF4EB" stroke-opacity="0.15"/>
+      <rect x="25" y="25" width="46" height="46" rx="12" fill="#FAF4EB" fill-opacity="0.15"/>
+      <text x="48" y="55" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#FAF4EB" text-anchor="middle">🔥</text>
+      <text x="25" y="105" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#FAF4EB">Proven Motivation</text>
+      <text x="25" y="135" font-family="'Manrope', sans-serif" font-size="14.5" font-weight="500" fill="#E7D8CE">
+        Daily streak mechanics and peer answer incentives foster consistent study habits and active collaborative mentorship.
+      </text>
+    </g>
+  </g>
+
+  <!-- Large Q&A and Thank You Hero Card -->
+  <g transform="translate(100, 520)">
+    <rect width="1720" height="450" rx="26" fill="url(#cardGradDark14)" filter="url(#heroShadow14)"/>
+
+    <!-- Left Column: Thank You Callout -->
+    <g transform="translate(60, 60)">
+      <rect width="180" height="34" rx="17" fill="#873B46" fill-opacity="0.12"/>
+      <text x="90" y="22" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46" text-anchor="middle" letter-spacing="1">PROJECT COMPLETE</text>
+
+      <text y="90" font-family="'Manrope', sans-serif" font-size="56" font-weight="800" fill="#332426" letter-spacing="-1">THANK YOU!</text>
+      <text y="140" font-family="'Manrope', sans-serif" font-size="30" font-weight="700" fill="#873B46">Questions &amp; Answers (Q&amp;A)</text>
+
+      <text y="185" font-family="'Manrope', sans-serif" font-size="18" font-weight="500" fill="#78666A">
+        Open for faculty evaluation, technical questions, and architectural discussion.
+      </text>
+
+      <!-- Key Project Quick Facts -->
+      <g transform="translate(0, 230)">
+        <rect width="210" height="60" rx="14" fill="#FAF4EB" stroke="#E7D8CE"/>
+        <text x="20" y="25" font-family="'Manrope', sans-serif" font-size="12" font-weight="700" fill="#78666A">TEST COVERAGE</text>
+        <text x="20" y="48" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#1B5E20">33 / 33 Passed</text>
+
+        <rect x="230" y="0" width="210" height="60" rx="14" fill="#FAF4EB" stroke="#E7D8CE"/>
+        <text x="250" y="25" font-family="'Manrope', sans-serif" font-size="12" font-weight="700" fill="#78666A">SYNC LATENCY</text>
+        <text x="250" y="48" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#873B46">&lt; 100 ms WS</text>
+
+        <rect x="460" y="0" width="210" height="60" rx="14" fill="#FAF4EB" stroke="#E7D8CE"/>
+        <text x="480" y="25" font-family="'Manrope', sans-serif" font-size="12" font-weight="700" fill="#78666A">DATABASE</text>
+        <text x="480" y="48" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#332426">SQLite (WAL)</text>
+
+        <rect x="690" y="0" width="210" height="60" rx="14" fill="#FAF4EB" stroke="#E7D8CE"/>
+        <text x="710" y="25" font-family="'Manrope', sans-serif" font-size="12" font-weight="700" fill="#78666A">ACADEMIC LEVEL</text>
+        <text x="710" y="48" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#873B46">B.Tech CSE Minor</text>
+      </g>
+    </g>
+
+    <!-- Right Column: Student & Project Attribution Card -->
+    <g transform="translate(1120, 60)">
+      <rect width="530" height="330" rx="20" fill="#FFFFFF" stroke="#E7D8CE" stroke-width="1.5"/>
+
+      <!-- Presenter Identity -->
+      <g transform="translate(35, 35)">
+        <rect width="60" height="60" rx="18" fill="#873B46"/>
+        <text x="30" y="40" font-family="'Manrope', sans-serif" font-size="28" font-weight="800" fill="#FFFFFF" text-anchor="middle">MK</text>
+        <text x="80" y="30" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Mohit Kumar</text>
+        <text x="80" y="52" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#873B46">Project Author &amp; Lead Developer</text>
+      </g>
+
+      <line x1="35" y1="120" x2="495" y2="120" stroke="#E7D8CE" stroke-width="1"/>
+
+      <!-- Academic Metadata -->
+      <g transform="translate(35, 140)">
+        <text font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#78666A" letter-spacing="1">DEGREE &amp; DEPARTMENT</text>
+        <text y="22" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">B.Tech in Computer Science &amp; Engineering</text>
+        <text y="44" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Academic Session 2025 – 2026</text>
+
+        <text y="80" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#78666A" letter-spacing="1">PROJECT REPOSITORY</text>
+        <text y="102" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="600" fill="#873B46">github.com/Mr-Mohit-2006/consta</text>
+        <text y="124" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Complete source code, automated test suite &amp; docs</text>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 1030)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#FAF4EB" stroke-opacity="0.2" stroke-width="1"/>
+    <text x="0" y="24" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#E7D8CE">CONSTA B.Tech Minor Project Presentation • Final Evaluation</text>
+    <text x="1720" y="24" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#FAF4EB" text-anchor="end">Slide 14 of 14</text>
+  </g>
+</svg>
