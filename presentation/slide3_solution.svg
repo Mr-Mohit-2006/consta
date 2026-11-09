@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="s3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="60%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+    <pattern id="s3_grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.3"/>
+    </pattern>
+    <filter id="s3_cardShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#332426" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#s3_bg)"/>
+  <rect width="1920" height="1080" fill="url(#s3_grid)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      PROJECT OBJECTIVES &amp; PROPOSED SOLUTION
+    </text>
+    <text x="56" y="44" font-family="'Manrope', sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      The CONSTA Solution: Structured, Accountable, Collaborative Learning
+    </text>
+
+    <rect x="1560" y="5" width="160" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1640" y="28" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46">
+      THE SOLUTION
+    </text>
+  </g>
+
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- Left Column: Core Project Objectives (Numbered) -->
+  <g transform="translate(100, 190)">
+    <rect width="810" height="760" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s3_cardShadow)"/>
+    
+    <rect x="40" y="40" width="180" height="40" rx="20" fill="#F4E2E3" stroke="#C58B91" stroke-width="1"/>
+    <text x="130" y="65" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46" letter-spacing="1.5">
+      CORE OBJECTIVES
+    </text>
+    
+    <text x="40" y="125" font-family="'Manrope', sans-serif" font-size="26" font-weight="900" fill="#332426">
+      What CONSTA Aims to Achieve
+    </text>
+    <line x1="40" y1="150" x2="770" y2="150" stroke="#E7D8CE" stroke-width="1.2"/>
+
+    <!-- Objective 1 -->
+    <g transform="translate(40, 180)">
+      <circle cx="20" cy="20" r="18" fill="#873B46"/>
+      <text x="20" y="27" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="15" font-weight="900" fill="#FFFCF7">1</text>
+      <text x="55" y="18" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#332426">Improve Individual Study Habits</text>
+      <text x="55" y="42" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Decouple timers from rewards; require verifiable checklist completion.</text>
+    </g>
+
+    <!-- Objective 2 -->
+    <g transform="translate(40, 275)">
+      <circle cx="20" cy="20" r="18" fill="#873B46"/>
+      <text x="20" y="27" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="15" font-weight="900" fill="#FFFCF7">2</text>
+      <text x="55" y="18" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#332426">Make Group Study More Organized</text>
+      <text x="55" y="42" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Provide dedicated cohorts with admin roles, task topics, and deadline timers.</text>
+    </g>
+
+    <!-- Objective 3 -->
+    <g transform="translate(40, 370)">
+      <circle cx="20" cy="20" r="18" fill="#873B46"/>
+      <text x="20" y="27" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="15" font-weight="900" fill="#FFFCF7">3</text>
+      <text x="55" y="18" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#332426">Provide Multi-Version Submissions &amp; Peer Reviews</text>
+      <text x="55" y="42" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Support v1 → v2 revisions, multi-page image uploads, and rubric scorecards.</text>
+    </g>
+
+    <!-- Objective 4 -->
+    <g transform="translate(40, 465)">
+      <circle cx="20" cy="20" r="18" fill="#873B46"/>
+      <text x="20" y="27" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="15" font-weight="900" fill="#FFFCF7">4</text>
+      <text x="55" y="18" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#332426">Enable Real-Time Doubt Solving</text>
+      <text x="55" y="42" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Fast WebSockets (&lt;100ms) with diagram sharing and accepted solution rewards.</text>
+    </g>
+
+    <!-- Objective 5 -->
+    <g transform="translate(40, 560)">
+      <circle cx="20" cy="20" r="18" fill="#873B46"/>
+      <text x="20" y="27" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="15" font-weight="900" fill="#FFFCF7">5</text>
+      <text x="55" y="18" font-family="'Manrope', sans-serif" font-size="18" font-weight="800" fill="#332426">Track Progress with XP Points &amp; Daily Streaks</text>
+      <text x="55" y="42" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Audited ledger with activity heatmaps and rank progression (Novice to Scholar).</text>
+    </g>
+  </g>
+
+  <!-- Right Column: How CONSTA Solves Traditional Learning Problems -->
+  <g transform="translate(950, 190)">
+    <rect width="870" height="760" rx="24" fill="#FFFFFF" stroke="#C58B91" stroke-width="2" filter="url(#s3_cardShadow)"/>
+    
+    <rect x="40" y="40" width="220" height="40" rx="20" fill="#873B46"/>
+    <text x="150" y="65" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#FFFCF7" letter-spacing="1.5">
+      HOW CONSTA SOLVES IT
+    </text>
+    
+    <text x="40" y="125" font-family="'Manrope', sans-serif" font-size="26" font-weight="900" fill="#332426">
+      Transforming Traditional Learning
+    </text>
+    <line x1="40" y1="150" x2="830" y2="150" stroke="#E7D8CE" stroke-width="1.2"/>
+
+    <!-- Solution 1 -->
+    <g transform="translate(40, 180)">
+      <rect width="790" height="115" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <circle cx="35" cy="35" r="16" fill="#873B46"/>
+      <text x="35" y="41" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">✓</text>
+      <text x="65" y="32" font-family="'Manrope', sans-serif" font-size="17" font-weight="800" fill="#332426">From Clock Watching → To Concrete Objectives</text>
+      <text x="65" y="58" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">XP is tied strictly to completed checklist items and logged roadblocks, ending fake productivity.</text>
+      <text x="65" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#873B46">Pedagogical AI breaks down complex concepts when students get stuck.</text>
+    </g>
+
+    <!-- Solution 2 -->
+    <g transform="translate(40, 315)">
+      <rect width="790" height="115" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <circle cx="35" cy="35" r="16" fill="#873B46"/>
+      <text x="35" y="41" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">✓</text>
+      <text x="65" y="32" font-family="'Manrope', sans-serif" font-size="17" font-weight="800" fill="#332426">From Chat Chaos → To Dedicated Cohort Workspaces</text>
+      <text x="65" y="58" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Group creator serves as Admin; coursework, member approvals, and deadlines remain in one clean dashboard.</text>
+      <text x="65" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#873B46">Zero mixing of social chatter with academic deadlines.</text>
+    </g>
+
+    <!-- Solution 3 -->
+    <g transform="translate(40, 450)">
+      <rect width="790" height="115" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <circle cx="35" cy="35" r="16" fill="#873B46"/>
+      <text x="35" y="41" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">✓</text>
+      <text x="65" y="32" font-family="'Manrope', sans-serif" font-size="17" font-weight="800" fill="#332426">From Final Marks → To Progressive Iteration (v1 → v2)</text>
+      <text x="65" y="58" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Students re-submit revised work based on structured rubrics: Correctness, Completeness, Clarity, and Method.</text>
+      <text x="65" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#873B46">Mirrors real-world engineering review cycles.</text>
+    </g>
+
+    <!-- Solution 4 -->
+    <g transform="translate(40, 585)">
+      <rect width="790" height="115" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <circle cx="35" cy="35" r="16" fill="#873B46"/>
+      <text x="35" y="41" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">✓</text>
+      <text x="65" y="32" font-family="'Manrope', sans-serif" font-size="17" font-weight="800" fill="#332426">From Click-Farming → To Audited Ledger &amp; Accepted Doubts</text>
+      <text x="65" y="58" font-family="'Manrope', sans-serif" font-size="14" font-weight="500" fill="#78666A">Every XP point is logged in an append-only ledger; answering peer doubts awards +15 XP only when accepted.</text>
+      <text x="65" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="700" fill="#873B46">Real-time WebSockets stream diagrams and answers without page refresh.</text>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • PROJECT OBJECTIVES &amp; PROPOSED SOLUTION
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">
+      SLIDE 03 / 08
+    </text>
+  </g>
+</svg>

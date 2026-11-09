@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="s7_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="60%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+    <pattern id="s7_grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.25"/>
+    </pattern>
+    <filter id="s7_cardShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#332426" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#s7_bg)"/>
+  <rect width="1920" height="1080" fill="url(#s7_grid)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      TESTING, ADVANTAGES &amp; FUTURE SCOPE
+    </text>
+    <text x="56" y="44" font-family="'Manrope', sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      Verification Rigor, Key Platform Benefits &amp; Evolution Roadmap
+    </text>
+
+    <rect x="1560" y="5" width="160" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1640" y="28" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46">
+      EVALUATION
+    </text>
+  </g>
+
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- 3 Equal Width Columns Grid -->
+  <g transform="translate(100, 190)">
+    <!-- Column 1: Testing & Verification -->
+    <g transform="translate(0, 0)">
+      <rect width="550" height="765" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s7_cardShadow)"/>
+      <rect x="35" y="35" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="63" y="70" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="22" font-weight="900" fill="#873B46">🧪</text>
+
+      <text x="105" y="55" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Automated Testing</text>
+      <text x="105" y="80" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#873B46">33 Automated Test Suites (100% Pass)</text>
+      <line x1="35" y1="110" x2="515" y2="110" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <!-- Pass Badge Pill -->
+      <g transform="translate(35, 130)">
+        <rect width="480" height="48" rx="14" fill="#F4E2E3" stroke="#C58B91" stroke-width="1.2"/>
+        <circle cx="28" cy="24" r="10" fill="#873B46"/>
+        <text x="28" y="29" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="900" fill="#FFFCF7">✓</text>
+        <text x="48" y="30" font-family="'Manrope', sans-serif" font-size="14" font-weight="800" fill="#873B46">
+          33 / 33 Unit &amp; Integration Tests Passing
+        </text>
+      </g>
+
+      <g transform="translate(35, 210)">
+        <!-- Test 1 -->
+        <g transform="translate(0, 0)">
+          <text x="0" y="0" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Authentication Testing</text>
+          <text x="0" y="25" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">JWT token lifecycle, password hashing, and secure reset verification.</text>
+        </g>
+
+        <!-- Test 2 -->
+        <g transform="translate(0, 75)">
+          <text x="0" y="0" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Group &amp; Task Workflows</text>
+          <text x="0" y="25" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Multi-user cohort segregation, join approvals, and task checklist toggling.</text>
+        </g>
+
+        <!-- Test 3 -->
+        <g transform="translate(0, 150)">
+          <text x="0" y="0" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Real-Time Chat Testing</text>
+          <text x="0" y="25" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">WebSocket broadcasting, typing indicators, and accepted answer pins.</text>
+        </g>
+
+        <!-- Test 4 -->
+        <g transform="translate(0, 225)">
+          <text x="0" y="0" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Data Persistence Testing</text>
+          <text x="0" y="25" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">SQLite WAL auto-checkpoints and client recovery sync on cloud restarts.</text>
+        </g>
+
+        <!-- Test 5 -->
+        <g transform="translate(0, 300)">
+          <text x="0" y="0" font-family="'Manrope', sans-serif" font-size="16" font-weight="700" fill="#332426">• Exploit Safeguard Testing</text>
+          <text x="0" y="25" font-family="'Manrope', sans-serif" font-size="14" font-weight="400" fill="#78666A">Append-only XP ledger verification prevents point farming exploits.</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Column 2: Platform Advantages -->
+    <g transform="translate(585, 0)">
+      <rect width="550" height="765" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s7_cardShadow)"/>
+      <rect x="35" y="35" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="63" y="70" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="22" font-weight="900" fill="#873B46">⭐</text>
+
+      <text x="105" y="55" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Platform Advantages</text>
+      <text x="105" y="80" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#873B46">Why CONSTA Stands Apart</text>
+      <line x1="35" y1="110" x2="515" y2="110" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <g transform="translate(35, 140)">
+        <!-- Advantage 1 -->
+        <g transform="translate(0, 0)">
+          <rect width="480" height="95" rx="14" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <circle cx="28" cy="28" r="12" fill="#873B46"/>
+          <text x="28" y="33" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="50" y="28" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Better Study Management</text>
+          <text x="50" y="55" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Combines timers with verifiable outcome checklists and roadblock logs.</text>
+        </g>
+
+        <!-- Advantage 2 -->
+        <g transform="translate(0, 115)">
+          <rect width="480" height="95" rx="14" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <circle cx="28" cy="28" r="12" fill="#873B46"/>
+          <text x="28" y="33" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="50" y="28" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Improved Teamwork &amp; Cohorts</text>
+          <text x="50" y="55" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Organized workspaces with admin roles, task topics, and deadline timers.</text>
+        </g>
+
+        <!-- Advantage 3 -->
+        <g transform="translate(0, 230)">
+          <rect width="480" height="95" rx="14" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <circle cx="28" cy="28" r="12" fill="#873B46"/>
+          <text x="28" y="33" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="50" y="28" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Continuous Iteration &amp; Rubrics</text>
+          <text x="50" y="55" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Multi-version (v1 → v2) assignment submissions with structured rubrics.</text>
+        </g>
+
+        <!-- Advantage 4 -->
+        <g transform="translate(0, 345)">
+          <rect width="480" height="95" rx="14" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <circle cx="28" cy="28" r="12" fill="#873B46"/>
+          <text x="28" y="33" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="50" y="28" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Authentic Progress Tracking</text>
+          <text x="50" y="55" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">Audited XP ledger and daily streak heatmaps reflect real effort.</text>
+        </g>
+
+        <!-- Advantage 5 -->
+        <g transform="translate(0, 460)">
+          <rect width="480" height="95" rx="14" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <circle cx="28" cy="28" r="12" fill="#873B46"/>
+          <text x="28" y="33" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="900" fill="#FFFCF7">✓</text>
+          <text x="50" y="28" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Secure User Accounts &amp; Privacy</text>
+          <text x="50" y="55" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">JWT auth, bcryptjs password hashing, and public/private profile controls.</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Column 3: Future Scope -->
+    <g transform="translate(1170, 0)">
+      <rect width="550" height="765" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s7_cardShadow)"/>
+      <rect x="35" y="35" width="56" height="56" rx="18" fill="#F4E2E3" stroke="#873B46" stroke-width="1.5"/>
+      <text x="63" y="70" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="22" font-weight="900" fill="#873B46">🚀</text>
+
+      <text x="105" y="55" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#332426">Future Scope</text>
+      <text x="105" y="80" font-family="'Manrope', sans-serif" font-size="14" font-weight="600" fill="#873B46">Next Phase Evolution Roadmap</text>
+      <line x1="35" y1="110" x2="515" y2="110" stroke="#F0E5D8" stroke-width="1.2"/>
+
+      <g transform="translate(35, 140)">
+        <!-- Roadmap 1 -->
+        <g transform="translate(0, 0)">
+          <rect width="480" height="120" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <rect x="20" y="20" width="30" height="30" rx="8" fill="#873B46"/>
+          <text x="35" y="40" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">1</text>
+          <text x="60" y="38" font-family="'Manrope', sans-serif" font-size="17" font-weight="800" fill="#332426">Advanced AI Study Assistance</text>
+          <text x="20" y="75" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+            Fine-tuned local LLM for automated preliminary rubric evaluations, missing derivation hints, and step-by-step problem breakdowns.
+          </text>
+        </g>
+
+        <!-- Roadmap 2 -->
+        <g transform="translate(0, 145)">
+          <rect width="480" height="120" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <rect x="20" y="20" width="30" height="30" rx="8" fill="#873B46"/>
+          <text x="35" y="40" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">2</text>
+          <text x="60" y="38" font-family="'Manrope', sans-serif" font-size="17" font-weight="800" fill="#332426">Personalized Recommendations</text>
+          <text x="20" y="75" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+            Adaptive study plans that recommend specific revision topics based on historical roadblock frequency and peer review rubrics.
+          </text>
+        </g>
+
+        <!-- Roadmap 3 -->
+        <g transform="translate(0, 290)">
+          <rect width="480" height="120" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <rect x="20" y="20" width="30" height="30" rx="8" fill="#873B46"/>
+          <text x="35" y="40" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">3</text>
+          <text x="60" y="38" font-family="'Manrope', sans-serif" font-size="17" font-weight="800" fill="#332426">Advanced Study Analytics</text>
+          <text x="20" y="75" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+            Cohort velocity charts, peer review latency metrics, and subjective difficulty progression indices for continuous personal growth.
+          </text>
+        </g>
+
+        <!-- Roadmap 4 -->
+        <g transform="translate(0, 435)">
+          <rect width="480" height="120" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1"/>
+          <rect x="20" y="20" width="30" height="30" rx="8" fill="#873B46"/>
+          <text x="35" y="40" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">4</text>
+          <text x="60" y="38" font-family="'Manrope', sans-serif" font-size="17" font-weight="800" fill="#332426">Improved Mobile App Experience</text>
+          <text x="20" y="75" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+            Cross-platform React Native mobile client with push notifications, offline session caching, and instant camera diagram uploads.
+          </text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • TESTING, ADVANTAGES &amp; FUTURE SCOPE
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">
+      SLIDE 07 / 08
+    </text>
+  </g>
+</svg>

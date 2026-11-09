@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="s6_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF4EB"/>
+      <stop offset="60%" stop-color="#F8EFE4"/>
+      <stop offset="100%" stop-color="#F0E5D8"/>
+    </linearGradient>
+    <pattern id="s6_grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E7D8CE" stroke-width="1" stroke-opacity="0.3"/>
+    </pattern>
+    <filter id="s6_cardShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#332426" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#s6_bg)"/>
+  <rect width="1920" height="1080" fill="url(#s6_grid)"/>
+
+  <!-- Top Header Ribbon -->
+  <g transform="translate(100, 70)">
+    <rect width="44" height="44" rx="12" fill="#873B46"/>
+    <path d="M 22 14 L 12 20 L 22 26 L 32 20 Z M 16 23 L 16 28 C 16 30 28 30 28 28 L 28 23" fill="none" stroke="#FFFCF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <text x="56" y="22" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46" letter-spacing="2">
+      SYSTEM ARCHITECTURE &amp; WORKING
+    </text>
+    <text x="56" y="44" font-family="'Manrope', sans-serif" font-size="34" font-weight="900" fill="#332426" letter-spacing="-0.5">
+      End-to-End Data Flow &amp; Process Architecture
+    </text>
+
+    <rect x="1560" y="5" width="160" height="36" rx="18" fill="#F4E2E3" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="1640" y="28" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="12" font-weight="800" fill="#873B46">
+      ARCHITECTURE
+    </text>
+  </g>
+
+  <line x1="100" y1="155" x2="1820" y2="155" stroke="#E7D8CE" stroke-width="1.5"/>
+
+  <!-- Top: Architecture Flow Diagram Container -->
+  <g transform="translate(100, 185)">
+    <rect width="1720" height="440" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s6_cardShadow)"/>
+    
+    <text x="40" y="45" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">
+      High-Level System Flow: User → React Frontend → Express.js Backend → SQLite Database
+    </text>
+    <line x1="40" y1="65" x2="1680" y2="65" stroke="#F0E5D8" stroke-width="1.2"/>
+
+    <!-- Step 1: User / Client -->
+    <g transform="translate(60, 100)">
+      <rect width="320" height="290" rx="18" fill="#FAF4EB" stroke="#C58B91" stroke-width="1.5"/>
+      <circle cx="45" cy="45" r="22" fill="#873B46"/>
+      <text x="45" y="53" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">01</text>
+      <text x="80" y="52" font-family="'Manrope', sans-serif" font-size="19" font-weight="800" fill="#332426">Student / User</text>
+      <line x1="25" y1="85" x2="295" y2="85" stroke="#E7D8CE" stroke-width="1"/>
+      
+      <text x="25" y="125" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#873B46">• User Interaction</text>
+      <text x="25" y="155" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Register / Login</text>
+      <text x="25" y="185" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Solo Timer + Objectives</text>
+      <text x="25" y="215" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Join Study Cohort</text>
+      <text x="25" y="245" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Submit Task &amp; Ask Doubts</text>
+    </g>
+
+    <!-- Arrow 1 -->
+    <g transform="translate(390, 225)">
+      <line x1="0" y1="0" x2="60" y2="0" stroke="#873B46" stroke-width="3"/>
+      <polygon points="60,-7 72,0 60,7" fill="#873B46"/>
+      <text x="35" y="-14" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="11" font-weight="700" fill="#873B46">HTTP / UI</text>
+    </g>
+
+    <!-- Step 2: React Frontend -->
+    <g transform="translate(470, 100)">
+      <rect width="340" height="290" rx="18" fill="#FAF4EB" stroke="#C58B91" stroke-width="1.5"/>
+      <circle cx="45" cy="45" r="22" fill="#873B46"/>
+      <text x="45" y="53" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">02</text>
+      <text x="80" y="52" font-family="'Manrope', sans-serif" font-size="19" font-weight="800" fill="#332426">React 19 Frontend</text>
+      <line x1="25" y1="85" x2="315" y2="85" stroke="#E7D8CE" stroke-width="1"/>
+      
+      <text x="25" y="125" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#873B46">• Presentation Layer</text>
+      <text x="25" y="155" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Context API Auth State</text>
+      <text x="25" y="185" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Tailwind v4 Theme Tokens</text>
+      <text x="25" y="215" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- WebSocket Chat Client</text>
+      <text x="25" y="245" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Multi-Version Upload UI</text>
+    </g>
+
+    <!-- Arrow 2: REST + WS Double Arrow -->
+    <g transform="translate(820, 210)">
+      <line x1="0" y1="0" x2="70" y2="0" stroke="#873B46" stroke-width="3"/>
+      <polygon points="70,-7 82,0 70,7" fill="#873B46"/>
+      <text x="40" y="-12" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#873B46">REST APIs</text>
+      
+      <line x1="82" y1="35" x2="12" y2="35" stroke="#642B35" stroke-width="3"/>
+      <polygon points="12,28 0,35 12,42" fill="#642B35"/>
+      <text x="40" y="54" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="11" font-weight="800" fill="#642B35">WebSockets</text>
+    </g>
+
+    <!-- Step 3: Express Backend -->
+    <g transform="translate(915, 100)">
+      <rect width="360" height="290" rx="18" fill="#FAF4EB" stroke="#C58B91" stroke-width="1.5"/>
+      <circle cx="45" cy="45" r="22" fill="#873B46"/>
+      <text x="45" y="53" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">03</text>
+      <text x="80" y="52" font-family="'Manrope', sans-serif" font-size="19" font-weight="800" fill="#332426">Express.js Backend</text>
+      <line x1="25" y1="85" x2="335" y2="85" stroke="#E7D8CE" stroke-width="1"/>
+      
+      <text x="25" y="125" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#873B46">• Business &amp; API Logic</text>
+      <text x="25" y="155" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- JWT Bearer Verification</text>
+      <text x="25" y="185" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- ws Real-Time Server</text>
+      <text x="25" y="215" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Multer Multipart Engine</text>
+      <text x="25" y="245" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Audited XP Calculations</text>
+    </g>
+
+    <!-- Arrow 3 -->
+    <g transform="translate(1285, 225)">
+      <line x1="0" y1="0" x2="60" y2="0" stroke="#873B46" stroke-width="3"/>
+      <polygon points="60,-7 72,0 60,7" fill="#873B46"/>
+      <text x="35" y="-14" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="11" font-weight="700" fill="#873B46">SQL Queries</text>
+    </g>
+
+    <!-- Step 4: SQLite Database -->
+    <g transform="translate(1365, 100)">
+      <rect width="300" height="290" rx="18" fill="#FAF4EB" stroke="#C58B91" stroke-width="1.5"/>
+      <circle cx="45" cy="45" r="22" fill="#873B46"/>
+      <text x="45" y="53" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="16" font-weight="900" fill="#FFFCF7">04</text>
+      <text x="80" y="52" font-family="'Manrope', sans-serif" font-size="19" font-weight="800" fill="#332426">SQLite Engine</text>
+      <line x1="25" y1="85" x2="275" y2="85" stroke="#E7D8CE" stroke-width="1"/>
+      
+      <text x="25" y="125" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#873B46">• Storage &amp; Resilience</text>
+      <text x="25" y="155" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- `node:sqlite` Native</text>
+      <text x="25" y="185" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- WAL Mode Concurrency</text>
+      <text x="25" y="215" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- Auto-Checkpointing</text>
+      <text x="25" y="245" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">- User Backup Service</text>
+    </g>
+  </g>
+
+  <!-- Bottom: Working Process Walkthrough (5 Sequential Stages) -->
+  <g transform="translate(100, 655)">
+    <rect width="1720" height="300" rx="24" fill="#FFFCF7" stroke="#E7D8CE" stroke-width="1.5" filter="url(#s6_cardShadow)"/>
+    
+    <text x="40" y="40" font-family="'Manrope', sans-serif" font-size="20" font-weight="800" fill="#332426">
+      End-to-End User Working Workflow
+    </text>
+    <line x1="40" y1="60" x2="1680" y2="60" stroke="#F0E5D8" stroke-width="1.2"/>
+
+    <!-- Workflow Steps Grid (5 steps) -->
+    <!-- Step 1 -->
+    <g transform="translate(40, 85)">
+      <rect width="310" height="180" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <rect x="20" y="20" width="34" height="34" rx="10" fill="#873B46"/>
+      <text x="37" y="43" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">1</text>
+      <text x="65" y="42" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Auth &amp; Profile</text>
+      <text x="20" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+        User registers with unique username, hashed password (bcryptjs), and receives secure JWT token.
+      </text>
+    </g>
+
+    <!-- Step 2 -->
+    <g transform="translate(375, 85)">
+      <rect width="310" height="180" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <rect x="20" y="20" width="34" height="34" rx="10" fill="#873B46"/>
+      <text x="37" y="43" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">2</text>
+      <text x="65" y="42" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Solo Focus Study</text>
+      <text x="20" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+        Starts focus session; checks off concrete objectives and logs roadblocks to receive verified study XP.
+      </text>
+    </g>
+
+    <!-- Step 3 -->
+    <g transform="translate(710, 85)">
+      <rect width="310" height="180" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <rect x="20" y="20" width="34" height="34" rx="10" fill="#873B46"/>
+      <text x="37" y="43" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">3</text>
+      <text x="65" y="42" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Join / Create Cohort</text>
+      <text x="20" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+        Joins public rooms or requests private access. Cohort creators manage task sub-topics and countdowns.
+      </text>
+    </g>
+
+    <!-- Step 4 -->
+    <g transform="translate(1045, 85)">
+      <rect width="310" height="180" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <rect x="20" y="20" width="34" height="34" rx="10" fill="#873B46"/>
+      <text x="37" y="43" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">4</text>
+      <text x="65" y="42" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Task Iteration (v1→v2)</text>
+      <text x="20" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+        Submits work with diagrams/PDFs; receives rubric evaluations and submits revisions with changelog notes.
+      </text>
+    </g>
+
+    <!-- Step 5 -->
+    <g transform="translate(1380, 85)">
+      <rect width="310" height="180" rx="16" fill="#FAF4EB" stroke="#E7D8CE" stroke-width="1.2"/>
+      <rect x="20" y="20" width="34" height="34" rx="10" fill="#873B46"/>
+      <text x="37" y="43" text-anchor="middle" font-family="'Manrope', sans-serif" font-size="14" font-weight="900" fill="#FFFCF7">5</text>
+      <text x="65" y="42" font-family="'Manrope', sans-serif" font-size="16" font-weight="800" fill="#332426">Doubt Chat &amp; XP</text>
+      <text x="20" y="85" font-family="'Manrope', sans-serif" font-size="13" font-weight="500" fill="#78666A">
+        Asks doubts over WebSockets; earns +15 XP for accepted peer answers; builds daily streak heatmap.
+      </text>
+    </g>
+  </g>
+
+  <!-- Slide Footer -->
+  <g transform="translate(100, 990)">
+    <line x1="0" y1="0" x2="1720" y2="0" stroke="#E7D8CE" stroke-width="1"/>
+    <text x="0" y="32" font-family="'Manrope', sans-serif" font-size="13" font-weight="600" fill="#78666A">
+      CONSTA PLATFORM • SYSTEM ARCHITECTURE &amp; WORKING
+    </text>
+    <text x="1720" y="32" text-anchor="end" font-family="'Manrope', sans-serif" font-size="13" font-weight="800" fill="#873B46">
+      SLIDE 06 / 08
+    </text>
+  </g>
+</svg>
