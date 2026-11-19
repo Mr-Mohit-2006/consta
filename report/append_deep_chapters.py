@@ -6,222 +6,311 @@
 # ==========================================
 
 # TABLE OF CONTENTS
-add_p("TABLE OF CONTENTS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=16)
+add_p("TABLE OF CONTENTS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=14, color=(135, 59, 70))
 
 toc_data = [
-    ["Certificate of Approval", "ii"],
-    ["Declaration by Candidate", "iii"],
-    ["Acknowledgement", "iv"],
-    ["Abstract", "v"],
-    ["List of Figures", "viii"],
-    ["List of Tables", "ix"],
-    ["List of Abbreviations", "x"],
-    ["CHAPTER 1: INTRODUCTION", "1"],
-    ["  1.1 Overview & Background", "1"],
-    ["  1.2 Motivation & Industry Context", "2"],
-    ["  1.3 Problem Statement & Core Challenges", "3"],
-    ["  1.4 Project Objectives & Measurable Scope", "4"],
-    ["  1.5 Methodology Summary", "5"],
-    ["  1.6 Organization of the Report", "6"],
-    ["CHAPTER 2: LITERATURE REVIEW & THEORETICAL FOUNDATIONS", "7"],
-    ["  2.1 Computer-Supported Collaborative Learning (CSCL)", "7"],
-    ["  2.2 Focus Tracking & The Passive Timer Fallacy", "8"],
-    ["  2.3 Formative Rubrics & Multi-Version Revision Systems", "9"],
-    ["  2.4 Real-Time WebSockets in Educational Computing", "10"],
-    ["  2.5 Educational Gamification & Anti-Exploit Design", "11"],
-    ["  2.6 Comparative Analysis of Existing Platforms", "12"],
-    ["  2.7 Identified Research & Engineering Gaps", "13"],
-    ["CHAPTER 3: REQUIREMENTS SPECIFICATION & FEASIBILITY ANALYSIS", "14"],
-    ["  3.1 User Personas & Stakeholder Profiles", "14"],
-    ["  3.2 Functional Requirements (FR-01 to FR-10)", "15"],
-    ["  3.3 Non-Functional System Constraints (NFR-01 to NFR-08)", "17"],
-    ["  3.4 Detailed UML Use Case Specifications (UC-01 to UC-06)", "18"],
-    ["  3.5 Hardware, Software & Environmental Sizing", "21"],
+    ["Certificate of Approval", "2"],
+    ["Declaration by Candidate", "3"],
+    ["Acknowledgement", "4"],
+    ["Abstract", "5"],
+    ["List of Figures", "9"],
+    ["List of Tables", "10"],
+    ["List of Abbreviations", "11"],
+    ["CHAPTER 1: INTRODUCTION", "12"],
+    ["  1.1 Overview & Background", "12"],
+    ["  1.2 Motivation & Industry Context", "12"],
+    ["  1.3 Problem Statement & Core Challenges", "13"],
+    ["  1.4 Project Objectives & Measurable Scope", "14"],
+    ["  1.5 Team Organization & Work Allocation", "14"],
+    ["  1.6 Methodology Summary", "15"],
+    ["  1.7 Organization of the Report", "15"],
+    ["CHAPTER 2: LITERATURE REVIEW & THEORETICAL FOUNDATIONS", "16"],
+    ["  2.1 Computer-Supported Collaborative Learning (CSCL)", "16"],
+    ["  2.2 Focus Tracking & The Passive Timer Fallacy", "16"],
+    ["  2.3 Formative Rubrics & Multi-Version Revision Systems", "16"],
+    ["  2.4 Real-Time WebSockets in Educational Computing", "17"],
+    ["  2.5 Educational Gamification & Anti-Exploit Design", "17"],
+    ["  2.6 Comparative Analysis of Existing Platforms", "18"],
+    ["  2.7 Identified Research & Engineering Gaps", "18"],
+    ["CHAPTER 3: REQUIREMENTS SPECIFICATION & FEASIBILITY ANALYSIS", "19"],
+    ["  3.1 User Personas & Stakeholder Profiles", "19"],
+    ["  3.2 Functional Requirements (FR-01 to FR-10)", "19"],
+    ["  3.3 Non-Functional System Constraints (NFR-01 to NFR-08)", "20"],
+    ["  3.4 Detailed UML Use Case Specifications (UC-01 to UC-06)", "20"],
+    ["  3.5 Hardware, Software & Environmental Sizing", "22"],
     ["  3.6 Multi-Dimensional Feasibility Study", "22"],
-    ["CHAPTER 4: SYSTEM ARCHITECTURE & DETAILED DESIGN", "23"],
-    ["  4.1 High-Level 4-Tier Architectural Pipeline", "23"],
-    ["  4.2 Data Flow Modeling (Context, Level 1, Level 2)", "25"],
-    ["  4.3 Interaction & Sequence Flow Models", "27"],
-    ["  4.4 Entity-Relationship (ER) Schema & Data Dictionary", "29"],
-    ["  4.5 Database Normalization Progression (1NF to BCNF)", "31"],
-    ["  4.6 SQLite WAL Concurrency & Durability Architecture", "32"],
-    ["  4.7 UI/UX Design System & Color Tokens", "33"],
-    ["CHAPTER 5: METHODOLOGY & IMPLEMENTATION", "34"],
-    ["  5.1 Agile Sprint Methodology & Iterative Cycles", "34"],
-    ["  5.2 8-Stage Task State Machine Implementation", "35"],
-    ["  5.3 Anti-Exploit Gamification Ledger Algorithm", "37"],
-    ["  5.4 WebSocket Dispatcher & Channel Multiplexing", "38"],
-    ["  5.5 Frontend Component Hierarchy & State Management", "39"],
-    ["CHAPTER 6: TESTING, VERIFICATION & QUALITY ASSURANCE", "40"],
-    ["  6.1 Automated Regression Testing Strategy", "40"],
-    ["  6.2 Comprehensive 33-Test Suite Execution Matrix", "41"],
-    ["  6.3 Empirical Performance & Latency Benchmarks", "44"],
-    ["  6.4 Security, RBAC & Vulnerability Assessment", "44"],
-    ["  6.5 Usability Evaluation & Student Feedback", "45"],
-    ["CHAPTER 7: CONCLUSION & FUTURE WORK", "46"],
-    ["  7.1 Summary of Engineering Contributions", "46"],
-    ["  7.2 Practical Impact & Stakeholder Value", "47"],
-    ["  7.3 System Limitations & Boundary Conditions", "47"],
-    ["  7.4 Future Engineering Roadmap (Phase 2.0 to 2.3)", "48"],
-    ["REFERENCES", "49"],
-    ["APPENDIX A: SYSTEM DEPLOYMENT & ENVIRONMENT SETUP", "51"],
-    ["APPENDIX B: COMPLETE DATABASE TRIGGER & CHECKPOINT DDL", "52"],
-    ["APPENDIX C: RESTFUL API SPECIFICATION & ROUTE CATALOG", "53"],
-    ["APPENDIX D: KEY PRODUCTION SOURCE CODE EXCERPTS", "55"]
+    ["CHAPTER 4: SYSTEM ARCHITECTURE & DETAILED DESIGN", "24"],
+    ["  4.1 High-Level 4-Tier Architectural Pipeline", "24"],
+    ["  4.2 Data Flow Modeling (Context, Level 1, Level 2)", "24"],
+    ["  4.3 Interaction & Sequence Flow Models", "25"],
+    ["  4.4 Entity-Relationship (ER) Schema & Data Dictionary", "26"],
+    ["  4.5 Database Normalization Progression (1NF to BCNF)", "27"],
+    ["  4.6 SQLite WAL Concurrency & Durability Architecture", "27"],
+    ["  4.7 UI/UX Design System & Color Tokens", "28"],
+    ["CHAPTER 5: METHODOLOGY & IMPLEMENTATION", "29"],
+    ["  5.1 Agile Sprint Methodology & Iterative Cycles", "29"],
+    ["  5.2 8-Stage Task State Machine Implementation", "29"],
+    ["  5.3 Anti-Exploit Gamification Ledger Algorithm", "30"],
+    ["  5.4 WebSocket Dispatcher & Channel Multiplexing", "30"],
+    ["  5.5 Frontend Component Hierarchy & State Management", "31"],
+    ["CHAPTER 6: TESTING, VERIFICATION & QUALITY ASSURANCE", "32"],
+    ["  6.1 Automated Regression Testing Strategy", "32"],
+    ["  6.2 Comprehensive 33-Test Suite Execution Matrix", "32"],
+    ["  6.3 Empirical Performance & Latency Benchmarks", "35"],
+    ["  6.4 Security, RBAC & Vulnerability Assessment", "35"],
+    ["  6.5 Usability Evaluation & Student Feedback", "35"],
+    ["CHAPTER 7: CONCLUSION & FUTURE WORK", "37"],
+    ["  7.1 Summary of Engineering Contributions", "37"],
+    ["  7.2 Practical Impact & Stakeholder Value", "37"],
+    ["  7.3 System Limitations & Boundary Conditions", "37"],
+    ["  7.4 Future Engineering Roadmap (Phase 2.0 to 2.3)", "38"],
+    ["REFERENCES", "39"],
+    ["APPENDIX A: SYSTEM DEPLOYMENT & ENVIRONMENT SETUP", "41"],
+    ["APPENDIX B: COMPLETE DATABASE TRIGGER & CHECKPOINT DDL", "42"],
+    ["APPENDIX C: RESTFUL API SPECIFICATION & ROUTE CATALOG", "43"],
+    ["APPENDIX D: KEY PRODUCTION SOURCE CODE EXCERPTS", "45"]
 ]
 
 toc_tbl = doc.add_table(rows=len(toc_data) + 1, cols=2)
 toc_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
 toc_tbl.autofit = False
-toc_tbl.rows[0].cells[0].paragraphs[0].add_run("Topic / Chapter Heading").font.bold = True
-toc_tbl.rows[0].cells[1].paragraphs[0].add_run("Page No.").font.bold = True
-toc_tbl.rows[0].cells[1].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+toc_tbl.columns[0].width = Inches(5.3)
+toc_tbl.columns[1].width = Inches(0.97)
+
+# Header Row
+hdr_c0 = toc_tbl.rows[0].cells[0]
+hdr_c1 = toc_tbl.rows[0].cells[1]
+set_cell_shading(hdr_c0, "FAF4EB")
+set_cell_shading(hdr_c1, "FAF4EB")
+set_cell_border(hdr_c0, top=dict(sz=6, color="873B46"), bottom=dict(sz=6, color="873B46"))
+set_cell_border(hdr_c1, top=dict(sz=6, color="873B46"), bottom=dict(sz=6, color="873B46"))
+p_th0 = hdr_c0.paragraphs[0]
+p_th0.add_run("Topic / Chapter Heading").font.bold = True
+p_th0.runs[0].font.color.rgb = RGBColor(135, 59, 70)
+p_th1 = hdr_c1.paragraphs[0]
+p_th1.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+p_th1.add_run("Page No.").font.bold = True
+p_th1.runs[0].font.color.rgb = RGBColor(135, 59, 70)
 
 for i, (title, pg) in enumerate(toc_data):
     row = toc_tbl.rows[i + 1]
-    c0 = row.cells[0].paragraphs[0]
-    c0.paragraph_format.line_spacing = 1.15
-    c0.paragraph_format.space_after = Pt(2)
-    r = c0.add_run(title)
+    c0 = row.cells[0]
+    c1 = row.cells[1]
+    set_cell_margins(c0, top=40, bottom=40, left=100, right=100)
+    set_cell_margins(c1, top=40, bottom=40, left=100, right=100)
+    set_cell_border(c0, bottom=dict(sz=2, color="E7D8CE"))
+    set_cell_border(c1, bottom=dict(sz=2, color="E7D8CE"))
+    
+    p0 = c0.paragraphs[0]
+    p0.paragraph_format.line_spacing = 1.15
+    p0.paragraph_format.space_after = Pt(1)
+    p0.paragraph_format.space_before = Pt(1)
+    r = p0.add_run(title)
     r.font.name = 'Times New Roman'
-    r.font.size = Pt(10.5)
+    r.font.size = Pt(9.5)
     if "CHAPTER" in title or "REFERENCES" in title or "APPENDIX" in title:
         r.font.bold = True
+        r.font.color.rgb = RGBColor(135, 59, 70)
     
-    c1 = row.cells[1].paragraphs[0]
-    c1.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    c1.paragraph_format.line_spacing = 1.15
-    c1.paragraph_format.space_after = Pt(2)
-    r1 = c1.add_run(pg)
+    p1 = c1.paragraphs[0]
+    p1.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p1.paragraph_format.line_spacing = 1.15
+    p1.paragraph_format.space_after = Pt(1)
+    p1.paragraph_format.space_before = Pt(1)
+    r1 = p1.add_run(pg)
     r1.font.name = 'Times New Roman'
-    r1.font.size = Pt(10)
+    r1.font.size = Pt(9.5)
     if "CHAPTER" in title or "REFERENCES" in title or "APPENDIX" in title:
         r1.font.bold = True
+        r1.font.color.rgb = RGBColor(135, 59, 70)
 
 doc.add_page_break()
 
 # LIST OF FIGURES
-add_p("LIST OF FIGURES", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=16)
+add_p("LIST OF FIGURES", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=14, color=(135, 59, 70))
 
 figs_data = [
-    ["Figure 4.1", "Overall System Architecture and Multi-Tier Processing Pipeline of CONSTA", "24"],
-    ["Figure 4.2", "Data Flow Diagram (DFD Level 1) Decomposing Core Functional Platform Services", "26"],
-    ["Figure 4.3", "Complete Entity-Relationship (ER) Schema of Normalized SQLite Relational Database", "30"],
-    ["Figure 5.1", "Deterministic Finite State Machine (8-Stage Task Revision Lifecycle v1 to v3)", "36"],
-    ["Figure 6.1", "Automated Regression Test Suite Coverage Distribution and Execution Benchmarks", "42"]
+    ["Figure 4.1", "Overall System Architecture and Multi-Tier Processing Pipeline of CONSTA", "25"],
+    ["Figure 4.2", "Data Flow Diagram (DFD Level 1) Decomposing Core Functional Platform Services", "25"],
+    ["Figure 4.3", "Complete Entity-Relationship (ER) Schema of Normalized SQLite Relational Database", "26"],
+    ["Figure 5.1", "Deterministic Finite State Machine (8-Stage Task Revision Lifecycle v1 to v3)", "30"],
+    ["Figure 6.1", "Automated Regression Test Suite Coverage Distribution and Execution Benchmarks", "32"]
 ]
 
 fig_tbl = doc.add_table(rows=len(figs_data) + 1, cols=3)
 fig_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
 fig_tbl.autofit = False
-fig_tbl.rows[0].cells[0].paragraphs[0].add_run("Figure No.").font.bold = True
-fig_tbl.rows[0].cells[1].paragraphs[0].add_run("Figure Caption / Description").font.bold = True
-fig_tbl.rows[0].cells[2].paragraphs[0].add_run("Page No.").font.bold = True
-fig_tbl.rows[0].cells[2].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+fig_tbl.columns[0].width = Inches(1.2)
+fig_tbl.columns[1].width = Inches(4.2)
+fig_tbl.columns[2].width = Inches(0.87)
+
+# Header
+for i, h in enumerate(["Figure No.", "Figure Caption / Description", "Page No."]):
+    cell = fig_tbl.rows[0].cells[i]
+    set_cell_shading(cell, "FAF4EB")
+    set_cell_border(cell, top=dict(sz=6, color="873B46"), bottom=dict(sz=6, color="873B46"))
+    p = cell.paragraphs[0]
+    if i == 2: p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = p.add_run(h)
+    r.font.bold = True
+    r.font.color.rgb = RGBColor(135, 59, 70)
 
 for i, (fnum, fdesc, fpg) in enumerate(figs_data):
     row = fig_tbl.rows[i + 1]
-    c0 = row.cells[0].paragraphs[0]
-    c0.add_run(fnum).font.bold = True
-    c1 = row.cells[1].paragraphs[0]
-    c1.add_run(fdesc)
+    for cell in row.cells:
+        set_cell_margins(cell, top=60, bottom=60, left=100, right=100)
+        set_cell_border(cell, bottom=dict(sz=2, color="E7D8CE"))
+    row.cells[0].paragraphs[0].add_run(fnum).font.bold = True
+    row.cells[1].paragraphs[0].add_run(fdesc)
     c2 = row.cells[2].paragraphs[0]
     c2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     c2.add_run(fpg).font.bold = True
 
 doc.add_page_break()
 
-# LIST OF TABLES
-add_p("LIST OF TABLES", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=16)
+# LIST OF TABLES (Fits cleanly on 1 single page)
+add_p("LIST OF TABLES", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=12, color=(135, 59, 70))
 
 tbls_data = [
-    ["Table 2.1", "Comparative Capability Matrix of Existing EdTech and Productivity Platforms", "12"],
-    ["Table 3.1", "Formal Functional Requirements Specification (FR-01 to FR-10)", "15"],
-    ["Table 3.2", "Non-Functional System Constraints and Quality Benchmarks (NFR-01 to NFR-08)", "17"],
-    ["Table 3.3", "Use Case UC-01 Specification: Solo Study Session with Objective Verification", "18"],
-    ["Table 3.4", "Use Case UC-02 Specification: Multi-Version Coursework Submission & Rubric Review", "19"],
-    ["Table 3.5", "Use Case UC-03 Specification: Real-Time Doubt Clearing & Accepted Solution Award", "20"],
-    ["Table 4.1", "Relational Database Data Dictionary (All Core Tables & Constraints)", "29"],
-    ["Table 4.2", "Database Normalization Progression Analysis (1NF to BCNF)", "31"],
-    ["Table 4.3", "Design System UI Color Token Specifications & WCAG Contrast Metrics", "33"],
-    ["Table 6.1", "High-Level Automated Test Battery Execution Performance Summary", "41"],
-    ["Table 6.2", "Comprehensive 33-Test Suite Verification Matrix and Boundary Results", "43"],
-    ["Table 6.3", "Empirical Usability Evaluation and Student Feedback Analysis", "44"],
-    ["Table C.1", "Complete RESTful API Route Catalog and Response Contract Matrix", "53"]
+    ["Table 2.1", "Comparative Capability Matrix of Existing EdTech and Productivity Platforms", "18"],
+    ["Table 3.1", "Formal Functional Requirements Specification (FR-01 to FR-10)", "19"],
+    ["Table 3.2", "Non-Functional System Constraints and Quality Benchmarks (NFR-01 to NFR-08)", "20"],
+    ["Table 3.3", "Use Case UC-01 Specification: Solo Study Session with Objective Verification", "21"],
+    ["Table 3.4", "Use Case UC-02 Specification: Multi-Version Coursework Submission & Rubric Review", "21"],
+    ["Table 3.5", "Use Case UC-03 Specification: Real-Time Doubt Clearing & Accepted Solution Award", "22"],
+    ["Table 4.1", "Relational Database Data Dictionary (All Core Tables & Constraints)", "26"],
+    ["Table 4.2", "Database Normalization Progression Analysis (1NF to BCNF)", "27"],
+    ["Table 4.3", "Design System UI Color Token Specifications & WCAG Contrast Metrics", "28"],
+    ["Table 6.1", "High-Level Automated Test Battery Execution Performance Summary", "32"],
+    ["Table 6.2", "Comprehensive 33-Test Suite Verification Matrix and Boundary Results", "33"],
+    ["Table 6.3", "Empirical Usability Evaluation and Student Feedback Analysis", "36"],
+    ["Table C.1", "Complete RESTful API Route Catalog and Response Contract Matrix", "43"]
 ]
 
 tbl_list = doc.add_table(rows=len(tbls_data) + 1, cols=3)
 tbl_list.alignment = WD_TABLE_ALIGNMENT.CENTER
 tbl_list.autofit = False
-tbl_list.rows[0].cells[0].paragraphs[0].add_run("Table No.").font.bold = True
-tbl_list.rows[0].cells[1].paragraphs[0].add_run("Table Caption / Title").font.bold = True
-tbl_list.rows[0].cells[2].paragraphs[0].add_run("Page No.").font.bold = True
-tbl_list.rows[0].cells[2].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+tbl_list.columns[0].width = Inches(1.1)
+tbl_list.columns[1].width = Inches(4.3)
+tbl_list.columns[2].width = Inches(0.87)
+
+# Header
+for i, h in enumerate(["Table No.", "Table Caption / Title", "Page No."]):
+    cell = tbl_list.rows[0].cells[i]
+    set_cell_shading(cell, "FAF4EB")
+    set_cell_border(cell, top=dict(sz=6, color="873B46"), bottom=dict(sz=6, color="873B46"))
+    p = cell.paragraphs[0]
+    if i == 2: p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = p.add_run(h)
+    r.font.bold = True
+    r.font.size = Pt(9)
+    r.font.color.rgb = RGBColor(135, 59, 70)
 
 for i, (tnum, tdesc, tpg) in enumerate(tbls_data):
     row = tbl_list.rows[i + 1]
-    c0 = row.cells[0].paragraphs[0]
-    c0.add_run(tnum).font.bold = True
-    c1 = row.cells[1].paragraphs[0]
-    c1.add_run(tdesc)
-    c2 = row.cells[2].paragraphs[0]
-    c2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    c2.add_run(tpg).font.bold = True
+    for cell in row.cells:
+        set_cell_margins(cell, top=35, bottom=35, left=80, right=80)
+        set_cell_border(cell, bottom=dict(sz=2, color="E7D8CE"))
+    p0 = row.cells[0].paragraphs[0]
+    p0.paragraph_format.space_after = Pt(1)
+    p0.paragraph_format.space_before = Pt(1)
+    r0 = p0.add_run(tnum)
+    r0.font.bold = True
+    r0.font.size = Pt(8.5)
+    
+    p1 = row.cells[1].paragraphs[0]
+    p1.paragraph_format.space_after = Pt(1)
+    p1.paragraph_format.space_before = Pt(1)
+    r1 = p1.add_run(tdesc)
+    r1.font.size = Pt(8.5)
+    
+    p2 = row.cells[2].paragraphs[0]
+    p2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p2.paragraph_format.space_after = Pt(1)
+    p2.paragraph_format.space_before = Pt(1)
+    r2 = p2.add_run(tpg)
+    r2.font.bold = True
+    r2.font.size = Pt(8.5)
 
 doc.add_page_break()
 
-# LIST OF ABBREVIATIONS & ACRONYMS
-add_p("LIST OF ABBREVIATIONS & ACRONYMS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=16)
+# LIST OF ABBREVIATIONS & ACRONYMS (Fits cleanly on 1 single page)
+add_p("LIST OF ABBREVIATIONS & ACRONYMS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=12, color=(135, 59, 70))
 
 abbrev_data = [
-    ["ACID", "Atomicity, Consistency, Isolation, Durability"],
-    ["API", "Application Programming Interface"],
-    ["BCNF", "Boyce-Codd Normal Form"],
-    ["CRUD", "Create, Read, Update, Delete"],
-    ["CSCL", "Computer-Supported Collaborative Learning"],
-    ["CSS", "Cascading Style Sheets"],
-    ["DFD", "Data Flow Diagram"],
-    ["DOM", "Document Object Model"],
-    ["ER", "Entity-Relationship"],
-    ["HTTP", "Hypertext Transfer Protocol"],
-    ["IDE", "Integrated Development Environment"],
-    ["JWT", "JSON Web Token"],
-    ["LMS", "Learning Management System"],
-    ["NFR", "Non-Functional Requirement"],
-    ["RAM", "Random Access Memory"],
-    ["RBAC", "Role-Based Access Control"],
-    ["REST", "Representational State Transfer"],
-    ["SPA", "Single Page Application"],
-    ["SQL", "Structured Query Language"],
-    ["SRS", "Software Requirements Specification"],
-    ["TCP", "Transmission Control Protocol"],
-    ["UI/UX", "User Interface / User Experience"],
-    ["UML", "Unified Modeling Language"],
-    ["VPS", "Virtual Private Server"],
-    ["WAL", "Write-Ahead Logging"],
-    ["WCAG", "Web Content Accessibility Guidelines"],
-    ["WS", "WebSocket"],
-    ["XP", "Experience Points"]
+    ["ACID", "Atomicity, Consistency, Isolation, Durability", "NFR", "Non-Functional Requirement"],
+    ["API", "Application Programming Interface", "RAM", "Random Access Memory"],
+    ["BCNF", "Boyce-Codd Normal Form", "RBAC", "Role-Based Access Control"],
+    ["CRUD", "Create, Read, Update, Delete", "REST", "Representational State Transfer"],
+    ["CSCL", "Computer-Supported Collaborative Learning", "SPA", "Single Page Application"],
+    ["CSS", "Cascading Style Sheets", "SQL", "Structured Query Language"],
+    ["DFD", "Data Flow Diagram", "SRS", "Software Requirements Specification"],
+    ["DOM", "Document Object Model", "TCP", "Transmission Control Protocol"],
+    ["ER", "Entity-Relationship", "UI/UX", "User Interface / User Experience"],
+    ["HTTP", "Hypertext Transfer Protocol", "UML", "Unified Modeling Language"],
+    ["IDE", "Integrated Development Environment", "VPS", "Virtual Private Server"],
+    ["JWT", "JSON Web Token", "WAL", "Write-Ahead Logging"],
+    ["LMS", "Learning Management System", "WCAG", "Web Content Accessibility Guidelines"],
+    ["WS", "WebSocket", "XP", "Experience Points"]
 ]
 
-ab_tbl = doc.add_table(rows=len(abbrev_data) + 1, cols=2)
+ab_tbl = doc.add_table(rows=len(abbrev_data) + 1, cols=4)
 ab_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
 ab_tbl.autofit = False
-ab_tbl.rows[0].cells[0].paragraphs[0].add_run("Abbreviation").font.bold = True
-ab_tbl.rows[0].cells[1].paragraphs[0].add_run("Full Expansion / Meaning").font.bold = True
+ab_tbl.columns[0].width = Inches(0.9)
+ab_tbl.columns[1].width = Inches(2.2)
+ab_tbl.columns[2].width = Inches(0.9)
+ab_tbl.columns[3].width = Inches(2.27)
 
-for i, (abbr, exp) in enumerate(abbrev_data):
+# Header
+for i, h in enumerate(["Abbr.", "Expansion", "Abbr.", "Expansion"]):
+    cell = ab_tbl.rows[0].cells[i]
+    set_cell_shading(cell, "FAF4EB")
+    set_cell_border(cell, top=dict(sz=6, color="873B46"), bottom=dict(sz=6, color="873B46"))
+    p = cell.paragraphs[0]
+    r = p.add_run(h)
+    r.font.bold = True
+    r.font.size = Pt(8.5)
+    r.font.color.rgb = RGBColor(135, 59, 70)
+
+for i, (a1, e1, a2, e2) in enumerate(abbrev_data):
     row = ab_tbl.rows[i + 1]
-    row.cells[0].paragraphs[0].add_run(abbr).font.bold = True
-    row.cells[1].paragraphs[0].add_run(exp)
+    for cell in row.cells:
+        set_cell_margins(cell, top=30, bottom=30, left=60, right=60)
+        set_cell_border(cell, bottom=dict(sz=2, color="E7D8CE"))
+    p0 = row.cells[0].paragraphs[0]
+    p0.paragraph_format.space_after = Pt(1)
+    p0.paragraph_format.space_before = Pt(1)
+    r0 = p0.add_run(a1)
+    r0.font.bold = True
+    r0.font.size = Pt(8)
+    
+    p1 = row.cells[1].paragraphs[0]
+    p1.paragraph_format.space_after = Pt(1)
+    p1.paragraph_format.space_before = Pt(1)
+    r1 = p1.add_run(e1)
+    r1.font.size = Pt(8)
+    
+    p2 = row.cells[2].paragraphs[0]
+    p2.paragraph_format.space_after = Pt(1)
+    p2.paragraph_format.space_before = Pt(1)
+    r2 = p2.add_run(a2)
+    r2.font.bold = True
+    r2.font.size = Pt(8)
+    
+    p3 = row.cells[3].paragraphs[0]
+    p3.paragraph_format.space_after = Pt(1)
+    p3.paragraph_format.space_before = Pt(1)
+    r3 = p3.add_run(e2)
+    r3.font.size = Pt(8)
 
 doc.add_page_break()
 
 # ==========================================
 # CHAPTER 1: INTRODUCTION
 # ==========================================
-add_p("CHAPTER 1", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("INTRODUCTION", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18)
+add_p("CHAPTER 1", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("INTRODUCTION", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18, color=(51, 36, 38))
 
 add_heading_1("1.1 Overview & Background")
 add_p("In contemporary higher education, particularly within engineering, computer science, and technical disciplines, the paradigm of student learning has decisively transitioned toward self-directed, asynchronous study. Students are continually expected to master sophisticated algorithmic paradigms, design distributed microservices, write low-level systems code, and comprehend intricate mathematical derivations outside classroom lectures. The ability to sustain disciplined, autonomous mental effort over prolonged focus intervals constitutes one of the most critical determinants of academic success and long-term engineering competence.")
@@ -280,8 +369,8 @@ doc.add_page_break()
 # ==========================================
 # CHAPTER 2: LITERATURE REVIEW
 # ==========================================
-add_p("CHAPTER 2", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("LITERATURE REVIEW & THEORETICAL FOUNDATIONS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18)
+add_p("CHAPTER 2", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("LITERATURE REVIEW & THEORETICAL FOUNDATIONS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18, color=(51, 36, 38))
 
 add_heading_1("2.1 Theoretical Framework: CSCL")
 add_p("The pedagogical foundation of CONSTA is rooted in Computer-Supported Collaborative Learning (CSCL), an interdisciplinary field examining how digital computing technologies can mediate and scaffold group interactions to achieve deep conceptual understanding (Dillenbourg, 1999). Collaborative learning is fundamentally distinct from mere cooperative division of labor; in true collaboration, participants work synchronously or semi-synchronously to solve a shared problem, continually negotiating meaning, articulating mental models, and resolving cognitive dissonance.")
@@ -326,8 +415,8 @@ doc.add_page_break()
 # ==========================================
 # CHAPTER 3: REQUIREMENTS SPECIFICATION
 # ==========================================
-add_p("CHAPTER 3", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("REQUIREMENTS SPECIFICATION & FEASIBILITY ANALYSIS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18)
+add_p("CHAPTER 3", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("REQUIREMENTS SPECIFICATION & FEASIBILITY ANALYSIS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18, color=(51, 36, 38))
 
 add_heading_1("3.1 User Personas & Stakeholder Profiles")
 add_p("To ensure human-centric engineering, CONSTA was designed around three representative academic personas:")
@@ -428,8 +517,8 @@ doc.add_page_break()
 # ==========================================
 # CHAPTER 4: SYSTEM ARCHITECTURE & DESIGN
 # ==========================================
-add_p("CHAPTER 4", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("SYSTEM ARCHITECTURE & DETAILED DESIGN", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18)
+add_p("CHAPTER 4", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("SYSTEM ARCHITECTURE & DETAILED DESIGN", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18, color=(51, 36, 38))
 
 add_heading_1("4.1 High-Level 4-Tier Architectural Pipeline")
 add_p("The CONSTA platform employs a decoupled, four-tier clean architecture ensuring high modularity, maintainability, and testability. The architectural layers are structured as follows:")
@@ -538,8 +627,8 @@ doc.add_page_break()
 # ==========================================
 # CHAPTER 5: METHODOLOGY & IMPLEMENTATION
 # ==========================================
-add_p("CHAPTER 5", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("METHODOLOGY & IMPLEMENTATION", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18)
+add_p("CHAPTER 5", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("METHODOLOGY & IMPLEMENTATION", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18, color=(51, 36, 38))
 
 add_heading_1("5.1 Agile Sprint Methodology & Iterative Cycles")
 add_p("The engineering lifecycle of CONSTA followed an iterative, test-driven Agile methodology organized into five distinct two-week development sprints:")
@@ -624,8 +713,8 @@ doc.add_page_break()
 # ==========================================
 # CHAPTER 6: TESTING & VERIFICATION
 # ==========================================
-add_p("CHAPTER 6", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("TESTING, VERIFICATION & QUALITY ASSURANCE", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18)
+add_p("CHAPTER 6", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("TESTING, VERIFICATION & QUALITY ASSURANCE", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18, color=(51, 36, 38))
 
 add_heading_1("6.1 Automated Testing Strategy & Test Harness")
 add_p("Software reliability in CONSTA was verified using an automated regression testing battery executed via the native Node.js test runner (`node:test`) and assertion engine (`node:assert`). Rather than relying on external mock libraries that simulate database behaviors, tests run directly against live in-memory SQLite database instances. This ensures that foreign keys, uniqueness constraints, and transaction rollbacks are tested against actual SQLite engine semantics.")
@@ -725,8 +814,8 @@ doc.add_page_break()
 # ==========================================
 # CHAPTER 7: CONCLUSION & FUTURE WORK
 # ==========================================
-add_p("CHAPTER 7", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("CONCLUSION & FUTURE WORK", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18)
+add_p("CHAPTER 7", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("CONCLUSION & FUTURE WORK", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=15, space_after=18, color=(51, 36, 38))
 
 add_heading_1("7.1 Summary of Engineering Contributions")
 add_p("The development of CONSTA successfully demonstrates that digital educational software can overcome passive study habits and communication fragmentation through disciplined system architecture:")
@@ -757,7 +846,7 @@ doc.add_page_break()
 # ==========================================
 # REFERENCES (30+ IEEE CITATIONS)
 # ==========================================
-add_p("REFERENCES", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18)
+add_p("REFERENCES", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18, color=(135, 59, 70))
 
 refs = [
     "[1] D. W. Johnson, R. T. Johnson, and K. A. Smith, \"Cooperative learning: Improving university instruction by basing practice on validated theory,\" Journal on Excellence in College Teaching, vol. 25, no. 3&4, pp. 85–118, 2014.",
@@ -791,15 +880,15 @@ refs = [
 ]
 
 for r in refs:
-    add_p(r, size=10, space_after=4, line_spacing=1.15)
+    add_p(r, size=9.5, space_after=3, line_spacing=1.15)
 
 doc.add_page_break()
 
 # ==========================================
 # APPENDIX A: DEPLOYMENT GUIDE
 # ==========================================
-add_p("APPENDIX A", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("SYSTEM CONFIGURATION & LOCAL DEPLOYMENT GUIDE", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18)
+add_p("APPENDIX A", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("SYSTEM CONFIGURATION & LOCAL DEPLOYMENT GUIDE", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18, color=(51, 36, 38))
 
 add_heading_1("A.1 Prerequisites & Toolchain")
 add_p("To execute and verify the CONSTA platform in a local development or campus server environment, the following runtimes must be installed:")
@@ -836,8 +925,8 @@ doc.add_page_break()
 # ==========================================
 # APPENDIX B: DATABASE TRIGGER DDL
 # ==========================================
-add_p("APPENDIX B", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("DATABASE TRIGGERS & RECOVERY SCRIPTS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18)
+add_p("APPENDIX B", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("DATABASE TRIGGERS & RECOVERY SCRIPTS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18, color=(51, 36, 38))
 
 add_heading_1("B.1 Automated Audit Trigger Definitions")
 add_p("To maintain strict referential consistency and prevent manual ledger alterations, the following triggers execute within SQLite:")
@@ -887,8 +976,8 @@ doc.add_page_break()
 # ==========================================
 # APPENDIX C: REST API SPECIFICATION
 # ==========================================
-add_p("APPENDIX C", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("RESTFUL API SPECIFICATION & ROUTE CATALOG", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18)
+add_p("APPENDIX C", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("RESTFUL API SPECIFICATION & ROUTE CATALOG", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18, color=(51, 36, 38))
 
 add_heading_1("C.1 Endpoint Specifications")
 add_p("Table C.1 catalogues all 22 REST API endpoints implemented across the CONSTA backend.")
@@ -923,75 +1012,73 @@ add_table_data(api_headers, api_data, [0.8, 1.8, 0.7, 1.4, 0.9, 1.8])
 
 doc.add_page_break()
 
+def add_compact_code(code_str):
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(3)
+    p.paragraph_format.line_spacing = 1.05
+    p.paragraph_format.left_indent = Inches(0.2)
+    p.paragraph_format.right_indent = Inches(0.2)
+    run = p.add_run(code_str)
+    run.font.name = 'Courier New'
+    run.font.size = Pt(7.5)
+
 # ==========================================
 # APPENDIX D: KEY SOURCE CODE EXCERPTS
 # ==========================================
-add_p("APPENDIX D", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2)
-add_p("KEY PRODUCTION SOURCE CODE EXCERPTS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=18)
+add_p("APPENDIX D", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=2, color=(135, 59, 70))
+add_p("KEY PRODUCTION SOURCE CODE EXCERPTS", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=14, color=(51, 36, 38))
 
 add_heading_1("D.1 Authentication Middleware (`src/middleware/auth.js`)")
-add_code_block("// Express.js JWT Bearer Guard Middleware\n"
-               "const jwt = require('jsonwebtoken');\n\n"
-               "function authenticateToken(req, res, next) {\n"
-               "  const authHeader = req.headers['authorization'];\n"
-               "  const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>\n"
-               "  if (!token) {\n"
-               "    return res.status(401).json({ error: 'Access Denied: Missing Bearer token' });\n"
-               "  }\n"
-               "  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {\n"
-               "    if (err) {\n"
-               "      return res.status(403).json({ error: 'Access Forbidden: Invalid or expired token' });\n"
-               "    }\n"
-               "    req.user = user;\n"
-               "    next();\n"
-               "  });\n"
-               "}\n\n"
-               "module.exports = { authenticateToken };")
+add_compact_code("// Express.js JWT Bearer Guard Middleware\n"
+                 "const jwt = require('jsonwebtoken');\n\n"
+                 "function authenticateToken(req, res, next) {\n"
+                 "  const authHeader = req.headers['authorization'];\n"
+                 "  const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>\n"
+                 "  if (!token) return res.status(401).json({ error: 'Access Denied: Missing Bearer token' });\n"
+                 "  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {\n"
+                 "    if (err) return res.status(403).json({ error: 'Access Forbidden: Invalid or expired token' });\n"
+                 "    req.user = user;\n"
+                 "    next();\n"
+                 "  });\n"
+                 "}\n"
+                 "module.exports = { authenticateToken };")
 
 add_heading_1("D.2 Task Revision State Machine Engine (`src/services/taskEngine.js`)")
-add_code_block("// Deterministic 8-Stage Task Lifecycle Controller\n"
-               "const VALID_TRANSITIONS = {\n"
-               "  not_started: ['in_progress'],\n"
-               "  in_progress: ['submitted'],\n"
-               "  submitted: ['under_review'],\n"
-               "  under_review: ['approved', 'revision_requested', 'rejected'],\n"
-               "  revision_requested: ['submitted'],\n"
-               "  approved: ['completed'],\n"
-               "  completed: [],\n"
-               "  rejected: []\n"
-               "};\n\n"
-               "function transitionTaskState(currentState, nextState) {\n"
-               "  const allowed = VALID_TRANSITIONS[currentState];\n"
-               "  if (!allowed || !allowed.includes(nextState)) {\n"
-               "    throw new Error(`Illegal State Transition: Cannot move from ${currentState} to ${nextState}`);\n"
-               "  }\n"
-               "  return nextState;\n"
-               "}\n\n"
-               "module.exports = { transitionTaskState };")
+add_compact_code("// Deterministic 8-Stage Task Lifecycle Controller\n"
+                 "const VALID_TRANSITIONS = {\n"
+                 "  not_started: ['in_progress'],\n"
+                 "  in_progress: ['submitted'],\n"
+                 "  submitted: ['under_review'],\n"
+                 "  under_review: ['approved', 'revision_requested', 'rejected'],\n"
+                 "  revision_requested: ['submitted'],\n"
+                 "  approved: ['completed'],\n"
+                 "  completed: [], rejected: []\n"
+                 "};\n\n"
+                 "function transitionTaskState(currentState, nextState) {\n"
+                 "  const allowed = VALID_TRANSITIONS[currentState];\n"
+                 "  if (!allowed || !allowed.includes(nextState)) {\n"
+                 "    throw new Error(`Illegal State Transition: Cannot move from ${currentState} to ${nextState}`);\n"
+                 "  }\n"
+                 "  return nextState;\n"
+                 "}\n"
+                 "module.exports = { transitionTaskState };")
 
 add_heading_1("D.3 Solo Study Outcome Verification Engine (`src/services/studyService.js`)")
-add_code_block("// Objective Checklist Validation & Experience Calculation\n"
-               "function verifyStudySessionOutcome(db, sessionId, userId, completedCount, totalCount, roadblocks) {\n"
-               "  if (totalCount <= 0) throw new Error('Invalid Objective Count');\n"
-               "  const ratio = completedCount / totalCount;\n"
-               "  let earnedXP = 0;\n"
-               "  let streakIncrement = false;\n\n"
-               "  if (ratio >= 1.0) {\n"
-               "    earnedXP = 25; // Full completion award\n"
-               "    streakIncrement = true;\n"
-               "  } else if (ratio >= 0.5) {\n"
-               "    earnedXP = 10; // Partial completion award\n"
-               "  } else {\n"
-               "    earnedXP = 5;  // Effort award with logged roadblocks\n"
-               "  }\n\n"
-               "  db.transaction(() => {\n"
-               "    db.prepare('UPDATE study_sessions SET is_completed = 1, roadblock_notes = ? WHERE id = ?')\n"
-               "      .run(roadblocks || '', sessionId);\n"
-               "    db.prepare('INSERT INTO xp_transactions (user_id, amount, source_type, reference_id) VALUES (?, ?, ?, ?)')\n"
-               "      .run(userId, earnedXP, 'study_session', `session_${sessionId}`);\n"
-               "    db.prepare('UPDATE users SET total_xp = total_xp + ?, level = (total_xp + ?) / 100 + 1 WHERE id = ?')\n"
-               "      .run(earnedXP, earnedXP, userId);\n"
-               "  })();\n\n"
-               "  return { earnedXP, streakIncrement, ratio };\n"
-               "}\n\n"
-               "module.exports = { verifyStudySessionOutcome };")
+add_compact_code("// Objective Checklist Validation & Experience Calculation\n"
+                 "function verifyStudySessionOutcome(db, sessionId, userId, completedCount, totalCount, roadblocks) {\n"
+                 "  if (totalCount <= 0) throw new Error('Invalid Objective Count');\n"
+                 "  const ratio = completedCount / totalCount;\n"
+                 "  let earnedXP = (ratio >= 1.0) ? 25 : (ratio >= 0.5 ? 10 : 5);\n"
+                 "  let streakIncrement = (ratio >= 1.0);\n\n"
+                 "  db.transaction(() => {\n"
+                 "    db.prepare('UPDATE study_sessions SET is_completed = 1, roadblock_notes = ? WHERE id = ?')\n"
+                 "      .run(roadblocks || '', sessionId);\n"
+                 "    db.prepare('INSERT INTO xp_transactions (user_id, amount, source_type, reference_id) VALUES (?, ?, ?, ?)')\n"
+                 "      .run(userId, earnedXP, 'study_session', `session_${sessionId}`);\n"
+                 "    db.prepare('UPDATE users SET total_xp = total_xp + ?, level = (total_xp + ?) / 100 + 1 WHERE id = ?')\n"
+                 "      .run(earnedXP, earnedXP, userId);\n"
+                 "  })();\n"
+                 "  return { earnedXP, streakIncrement, ratio };\n"
+                 "}\n"
+                 "module.exports = { verifyStudySessionOutcome };")
