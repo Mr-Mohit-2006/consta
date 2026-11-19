@@ -420,6 +420,22 @@ add_p("Step 5: Real-Time WebSocket Doubt Resolution. A dedicated WebSocket serve
 
 add_p("Step 6: Data Persistence, Testing, and Verification. The database is configured on native node:sqlite with PRAGMA journal_mode = WAL and PRAGMA synchronous = NORMAL. Automatic checkpoints (wal_checkpoint(TRUNCATE)) prevent uncommitted write-ahead log bloating. A test suite of 33 automated tests verifies multi-user isolation, room creation, rubric grading, real-time message broadcasting, and cold-restart persistence.", size=10.5, space_after=5, line_spacing=1.1)
 
+# Fig. 2 Implemented UI Preview
+fig2_p1 = os.path.abspath('d:/consta/synopsis/figures/fig_ui_solo_study.png')
+fig2_p2 = os.path.abspath('d:/consta/synopsis/figures/fig_ui_doubt_chat.png')
+if os.path.exists(fig2_p1) and os.path.exists(fig2_p2):
+    ui_tbl = doc.add_table(rows=1, cols=2)
+    ui_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    ui_tbl.columns[0].width = Inches(3.0)
+    ui_tbl.columns[1].width = Inches(3.0)
+    p1 = ui_tbl.cell(0, 0).paragraphs[0]
+    p1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p1.add_run().add_picture(fig2_p1, width=Inches(2.82))
+    p2 = ui_tbl.cell(0, 1).paragraphs[0]
+    p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p2.add_run().add_picture(fig2_p2, width=Inches(2.82))
+    add_p("Fig. 2. Implemented Graphical User Interfaces: (a) Solo Study Studio with Roadblock Logger and (b) Real-Time Doubt Discussion Hub.", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=9, space_before=2, space_after=5, color=(135, 59, 70))
+
 add_p("Requirements. Software: Node.js (v22.5.0+), npm v10+, React 19, Vite 8, Tailwind CSS v4, Express.js, native node:sqlite, WebSockets (ws). Hardware: Standard laptop or desktop computer, 4 GB RAM, 500 MB free storage.", size=10.5, space_after=0, line_spacing=1.1)
 
 doc.add_page_break()
@@ -560,20 +576,20 @@ add_p("10", align=WD_ALIGN_PARAGRAPH.LEFT, size=10, space_after=8)
 add_p("References", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=12, color=(135, 59, 70))
 
 refs_p10 = [
-    "[1] React Core Team, \"React 19 Architecture: Optimistic UI Updates, Actions, and Concurrent Transitions,\" Meta Open Source, 2024. [Online]. Available: https://react.dev.",
-    "[2] Node.js Foundation, \"Node.js v22.x LTS Documentation: Asynchronous Event Loop, Native SQLite Integration, and Test Runner,\" OpenJS Foundation, 2024. [Online]. Available: https://nodejs.org.",
-    "[3] I. Fette and A. Melnikov, \"The WebSocket Protocol,\" Internet Engineering Task Force (IETF), RFC 6455, Dec. 2011.",
-    "[4] D. Richard Hipp, \"SQLite Write-Ahead Logging (WAL): Concurrency, Shared-Memory, and Atomic Commit,\" SQLite Consortium, 2023. [Online]. Available: https://www.sqlite.org/wal.html.",
-    "[5] Express.js Team, \"Express 4.x Routing, Error Handling, and Middleware Pipeline,\" OpenJS Foundation, 2023. [Online]. Available: https://expressjs.com.",
-    "[6] Tailwind Labs, \"Tailwind CSS v4: High-Performance Engine and Theme Cascade Layers,\" 2024. [Online]. Available: https://tailwindcss.com.",
-    "[7] R. Fielding, \"Architectural Styles and the Design of Network-based Software Architectures,\" Ph.D. dissertation, Dept. Inf. Comput. Sci., Univ. California, Irvine, CA, 2000.",
-    "[8] R. C. Martin, Clean Architecture: A Craftsman's Guide to Software Structure and Design, Boston: Prentice Hall, 2017.",
-    "[9] M. Fowler, Patterns of Enterprise Application Architecture, Boston: Addison-Wesley, 2002.",
-    "[10] K. Beck, Test-Driven Development: By Example, Boston: Addison-Wesley, 2002.",
-    "[11] B. Vasilescu, V. Serebrenik, P. Devanbu, and V. Filkov, \"How social Q&A sites are changing knowledge sharing in software development: A case study of Stack Overflow,\" in Proc. ACM CSCW, 2014, pp. 342–354.",
-    "[12] A. Anderson, D. Huttenlocher, J. Kleinberg, and J. Leskovec, \"Steering user behavior with badges,\" in Proc. 22nd Int. Conf. World Wide Web (WWW), ACM, 2013, pp. 95–106.",
-    "[13] P. Dillenbourg, \"What do you mean by collaborative learning?,\" in Collaborative Learning: Cognitive and Computational Approaches, Oxford: Elsevier, 1999, pp. 1–19.",
-    "[14] F. Cirillo, The Pomodoro Technique: The Acclaimed Time-Management System That Has Transformed How We Work, New York: Crown Publishing, 2018."
+    "1. React.js Documentation. Available at: https://react.dev/",
+    "2. Node.js Documentation. Available at: https://nodejs.org/docs/",
+    "3. Express.js Documentation. Available at: https://expressjs.com/",
+    "4. SQLite Documentation. Available at: https://www.sqlite.org/docs.html",
+    "5. JavaScript Documentation – MDN Web Docs. Available at: https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+    "6. HTML Documentation – MDN Web Docs. Available at: https://developer.mozilla.org/en-US/docs/Web/HTML",
+    "7. CSS Documentation – MDN Web Docs. Available at: https://developer.mozilla.org/en-US/docs/Web/CSS",
+    "8. Vite Documentation. Available at: https://vite.dev/guide/",
+    "9. JSON Web Token (JWT) Documentation. Available at: https://jwt.io/introduction",
+    "10. Git Documentation. Available at: https://git-scm.com/doc",
+    "11. Vercel Documentation. Available at: https://vercel.com/docs",
+    "12. Render Documentation. Available at: https://render.com/docs",
+    "13. WebSocket API – MDN Web Docs. Available at: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API",
+    "14. OpenAI API Documentation. Available at: https://platform.openai.com/docs/"
 ]
 
 for r in refs_p10:

@@ -53,6 +53,7 @@ toc_data = [
     ["  5.3 Anti-Exploit Gamification Ledger Algorithm", "30"],
     ["  5.4 WebSocket Dispatcher & Channel Multiplexing", "30"],
     ["  5.5 Frontend Component Hierarchy & State Management", "31"],
+    ["  5.6 Implemented Graphical User Interfaces & Functional Modules", "31"],
     ["CHAPTER 6: TESTING, VERIFICATION & QUALITY ASSURANCE", "32"],
     ["  6.1 Automated Regression Testing Strategy", "32"],
     ["  6.2 Comprehensive 33-Test Suite Execution Matrix", "32"],
@@ -134,7 +135,17 @@ figs_data = [
     ["Figure 4.2", "Data Flow Diagram (DFD Level 1) Decomposing Core Functional Platform Services", "25"],
     ["Figure 4.3", "Complete Entity-Relationship (ER) Schema of Normalized SQLite Relational Database", "26"],
     ["Figure 5.1", "Deterministic Finite State Machine (8-Stage Task Revision Lifecycle v1 to v3)", "30"],
-    ["Figure 6.1", "Automated Regression Test Suite Coverage Distribution and Execution Benchmarks", "32"]
+    ["Figure 5.2", "User Authentication Portal (Login and Registration Interfaces)", "31"],
+    ["Figure 5.3", "Solo Study Studio and Active Roadblock Tracking Logger", "31"],
+    ["Figure 5.4", "Collaborative Study Cohorts and Group Workspace Hub", "32"],
+    ["Figure 5.5", "Multi-Stage Task Revision and Submission Management Board", "32"],
+    ["Figure 5.6", "Academic Focus Challenges and Sprint Quests Engine", "33"],
+    ["Figure 5.7", "Real-Time Bidirectional Doubt Discussion & Accepted Solution Hub", "33"],
+    ["Figure 5.8", "Performance-Based XP Ledger and Progression Milestone Interface", "34"],
+    ["Figure 5.9", "Daily Learning Streaks and 90-Day Activity Heatmap Dashboard", "34"],
+    ["Figure 5.10", "Student Profile, Privacy Governance, and Milestone Badges", "35"],
+    ["Figure 5.11", "Quantitative Learning Analytics and Empirical Academic Metrics", "35"],
+    ["Figure 6.1", "Automated Regression Test Suite Coverage Distribution and Execution Benchmarks", "37"]
 ]
 
 fig_tbl = doc.add_table(rows=len(figs_data) + 1, cols=3)
@@ -158,13 +169,28 @@ for i, h in enumerate(["Figure No.", "Figure Caption / Description", "Page No."]
 for i, (fnum, fdesc, fpg) in enumerate(figs_data):
     row = fig_tbl.rows[i + 1]
     for cell in row.cells:
-        set_cell_margins(cell, top=60, bottom=60, left=100, right=100)
+        set_cell_margins(cell, top=20, bottom=20, left=60, right=60)
         set_cell_border(cell, bottom=dict(sz=2, color="E7D8CE"))
-    row.cells[0].paragraphs[0].add_run(fnum).font.bold = True
-    row.cells[1].paragraphs[0].add_run(fdesc)
-    c2 = row.cells[2].paragraphs[0]
-    c2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    c2.add_run(fpg).font.bold = True
+    p0 = row.cells[0].paragraphs[0]
+    p0.paragraph_format.space_after = Pt(1)
+    p0.paragraph_format.space_before = Pt(1)
+    r0 = p0.add_run(fnum)
+    r0.font.bold = True
+    r0.font.size = Pt(8.5)
+    
+    p1 = row.cells[1].paragraphs[0]
+    p1.paragraph_format.space_after = Pt(1)
+    p1.paragraph_format.space_before = Pt(1)
+    r1 = p1.add_run(fdesc)
+    r1.font.size = Pt(8.5)
+    
+    p2 = row.cells[2].paragraphs[0]
+    p2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p2.paragraph_format.space_after = Pt(1)
+    p2.paragraph_format.space_before = Pt(1)
+    r2 = p2.add_run(fpg)
+    r2.font.bold = True
+    r2.font.size = Pt(8.5)
 
 doc.add_page_break()
 
@@ -708,6 +734,88 @@ add_p("• Solo Study View (`SoloStudy.jsx`): Encapsulates countdown timer, dyna
 add_p("• Cohort Hub (`CohortBoard.jsx`): Task creation cards, role management, countdown deadline meters, and submission review trigger.")
 add_p("• Real-Time Doubt Hub (`DoubtHub.jsx`): WebSocket message stream, diagram uploader, and 'Accepted Answer' badge dispatcher.")
 
+add_heading_1("5.6 Implemented Graphical User Interfaces & Functional Modules")
+add_p("This section presents the fully implemented, responsive user interfaces of the CONSTA platform, demonstrating key interactive workflows across independent study, collaborative cohorts, and learning analytics.")
+
+def add_ui_pair(img1_path, cap1, img2_path, cap2):
+    tbl = doc.add_table(rows=2, cols=2)
+    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    tbl.columns[0].width = Inches(3.0)
+    tbl.columns[1].width = Inches(3.0)
+    for c in tbl.rows[0].cells + tbl.rows[1].cells:
+        set_cell_margins(c, top=15, bottom=15, left=35, right=35)
+    
+    p1 = tbl.cell(0, 0).paragraphs[0]
+    p1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p1.paragraph_format.space_before = Pt(3)
+    p1.paragraph_format.space_after = Pt(2)
+    if os.path.exists(img1_path):
+        p1.add_run().add_picture(img1_path, width=Inches(2.88))
+    
+    p2 = tbl.cell(0, 1).paragraphs[0]
+    p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p2.paragraph_format.space_before = Pt(3)
+    p2.paragraph_format.space_after = Pt(2)
+    if os.path.exists(img2_path):
+        p2.add_run().add_picture(img2_path, width=Inches(2.88))
+        
+    p_c1 = tbl.cell(1, 0).paragraphs[0]
+    p_c1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_c1.paragraph_format.space_after = Pt(3)
+    r_c1 = p_c1.add_run(cap1)
+    r_c1.font.size = Pt(8.5)
+    r_c1.font.italic = True
+    r_c1.font.color.rgb = RGBColor(135, 59, 70)
+    
+    p_c2 = tbl.cell(1, 1).paragraphs[0]
+    p_c2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_c2.paragraph_format.space_after = Pt(3)
+    r_c2 = p_c2.add_run(cap2)
+    r_c2.font.size = Pt(8.5)
+    r_c2.font.italic = True
+    r_c2.font.color.rgb = RGBColor(135, 59, 70)
+
+# Pair 1: Authentication (Login & Register)
+p_login = os.path.abspath('d:/consta/report/figures/fig_ui_login.png')
+p_reg = os.path.abspath('d:/consta/report/figures/fig_ui_register.png')
+add_ui_pair(p_login, "Fig. 5.2 (a). User Login Interface.", p_reg, "Fig. 5.2 (b). Registration Interface.")
+add_p("1. Authentication Portal (Fig. 5.2): Dual-mode Bcrypt/JWT security, credentials encryption, session token issuance, and responsive layout switching.", size=10, space_before=2, space_after=5)
+
+# Pair 2: Solo Focus & Collaborative Cohorts
+p_solo = os.path.abspath('d:/consta/report/figures/fig_ui_solo_study.png')
+p_group = os.path.abspath('d:/consta/report/figures/fig_ui_group_study.png')
+add_ui_pair(p_solo, "Fig. 5.3. Solo Study & Roadblock Logger.", p_group, "Fig. 5.4. Collaborative Cohorts Hub.")
+add_p("2. Solo & Collaborative Focus (Figs. 5.3 & 5.4): Solo mode decouples timers from XP by requiring verified checklists and qualitative roadblock capture. The cohort hub enables subject-specific peer grouping (Computer Science, Math, Physics) with 6-character unique join codes.", size=10, space_before=2, space_after=5)
+
+# Pair 3: Tasks Board & Focus Challenges
+p_tasks = os.path.abspath('d:/consta/report/figures/fig_ui_tasks_board.png')
+p_chlng = os.path.abspath('d:/consta/report/figures/fig_ui_challenges.png')
+add_ui_pair(p_tasks, "Fig. 5.5. Multi-Stage Task Revision Board.", p_chlng, "Fig. 5.6. Academic Challenges & Quests.")
+add_p("3. Tasks Board & Quests Engine (Figs. 5.5 & 5.6): Managed by the 8-stage state machine (Not Started to Approved) with versioned submissions (v1->v2). Sprints (24h, 7d, 30d) provide progressive XP multipliers.", size=10, space_before=2, space_after=5)
+
+# Pair 4: Doubt Chat & XP Ledger
+p_chat = os.path.abspath('d:/consta/report/figures/fig_ui_doubt_chat.png')
+p_xp = os.path.abspath('d:/consta/report/figures/fig_ui_xp_ledger.png')
+add_ui_pair(p_chat, "Fig. 5.7. Real-Time Doubt Discussion Hub.", p_xp, "Fig. 5.8. Auditable XP & Level Ledger.")
+add_p("4. Real-Time Doubts & XP Integrity (Figs. 5.7 & 5.8): Sub-100ms WebSocket broadcasts with instant photo attachments and author-endorsed '+15 XP Accepted Solution'. The immutable transaction ledger permanently records every XP modification.", size=10, space_before=2, space_after=5)
+
+# Pair 5: Streaks Heatmap & User Profile
+p_strk = os.path.abspath('d:/consta/report/figures/fig_ui_streaks_heatmap.png')
+p_prof = os.path.abspath('d:/consta/report/figures/fig_ui_profile.png')
+add_ui_pair(p_strk, "Fig. 5.9. 90-Day Consistency Heatmap.", p_prof, "Fig. 5.10. Student Profile & Privacy.")
+add_p("5. Habit Streaks & Profile Governance (Figs. 5.9 & 5.10): Multi-dimensional consistency tracking across a 90-day heatmap. Privacy toggles allow students to switch between Public and Friends-Only discovery modes.", size=10, space_before=2, space_after=5)
+
+# Solo: Learning Analytics Dashboard
+p_ana = os.path.abspath('d:/consta/report/figures/fig_ui_analytics.png')
+if os.path.exists(p_ana):
+    p_fig = doc.add_paragraph()
+    p_fig.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_fig.paragraph_format.space_before = Pt(5)
+    p_fig.paragraph_format.space_after = Pt(2)
+    p_fig.add_run().add_picture(p_ana, width=Inches(5.4))
+    add_p("Fig. 5.11. Quantitative Learning Analytics and Empirical Academic Metrics Panel.", align=WD_ALIGN_PARAGRAPH.CENTER, size=8.5, italic=True, space_before=1, space_after=3, color=(135, 59, 70))
+add_p("6. Quantitative Learning Analytics (Fig. 5.11): Computes verified metrics including Total Focus Time, Coursework Approval Rates, Iteration Counts, and Category XP distributions from genuine database records.", size=10, space_before=2, space_after=5)
+
 doc.add_page_break()
 
 # ==========================================
@@ -844,40 +952,29 @@ add_p("• Phase 2.3 (LMS Interoperability & SSO): Supporting LTI 1.3 standards 
 doc.add_page_break()
 
 # ==========================================
-# REFERENCES (AUTHENTIC TECHNICAL & CSCL CITATIONS)
+# REFERENCES (CLEAN TECHNICAL DOCUMENTATION CITATIONS)
 # ==========================================
 add_p("REFERENCES", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=16, color=(135, 59, 70))
 
 refs = [
-    "[1] React Core Team, \"React 19 Architecture: Concurrent Rendering, Server Actions, and Optimistic UI Updates,\" Meta Open Source, 2024. [Online]. Available: https://react.dev.",
-    "[2] Node.js Foundation, \"Node.js v22.x LTS Documentation: Event Loop, Asynchronous I/O, and Native SQLite Integration,\" OpenJS Foundation, 2024. [Online]. Available: https://nodejs.org.",
-    "[3] I. Fette and A. Melnikov, \"The WebSocket Protocol,\" Internet Engineering Task Force (IETF), RFC 6455, Dec. 2011.",
-    "[4] D. Richard Hipp, \"SQLite Write-Ahead Logging (WAL): Concurrency, Shared-Memory, and Atomic Commit,\" SQLite Consortium, 2023. [Online]. Available: https://www.sqlite.org/wal.html.",
-    "[5] Express.js Team, \"Express 4.x Routing, Error Handling, and Middleware Pipeline,\" OpenJS Foundation, 2023. [Online]. Available: https://expressjs.com.",
-    "[6] Tailwind Labs, \"Tailwind CSS v4: High-Performance Engine and Theme Cascade Layers,\" 2024. [Online]. Available: https://tailwindcss.com.",
-    "[7] M. Jones, J. Bradley, and N. Sakimura, \"JSON Web Token (JWT),\" Internet Engineering Task Force (IETF), RFC 7519, May 2015.",
-    "[8] P. Provos and D. Mazières, \"A Future-Adaptable Password Scheme,\" in Proc. USENIX Annual Technical Conference (FREENIX Track), 1999, pp. 81–91.",
-    "[9] R. Fielding, \"Architectural Styles and the Design of Network-based Software Architectures,\" Ph.D. dissertation, Dept. Inf. Comput. Sci., Univ. California, Irvine, CA, 2000.",
-    "[10] R. C. Martin, Clean Architecture: A Craftsman's Guide to Software Structure and Design, Boston: Prentice Hall, 2017.",
-    "[11] M. Fowler, Patterns of Enterprise Application Architecture, Boston: Addison-Wesley, 2002.",
-    "[12] K. Beck, Test-Driven Development: By Example, Boston: Addison-Wesley, 2002.",
-    "[13] P. Dillenbourg, \"What do you mean by collaborative learning?,\" in Collaborative Learning: Cognitive and Computational Approaches, Oxford: Elsevier, 1999, pp. 1–19.",
-    "[14] J. Roschelle and S. D. Teasley, \"The construction of shared knowledge in collaborative problem solving,\" in Computer Supported Collaborative Learning, C. O'Malley, Ed. Berlin: Springer, 1995, pp. 69–97.",
-    "[15] D. W. Johnson, R. T. Johnson, and K. A. Smith, \"Cooperative learning: Improving university instruction by basing practice on validated theory,\" Journal on Excellence in College Teaching, vol. 25, no. 3&4, pp. 85–118, 2014.",
-    "[16] F. Cirillo, The Pomodoro Technique: The Acclaimed Time-Management System That Has Transformed How We Work, New York: Crown Publishing, 2018.",
-    "[17] J. Dunlosky, K. A. Rawson, E. J. Marsh, M. J. Nathan, and D. T. Willingham, \"Improving students’ learning with effective learning techniques: Promising directions from cognitive and educational psychology,\" Psychological Science in the Public Interest, vol. 14, no. 1, pp. 4–58, 2013.",
-    "[18] H. G. Andrade, \"Using rubrics to promote thinking and learning in higher education,\" Educational Leadership, vol. 57, no. 5, pp. 13–18, 2000.",
-    "[19] J. Hattie and H. Timperley, \"The power of feedback,\" Review of Educational Research, vol. 77, no. 1, pp. 81–112, 2007.",
-    "[20] C. S. Dweck, Mindset: The New Psychology of Success, New York: Random House, 2006.",
-    "[21] B. Vasilescu, V. Serebrenik, P. Devanbu, and V. Filkov, \"How social Q&A sites are changing knowledge sharing in software development: A case study of Stack Overflow,\" in Proc. ACM CSCW, 2014, pp. 342–354.",
-    "[22] A. Anderson, D. Huttenlocher, J. Kleinberg, and J. Leskovec, \"Steering user behavior with badges,\" in Proc. 22nd Int. Conf. World Wide Web (WWW), ACM, 2013, pp. 95–106.",
-    "[23] R. S. Baker, A. T. Corbett, and K. R. Koedinger, \"Detecting when students 'game the system',\" in Proc. 7th Int. Conf. Intelligent Tutoring Systems (ITS), Springer, 2004, pp. 383–390.",
-    "[24] K. Seaborn and D. I. Fels, \"Gamification in theory and practice: A systematic review,\" International Journal of Human-Computer Studies, vol. 74, pp. 14–31, 2015.",
-    "[25] W3C, \"Web Content Accessibility Guidelines (WCAG) 2.1,\" World Wide Web Consortium, Recommendation, Jun. 2018. [Online]. Available: https://www.w3.org/TR/WCAG21/."
+    "1. React.js Documentation. Available at: https://react.dev/",
+    "2. Node.js Documentation. Available at: https://nodejs.org/docs/",
+    "3. Express.js Documentation. Available at: https://expressjs.com/",
+    "4. SQLite Documentation. Available at: https://www.sqlite.org/docs.html",
+    "5. JavaScript Documentation – MDN Web Docs. Available at: https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+    "6. HTML Documentation – MDN Web Docs. Available at: https://developer.mozilla.org/en-US/docs/Web/HTML",
+    "7. CSS Documentation – MDN Web Docs. Available at: https://developer.mozilla.org/en-US/docs/Web/CSS",
+    "8. Vite Documentation. Available at: https://vite.dev/guide/",
+    "9. JSON Web Token (JWT) Documentation. Available at: https://jwt.io/introduction",
+    "10. Git Documentation. Available at: https://git-scm.com/doc",
+    "11. Vercel Documentation. Available at: https://vercel.com/docs",
+    "12. Render Documentation. Available at: https://render.com/docs",
+    "13. WebSocket API – MDN Web Docs. Available at: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API",
+    "14. OpenAI API Documentation. Available at: https://platform.openai.com/docs/"
 ]
 
 for r in refs:
-    add_p(r, size=9.5, space_after=3, line_spacing=1.12)
+    add_p(r, size=10, space_after=5, line_spacing=1.2)
 
 doc.add_page_break()
 
@@ -1011,14 +1108,14 @@ doc.add_page_break()
 
 def add_compact_code(code_str):
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(2)
-    p.paragraph_format.space_after = Pt(3)
-    p.paragraph_format.line_spacing = 1.05
-    p.paragraph_format.left_indent = Inches(0.2)
-    p.paragraph_format.right_indent = Inches(0.2)
+    p.paragraph_format.space_before = Pt(1)
+    p.paragraph_format.space_after = Pt(2)
+    p.paragraph_format.line_spacing = 1.0
+    p.paragraph_format.left_indent = Inches(0.15)
+    p.paragraph_format.right_indent = Inches(0.15)
     run = p.add_run(code_str)
     run.font.name = 'Courier New'
-    run.font.size = Pt(7.5)
+    run.font.size = Pt(6.8)
 
 # ==========================================
 # APPENDIX D: KEY SOURCE CODE EXCERPTS

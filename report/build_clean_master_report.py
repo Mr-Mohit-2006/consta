@@ -291,7 +291,7 @@ set_cell_margins(sig_table.cell(1, 0), top=100, bottom=100, left=120, right=120)
 
 p_s4 = sig_table.cell(1, 1).paragraphs[0]
 p_s4.paragraph_format.line_spacing = 1.3
-p_s4.add_run("Head of the Department\nProfessor & HOD, CSE\n\nSignature: __________________")
+p_s4.add_run("DR. NIKHIL GOVIL\nHead Of Department, CSE\n\nSignature: __________________")
 set_cell_border(sig_table.cell(1, 1), bottom=dict(sz=4, color="CCCCCC"),
                                       left=dict(sz=4, color="CCCCCC"), right=dict(sz=4, color="CCCCCC"))
 set_cell_margins(sig_table.cell(1, 1), top=100, bottom=100, left=120, right=120)
@@ -351,9 +351,9 @@ add_p("ACKNOWLEDGEMENT", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, sp
 
 add_p("We express our deepest gratitude and heartfelt appreciation to our project supervisor, Mr. Manoj Kumar, Assistant Professor, Department of Computer Science & Engineering, for his invaluable guidance, continuous encouragement, constructive criticism, and expert technical insights throughout the design, implementation, and evaluation of this project.", size=11.5, space_before=0, space_after=12, line_spacing=1.25)
 
-add_p("We are profoundly thankful to the Head of the Department, Department of Computer Science & Engineering, for providing the departmental resources, laboratory infrastructure, and academic atmosphere required to carry out this project successfully.", size=11.5, space_before=0, space_after=12, line_spacing=1.25)
+add_p("We are profoundly thankful to Dr. Nikhil Govil, Head of the Department, Department of Computer Science & Engineering, for providing the departmental resources, laboratory infrastructure, and academic atmosphere required to carry out this project successfully.", size=11.5, space_before=0, space_after=12, line_spacing=1.25)
 
-add_p("We also extend our sincere gratitude to the Director and Management of Greater Noida Institute of Technology (Engineering Institute), Greater Noida, for fostering an academic environment dedicated to technical rigor, research, and innovation.", size=11.5, space_before=0, space_after=12, line_spacing=1.25)
+add_p("We also extend our sincere gratitude to the Director Mr. Dhiraj Gupta and Management of Greater Noida Institute of Technology (Engineering Institute), Greater Noida, for fostering an academic environment dedicated to technical rigor, research, and innovation.", size=11.5, space_before=0, space_after=12, line_spacing=1.25)
 
 add_p("Finally, we express our warmest appreciation to our parents, family members, and classmates for their moral support, understanding, and constructive feedback throughout our engineering coursework and project development.", size=11.5, space_before=0, space_after=30, line_spacing=1.25)
 
