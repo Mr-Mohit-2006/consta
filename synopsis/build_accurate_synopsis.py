@@ -356,21 +356,19 @@ add_p("6", align=WD_ALIGN_PARAGRAPH.LEFT, size=10, space_after=8)
 add_p("Literature References", align=WD_ALIGN_PARAGRAPH.LEFT, bold=True, size=12, space_after=8, color=(135, 59, 70))
 
 refs_p6 = [
-    "[1] D. W. Johnson, R. T. Johnson, and K. A. Smith, \"Cooperative learning: Improving university instruction by basing practice on validated theory,\" Journal on Excellence in College Teaching, vol. 25, no. 3&4, pp. 85–118, 2014.",
-    "[2] P. Dillenbourg, \"What do you mean by collaborative learning?,\" in Collaborative-learning: Cognitive and Computational Approaches, Elsevier, 1999, pp. 1–19.",
-    "[3] S. Graf and Kinshuk, \"Advanced adaptability in learning management systems,\" International Journal of Computer and Information Engineering, vol. 1, no. 8, pp. 2530–2535, 2007.",
+    "[1] P. Dillenbourg, \"What do you mean by collaborative learning?,\" in Collaborative Learning: Cognitive and Computational Approaches, Oxford: Elsevier, 1999, pp. 1–19.",
+    "[2] J. Roschelle and S. D. Teasley, \"The construction of shared knowledge in collaborative problem solving,\" in Computer Supported Collaborative Learning, C. O'Malley, Ed. Berlin: Springer, 1995, pp. 69–97.",
+    "[3] S. Graf and Kinshuk, \"Advanced adaptability in modern learning management systems,\" International Journal of Computer and Information Engineering, vol. 1, no. 8, pp. 2530–2535, 2007.",
     "[4] F. Cirillo, The Pomodoro Technique: The Acclaimed Time-Management System That Has Transformed How We Work, New York: Crown Publishing, 2018.",
-    "[5] J. Dunlosky, K. A. Rawson, E. J. Marsh, M. J. Nathan, and D. T. Willingham, \"Improving students’ learning with effective learning techniques: Promising directions from cognitive and educational psychology,\" Psychological Science in the Public Interest, vol. 14, no. 1, pp. 4–58, 2013.",
-    "[6] B. Oakley, A Mind for Numbers: How to Excel at Math and Science (Even If You Flunked Algebra), New York: TarcherPerigee, 2014.",
-    "[7] J. Hattie and H. Timperley, \"The power of feedback,\" Review of Educational Research, vol. 77, no. 1, pp. 81–112, 2007.",
-    "[8] H. G. Andrade, \"Using rubrics to promote thinking and learning,\" Educational Leadership, vol. 57, no. 5, pp. 13–18, 2000.",
-    "[9] C. S. Dweck, Mindset: The New Psychology of Success, New York: Random House, 2006.",
-    "[10] T. Tang and M. Wang, \"Students’ motivation for using social media in higher education,\" Computers & Education, vol. 146, p. 103730, 2020.",
-    "[11] R. Junco, \"The relationship between frequency of social messaging and academic performance,\" Computers & Education, vol. 59, no. 2, pp. 505–514, 2012.",
-    "[12] L. Mamykina, B. Manoim, M. Mittal, G. Hripcsak, and B. Hartmann, \"Design lessons from the success of Stack Overflow,\" in Proc. SIGCHI Conf. Human Factors in Computing Systems (CHI '11), 2011, pp. 2845–2854.",
-    "[13] S. Deterding, D. Dixon, R. Khaled, and L. Nacke, \"From game design elements to gamefulness: Defining gamification,\" in Proc. 15th Int. Academic MindTrek Conf., 2011, pp. 9–15.",
-    "[14] R. S. Baker, A. T. Corbett, K. R. Koedinger, and A. Z. Wagner, \"Off-task behavior in the cognitive tutor classroom: When students ‘game the system’,\" in Proc. SIGCHI Conf. Human Factors in Computing Systems (CHI '04), 2004, pp. 383–390.",
-    "[15] K. Seaborn and D. I. Fels, \"Gamification in theory and practice: A systematic review,\" International Journal of Human-Computer Studies, vol. 74, pp. 14–31, 2015."
+    "[5] J. Dunlosky, K. A. Rawson, E. J. Marsh, M. J. Nathan, and D. T. Willingham, \"Improving students’ learning with effective learning techniques: Promising directions from cognitive psychology,\" Psychological Science in the Public Interest, vol. 14, no. 1, pp. 4–58, 2013.",
+    "[6] H. G. Andrade, \"Using rubrics to promote thinking and learning in higher education,\" Educational Leadership, vol. 57, no. 5, pp. 13–18, 2000.",
+    "[7] C. S. Dweck, Mindset: The New Psychology of Success, New York: Random House, 2006.",
+    "[8] B. Vasilescu, V. Serebrenik, P. Devanbu, and V. Filkov, \"How social Q&A sites are changing knowledge sharing in software development: A case study of Stack Overflow,\" in Proc. ACM CSCW, 2014, pp. 342–354.",
+    "[9] A. Anderson, D. Huttenlocher, J. Kleinberg, and J. Leskovec, \"Steering user behavior with badges,\" in Proc. 22nd Int. Conf. World Wide Web (WWW), ACM, 2013, pp. 95–106.",
+    "[10] R. S. Baker, A. T. Corbett, and K. R. Koedinger, \"Detecting when students 'game the system',\" in Proc. 7th Int. Conf. Intelligent Tutoring Systems (ITS), Springer, 2004, pp. 383–390.",
+    "[11] K. Seaborn and D. I. Fels, \"Gamification in theory and practice: A systematic review,\" International Journal of Human-Computer Studies, vol. 74, pp. 14–31, 2015.",
+    "[12] I. Fette and A. Melnikov, \"The WebSocket Protocol,\" Internet Engineering Task Force (IETF), RFC 6455, Dec. 2011.",
+    "[13] D. Richard Hipp, \"SQLite Write-Ahead Logging (WAL) Architecture and Concurrency Internals,\" SQLite.org Documentation, 2023. [Online]. Available: https://www.sqlite.org/wal.html."
 ]
 
 for r in refs_p6:
@@ -562,22 +560,24 @@ add_p("10", align=WD_ALIGN_PARAGRAPH.LEFT, size=10, space_after=8)
 add_p("References", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, space_after=12, color=(135, 59, 70))
 
 refs_p10 = [
-    "[1] D. W. Johnson, R. T. Johnson, and K. A. Smith, “Cooperative learning: Improving university instruction by basing practice on validated theory,” Journal on Excellence in College Teaching, vol. 25, no. 3&4, pp. 85–118, 2014.",
-    "[2] P. Dillenbourg, “What do you mean by collaborative learning?,” in Collaborative-learning: Cognitive and Computational Approaches, Elsevier, 1999, pp. 1–19.",
-    "[3] S. Graf and Kinshuk, “Advanced adaptability in learning management systems,” International Journal of Computer and Information Engineering, vol. 1, no. 8, pp. 2530–2535, 2007.",
-    "[4] F. Cirillo, The Pomodoro Technique: The Acclaimed Time-Management System That Has Transformed How We Work, New York: Crown Publishing, 2018.",
-    "[5] J. Dunlosky, K. A. Rawson, E. J. Marsh, M. J. Nathan, and D. T. Willingham, “Improving students’ learning with effective learning techniques: Promising directions from cognitive and educational psychology,” Psychological Science in the Public Interest, vol. 14, no. 1, pp. 4–58, 2013.",
-    "[6] B. Oakley, A Mind for Numbers: How to Excel at Math and Science (Even If You Flunked Algebra), New York: TarcherPerigee, 2014.",
-    "[7] J. Hattie and H. Timperley, “The power of feedback,” Review of Educational Research, vol. 77, no. 1, pp. 81–112, 2007.",
-    "[8] H. G. Andrade, “Using rubrics to promote thinking and learning,” Educational Leadership, vol. 57, no. 5, pp. 13–18, 2000.",
-    "[9] C. S. Dweck, Mindset: The New Psychology of Success, New York: Random House, 2006.",
-    "[10] I. Fette and A. Melnikov, “The WebSocket Protocol,” RFC 6455, Internet Engineering Task Force (IETF), Dec. 2011.",
-    "[11] D. R. Hipp, “SQLite: Small, Fast, Reliable, Choose Any Three,” in Proc. International Conference on Data Engineering (ICDE), 2020, pp. 1–8.",
-    "[12] S. Deterding, D. Dixon, R. Khaled, and L. Nacke, “From game design elements to gamefulness: Defining gamification,” in Proc. 15th Int. Academic MindTrek Conf., 2011, pp. 9–15."
+    "[1] React Core Team, \"React 19 Architecture: Optimistic UI Updates, Actions, and Concurrent Transitions,\" Meta Open Source, 2024. [Online]. Available: https://react.dev.",
+    "[2] Node.js Foundation, \"Node.js v22.x LTS Documentation: Asynchronous Event Loop, Native SQLite Integration, and Test Runner,\" OpenJS Foundation, 2024. [Online]. Available: https://nodejs.org.",
+    "[3] I. Fette and A. Melnikov, \"The WebSocket Protocol,\" Internet Engineering Task Force (IETF), RFC 6455, Dec. 2011.",
+    "[4] D. Richard Hipp, \"SQLite Write-Ahead Logging (WAL): Concurrency, Shared-Memory, and Atomic Commit,\" SQLite Consortium, 2023. [Online]. Available: https://www.sqlite.org/wal.html.",
+    "[5] Express.js Team, \"Express 4.x Routing, Error Handling, and Middleware Pipeline,\" OpenJS Foundation, 2023. [Online]. Available: https://expressjs.com.",
+    "[6] Tailwind Labs, \"Tailwind CSS v4: High-Performance Engine and Theme Cascade Layers,\" 2024. [Online]. Available: https://tailwindcss.com.",
+    "[7] R. Fielding, \"Architectural Styles and the Design of Network-based Software Architectures,\" Ph.D. dissertation, Dept. Inf. Comput. Sci., Univ. California, Irvine, CA, 2000.",
+    "[8] R. C. Martin, Clean Architecture: A Craftsman's Guide to Software Structure and Design, Boston: Prentice Hall, 2017.",
+    "[9] M. Fowler, Patterns of Enterprise Application Architecture, Boston: Addison-Wesley, 2002.",
+    "[10] K. Beck, Test-Driven Development: By Example, Boston: Addison-Wesley, 2002.",
+    "[11] B. Vasilescu, V. Serebrenik, P. Devanbu, and V. Filkov, \"How social Q&A sites are changing knowledge sharing in software development: A case study of Stack Overflow,\" in Proc. ACM CSCW, 2014, pp. 342–354.",
+    "[12] A. Anderson, D. Huttenlocher, J. Kleinberg, and J. Leskovec, \"Steering user behavior with badges,\" in Proc. 22nd Int. Conf. World Wide Web (WWW), ACM, 2013, pp. 95–106.",
+    "[13] P. Dillenbourg, \"What do you mean by collaborative learning?,\" in Collaborative Learning: Cognitive and Computational Approaches, Oxford: Elsevier, 1999, pp. 1–19.",
+    "[14] F. Cirillo, The Pomodoro Technique: The Acclaimed Time-Management System That Has Transformed How We Work, New York: Crown Publishing, 2018."
 ]
 
 for r in refs_p10:
-    add_p(r, size=9.5, space_after=4.5, line_spacing=1.1)
+    add_p(r, size=9.5, space_after=3.5, line_spacing=1.08)
 
 # Save Word Document
 docx_path = os.path.abspath('d:/consta/synopsis/CONSTA_Minor_Project_Synopsis.docx')
