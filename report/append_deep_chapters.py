@@ -135,17 +135,18 @@ figs_data = [
     ["Figure 4.2", "Data Flow Diagram (DFD Level 1) Decomposing Core Functional Platform Services", "25"],
     ["Figure 4.3", "Complete Entity-Relationship (ER) Schema of Normalized SQLite Relational Database", "26"],
     ["Figure 5.1", "Deterministic Finite State Machine (8-Stage Task Revision Lifecycle v1 to v3)", "30"],
-    ["Figure 5.2", "User Authentication Portal (Login and Registration Interfaces)", "31"],
-    ["Figure 5.3", "Solo Study Studio and Active Roadblock Tracking Logger", "31"],
-    ["Figure 5.4", "Collaborative Study Cohorts and Group Workspace Hub", "32"],
-    ["Figure 5.5", "Multi-Stage Task Revision and Submission Management Board", "32"],
-    ["Figure 5.6", "Academic Focus Challenges and Sprint Quests Engine", "33"],
-    ["Figure 5.7", "Real-Time Bidirectional Doubt Discussion & Accepted Solution Hub", "33"],
-    ["Figure 5.8", "Performance-Based XP Ledger and Progression Milestone Interface", "34"],
-    ["Figure 5.9", "Daily Learning Streaks and 90-Day Activity Heatmap Dashboard", "34"],
-    ["Figure 5.10", "Student Profile, Privacy Governance, and Milestone Badges", "35"],
-    ["Figure 5.11", "Quantitative Learning Analytics and Empirical Academic Metrics", "35"],
-    ["Figure 6.1", "Automated Regression Test Suite Coverage Distribution and Execution Benchmarks", "37"]
+    ["Figure 5.2", "User Authentication Portal (User Login and Account Registration Interfaces)", "31"],
+    ["Figure 5.3", "Central Student Dashboard Overview and Navigation Portal", "31"],
+    ["Figure 5.4", "Solo Study Studio and Active Roadblock Tracking Logger", "31"],
+    ["Figure 5.5", "Collaborative Study Cohorts and Group Workspace Hub", "32"],
+    ["Figure 5.6", "Multi-Stage Task Revision and Submission Management Board", "32"],
+    ["Figure 5.7", "Academic Focus Challenges and Sprint Quests Engine", "33"],
+    ["Figure 5.8", "Real-Time Bidirectional Doubt Discussion & Accepted Solution Hub", "33"],
+    ["Figure 5.9", "Performance-Based XP Ledger and Progression Milestone Interface", "34"],
+    ["Figure 5.10", "Daily Learning Streaks and 90-Day Activity Heatmap Dashboard", "34"],
+    ["Figure 5.11", "Student Profile, Privacy Governance, and Milestone Badges", "35"],
+    ["Figure 5.12", "Quantitative Learning Analytics and Empirical Academic Metrics", "35"],
+    ["Figure 6.1", "Automated Regression Test Suite Coverage Distribution and Execution Benchmarks", "36"]
 ]
 
 fig_tbl = doc.add_table(rows=len(figs_data) + 1, cols=3)
@@ -735,7 +736,7 @@ add_p("• Cohort Hub (`CohortBoard.jsx`): Task creation cards, role management,
 add_p("• Real-Time Doubt Hub (`DoubtHub.jsx`): WebSocket message stream, diagram uploader, and 'Accepted Answer' badge dispatcher.")
 
 add_heading_1("5.6 Implemented Graphical User Interfaces & Functional Modules")
-add_p("This section presents the fully implemented, responsive user interfaces of the CONSTA platform, demonstrating key interactive workflows across independent study, collaborative cohorts, and learning analytics.")
+add_p("This section presents the twelve fully implemented, responsive frontend user interfaces of the CONSTA platform, demonstrating key interactive workflows across authentication, solo focus, cohort collaboration, doubt clearing, and quantitative learning analytics.")
 
 def add_ui_pair(img1_path, cap1, img2_path, cap2):
     tbl = doc.add_table(rows=2, cols=2)
@@ -775,46 +776,41 @@ def add_ui_pair(img1_path, cap1, img2_path, cap2):
     r_c2.font.italic = True
     r_c2.font.color.rgb = RGBColor(135, 59, 70)
 
-# Pair 1: Authentication (Login & Register)
+# Pair 1: Authentication (Login & Registration)
 p_login = os.path.abspath('d:/consta/report/figures/fig_ui_login.png')
 p_reg = os.path.abspath('d:/consta/report/figures/fig_ui_register.png')
 add_ui_pair(p_login, "Fig. 5.2 (a). User Login Interface.", p_reg, "Fig. 5.2 (b). Registration Interface.")
-add_p("1. Authentication Portal (Fig. 5.2): Dual-mode Bcrypt/JWT security, credentials encryption, session token issuance, and responsive layout switching.", size=10, space_before=2, space_after=5)
+add_p("1. Authentication Portal (Fig. 5.2): Dual-mode Bcrypt/JWT security, credentials encryption, session token issuance, and responsive layout switching.", size=9.5, space_before=2, space_after=5)
 
-# Pair 2: Solo Focus & Collaborative Cohorts
+# Pair 2: Dashboard & Solo Study Studio
+p_dash = os.path.abspath('d:/consta/report/figures/fig_ui_dashboard.png')
 p_solo = os.path.abspath('d:/consta/report/figures/fig_ui_solo_study.png')
+add_ui_pair(p_dash, "Fig. 5.3. Student Dashboard Overview.", p_solo, "Fig. 5.4. Solo Study Studio & Roadblocks.")
+add_p("2. Student Dashboard & Solo Focus (Figs. 5.3 & 5.4): Central portal displays active streaks, focus minutes, Lvl 1 rank, and queued tasks. Solo mode decouples timers from XP by requiring verified checklists and qualitative roadblock capture.", size=9.5, space_before=2, space_after=5)
+
+# Pair 3: Collaborative Cohorts & Tasks Board
 p_group = os.path.abspath('d:/consta/report/figures/fig_ui_group_study.png')
-add_ui_pair(p_solo, "Fig. 5.3. Solo Study & Roadblock Logger.", p_group, "Fig. 5.4. Collaborative Cohorts Hub.")
-add_p("2. Solo & Collaborative Focus (Figs. 5.3 & 5.4): Solo mode decouples timers from XP by requiring verified checklists and qualitative roadblock capture. The cohort hub enables subject-specific peer grouping (Computer Science, Math, Physics) with 6-character unique join codes.", size=10, space_before=2, space_after=5)
-
-# Pair 3: Tasks Board & Focus Challenges
 p_tasks = os.path.abspath('d:/consta/report/figures/fig_ui_tasks_board.png')
+add_ui_pair(p_group, "Fig. 5.5. Collaborative Cohorts Hub.", p_tasks, "Fig. 5.6. Multi-Stage Task Revision Board.")
+add_p("3. Cohorts & Revision Board (Figs. 5.5 & 5.6): Subject-specific peer grouping (Computer Science, Math, Physics) with 6-character join codes. Tasks board is governed by the 8-stage state machine with multi-version submissions (v1->v2).", size=9.5, space_before=2, space_after=5)
+
+# Pair 4: Challenges & Doubt Chat
 p_chlng = os.path.abspath('d:/consta/report/figures/fig_ui_challenges.png')
-add_ui_pair(p_tasks, "Fig. 5.5. Multi-Stage Task Revision Board.", p_chlng, "Fig. 5.6. Academic Challenges & Quests.")
-add_p("3. Tasks Board & Quests Engine (Figs. 5.5 & 5.6): Managed by the 8-stage state machine (Not Started to Approved) with versioned submissions (v1->v2). Sprints (24h, 7d, 30d) provide progressive XP multipliers.", size=10, space_before=2, space_after=5)
-
-# Pair 4: Doubt Chat & XP Ledger
 p_chat = os.path.abspath('d:/consta/report/figures/fig_ui_doubt_chat.png')
+add_ui_pair(p_chlng, "Fig. 5.7. Academic Challenges & Quests.", p_chat, "Fig. 5.8. Real-Time Doubt Discussion Hub.")
+add_p("4. Quests Engine & Doubt Resolution (Figs. 5.7 & 5.8): Sprints (24h, 7d, 30d) provide progressive XP multipliers. Real-time doubt chat delivers sub-100ms WebSocket broadcasts with instant photo attachments and author-endorsed '+15 XP Accepted Solution'.", size=9.5, space_before=2, space_after=5)
+
+# Pair 5: XP Ledger & Streaks Heatmap
 p_xp = os.path.abspath('d:/consta/report/figures/fig_ui_xp_ledger.png')
-add_ui_pair(p_chat, "Fig. 5.7. Real-Time Doubt Discussion Hub.", p_xp, "Fig. 5.8. Auditable XP & Level Ledger.")
-add_p("4. Real-Time Doubts & XP Integrity (Figs. 5.7 & 5.8): Sub-100ms WebSocket broadcasts with instant photo attachments and author-endorsed '+15 XP Accepted Solution'. The immutable transaction ledger permanently records every XP modification.", size=10, space_before=2, space_after=5)
-
-# Pair 5: Streaks Heatmap & User Profile
 p_strk = os.path.abspath('d:/consta/report/figures/fig_ui_streaks_heatmap.png')
-p_prof = os.path.abspath('d:/consta/report/figures/fig_ui_profile.png')
-add_ui_pair(p_strk, "Fig. 5.9. 90-Day Consistency Heatmap.", p_prof, "Fig. 5.10. Student Profile & Privacy.")
-add_p("5. Habit Streaks & Profile Governance (Figs. 5.9 & 5.10): Multi-dimensional consistency tracking across a 90-day heatmap. Privacy toggles allow students to switch between Public and Friends-Only discovery modes.", size=10, space_before=2, space_after=5)
+add_ui_pair(p_xp, "Fig. 5.9. Auditable XP & Level Ledger.", p_strk, "Fig. 5.10. 90-Day Consistency Heatmap.")
+add_p("5. Ledger Integrity & Consistency (Figs. 5.9 & 5.10): The immutable transaction ledger permanently records every XP modification. Streaks dashboard monitors multi-dimensional habits across a persistent 90-day GitHub-style activity matrix.", size=9.5, space_before=2, space_after=5)
 
-# Solo: Learning Analytics Dashboard
+# Pair 6: User Profile & Learning Analytics
+p_prof = os.path.abspath('d:/consta/report/figures/fig_ui_profile.png')
 p_ana = os.path.abspath('d:/consta/report/figures/fig_ui_analytics.png')
-if os.path.exists(p_ana):
-    p_fig = doc.add_paragraph()
-    p_fig.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_fig.paragraph_format.space_before = Pt(5)
-    p_fig.paragraph_format.space_after = Pt(2)
-    p_fig.add_run().add_picture(p_ana, width=Inches(5.4))
-    add_p("Fig. 5.11. Quantitative Learning Analytics and Empirical Academic Metrics Panel.", align=WD_ALIGN_PARAGRAPH.CENTER, size=8.5, italic=True, space_before=1, space_after=3, color=(135, 59, 70))
-add_p("6. Quantitative Learning Analytics (Fig. 5.11): Computes verified metrics including Total Focus Time, Coursework Approval Rates, Iteration Counts, and Category XP distributions from genuine database records.", size=10, space_before=2, space_after=5)
+add_ui_pair(p_prof, "Fig. 5.11. Student Profile & Privacy.", p_ana, "Fig. 5.12. Learning Analytics & Metrics.")
+add_p("6. Profile Governance & Quantitative Analytics (Figs. 5.11 & 5.12): Privacy toggles allow students to switch between Public and Friends-Only discovery. Analytics panel computes Total Focus Time, Approval Rates, and Category XP from verified database records.", size=9.5, space_before=2, space_after=5)
 
 doc.add_page_break()
 
